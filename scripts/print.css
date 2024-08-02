@@ -1,0 +1,116 @@
+  /* cuando vayamos a imprimir ... */
+
+  @media print{
+    @page { size: portrait; 
+            margin-right: 2mm;
+            margin-left: 3mm;
+            margin-top: 10mm;
+
+    }
+    .landscape{
+          margin-bottom: 1.5cm;
+          margin-top: 15mm!important;
+          zoom: 50%;
+      }
+    .landscape2{
+        margin-bottom: 0.5cm;
+        margin-top: 3.5cm!important;
+        zoom: 45%;
+    }  
+    .portrait{    
+          
+          margin-bottom: 0.5cm;
+          zoom: 100%;
+    }
+
+    .portrait2{    
+      margin-top: 15mm!important;
+      margin-left: 10mm;    
+      margin-bottom: 5mm;
+      zoom: 46%;
+      font-size: large!important;
+}
+
+
+    /* indicamos el salto de pagina */
+    .saltoDePagina{
+      display:block;
+      page-break-before:always;
+    }
+    header, footer, nav, aside, div.card-header {
+      display: none;
+    }
+    div.sinBorde {
+      border-left: 0.5px solid grey;
+      border-top: 0.5px solid grey;  
+      padding-bottom: 0em;
+      margin-bottom: 0px;
+      margin-right: 0px;
+      margin-left: 0px;
+      height: 25px;
+    }
+    div.sinBorde1 {
+    border-left: 0.5px solid grey;
+    
+    padding-bottom: 0em;
+    margin-bottom: 0px;
+    height: 30px;
+    }
+    div.sinBorde2 {
+    
+    border-left: 0.5px solid grey;
+    padding-bottom: 4em;
+    margin-bottom: 0px;
+    height: 60px;
+    }
+    div.sinBorde4 {
+      border-left: 0.5px solid grey;
+    
+      padding-bottom: 0em;
+      margin-bottom: 0px;
+      height: 25px;
+    }
+    div.sinBorde5 {
+      border-left: 0.5px solid grey;
+      border-top: 0.5px solid grey;
+      padding-bottom: 0em;
+      margin-bottom: 0px;
+      height: 25px;
+    }
+    div.forRow{
+      border-top: 0.5px solid grey;
+      border-bottom: 0.5px solid grey;
+    
+    }
+    table {
+      width: 100%;
+      border: 1px solid #000;
+   }
+
+   tr, td { 
+      text-align: center;
+      vertical-align: center;
+      border: 1mm solid #000;
+      border-collapse: collapse;
+      padding: 0!important;
+      margin: 0 !important;
+   }
+   th{
+    text-align: center;
+    vertical-align: center;
+    border: 1mm solid #000;
+    border-collapse: collapse;
+   }
+  td.tdsmall{ 
+    background-color: aqua;
+    width: 32px !important; 
+  }  
+ 
+  td.bolded{
+    font-weight:bold !important;
+    font-size: x-large !important;
+  }
+  
+}
+  
+  
