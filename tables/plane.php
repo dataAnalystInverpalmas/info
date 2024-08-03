@@ -42,6 +42,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 		$variedad_reem=$objPHPExcel->getActiveSheet()->getCell('O'.$i)->getCalculatedValue();
 		$pico=$objPHPExcel->getActiveSheet()->getCell('P'.$i)->getCalculatedValue();
 		$nmanguera=$objPHPExcel->getActiveSheet()->getCell('Q'.$i)->getCalculatedValue();
+		$ferradica=$objPHPExcel->getActiveSheet()->getCell('R'.$i)->getCalculatedValue();
 		//variables que vienen vacias solo para LD5000
 		//$cama=$camaa.$tabla;
 		//$area = 0;
@@ -53,8 +54,8 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 		
 		$origen=addslashes($origen);
 		
-		$sql="INSERT INTO plane (finca,bloque,tabla,nave,cama,producto,variedad,origen,tipo_suelo,temporada,fecha_siembra,plantas,tipo_siembra,cosecha_reem,variedad_reem,pico,nmanguera)";
-		$sql=$sql." VALUES ('$finca',$bloque,'$tabla',$nave,'$cama','$producto','$variedad','$origen','$tipo_suelo','$temporada','$fecha_siembra',$plantas,'$tipo_siembra','$cosecha_reem','$variedad_reem','$pico','$nmanguera')";
+		$sql="INSERT INTO plane (finca,bloque,tabla,nave,cama,producto,variedad,origen,tipo_suelo,temporada,fecha_siembra,plantas,tipo_siembra,cosecha_reem,variedad_reem,pico,nmanguera,ferradica)";
+		$sql=$sql." VALUES ('$finca',$bloque,'$tabla',$nave,'$cama','$producto','$variedad','$origen','$tipo_suelo','$temporada','$fecha_siembra',$plantas,'$tipo_siembra','$cosecha_reem','$variedad_reem','$pico','$nmanguera','$ferradica')";
 		$result=$conexion->query($sql);
 		echo $sql;
 	}
