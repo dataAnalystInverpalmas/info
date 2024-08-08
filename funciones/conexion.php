@@ -17,9 +17,9 @@ if(!isset($_SESSION))
 
 $ip=$_SERVER['REMOTE_ADDR'];
 if (substr($ip,0,9)=='172.10.18'){
-    $_GLOBALS['src'] = 'http://172.10.18.220:4444';
+    $_GLOBALS['src'] = 'http://172.10.18.220:9257';
 }else{
-    $_GLOBALS['src'] = 'http://190.60.223.98:9856';
+    $_GLOBALS['src'] = 'http://190.60.223.98:9257';
 }
 
 ?>

@@ -474,7 +474,8 @@ $COM4=$conexion->query($slqCOM4);
 <?php
 $sql="SELECT p.id,p.finca,p.bloque,p.variedad,p.temporada, p.fecha_siembra,p.origen,p.producto, 
   p.tabla,count(p.bloque) as ndatos, sum(p.plantas) as plantas,53.3 as plantasM2,
-  s.fecha_fiesta as fecha_temporada,s.fecha_pico, if(isnull(pr.ciclo),v.ciclo,pr.ciclo) as ciclo,tipo_siembra, b.nombre as casa,cosecha_reem,variedad_reem,p.pico,p.tipo_suelo,p.nmanguera
+  s.fecha_fiesta as fecha_temporada,s.fecha_pico, if(isnull(pr.ciclo),v.ciclo,pr.ciclo) as ciclo,
+  tipo_siembra, b.nombre as casa,cosecha_reem,variedad_reem,p.pico,p.tipo_suelo,p.nmanguera,p.ferradica
   FROM plane as p 
   LEFT JOIN seasons AS s ON s.nombre=p.temporada
   LEFT JOIN (SELECT variedad,programa,ciclo FROM program group by 1,2,3) as pr
@@ -644,7 +645,7 @@ echo $error;
                   <div class=""><p class="small"><?php		echo $r->nmanguera; ?></p> </div>
                 </div>
                 <div class="col-4 sinBorde1">
-                  <div class=""><p class="small"><?php		//echo $r->tipo_suelo; ?></p> </div>
+                  <div class=""><p class="small"><?php		echo "Fecha Erradicación (aaaass): ". $r->ferradica; ?></p> </div>
                 </div>
               </div>
             </div>
