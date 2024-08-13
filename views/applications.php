@@ -3,6 +3,7 @@
 //lamar conexion
 include ('funciones/conexion.php');
 //funciones personalizadas
+require_once 'dist/Barcode39.php';
 //carbon
 require "vendor/autoload.php";
 use Carbon\Carbon;
@@ -78,8 +79,11 @@ use Carbon\Carbon;
 		if(aa.calc_conciclo=7,
 		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.ciclo week),s.fecha_pico), interval - 0 week )
 		,
+		if(aa.calc_conciclo=8,
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.ciclo week),s.fecha_pico), interval - 0 week )
+		,
 		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.ciclo week),s.fecha_pico), interval - pr.ciclo  + pr.ciclo week )
-		)))))))
+		))))))))
 		,interval a.valor * if(aa.calc_conciclo=6,-1,1) day)
 		between '$dateIni' AND '$dateEnd' 		   		  
 			  ";
@@ -106,8 +110,11 @@ use Carbon\Carbon;
 		if(aa.calc_conciclo=7,
 		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.ciclo week),s.fecha_pico), interval - 0 week )
 		,
+		if(aa.calc_conciclo=8,
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.ciclo week),s.fecha_pico), interval - 0 week )
+		,
 		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.ciclo week),s.fecha_pico), interval - pr.ciclo  + pr.ciclo week )
-		)))))))
+		))))))))
 		,interval a.valor * if(aa.calc_conciclo=6,-1,1) day)
 		between '$dateIni' AND '$dateEnd' 		  
 		";
@@ -117,9 +124,10 @@ use Carbon\Carbon;
 	$sql="SELECT p.finca,
 			p.bloque,
 			p.variedad,
-			p.temporada,
+			s.cod_temporada as temporada,
 			a.tipo,
 			a.aplicar,
+			ld_v.codigo,
 		COUNT(p.bloque) as camas,round(sum(p.plantas)/960,1) as ncamas,
 		DATE_ADD(
 		if(
@@ -141,14 +149,19 @@ use Carbon\Carbon;
 		if(aa.calc_conciclo=7,
 		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.ciclo week),s.fecha_pico), interval - 0 week )
 		,
+		if(aa.calc_conciclo=8,
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.ciclo week),s.fecha_pico), interval - 0 week )
+		,
 		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.ciclo week),s.fecha_pico), interval - pr.ciclo  + pr.ciclo week )
-		)))))))
+		))))))))
 		,interval a.valor * if(aa.calc_conciclo=6,-1,1) day) as fecha_aplica
 		FROM plane AS p
 		INNER JOIN arrangements as a
 		ON a.variedad=p.variedad and a.finca=p.finca
 		INNER JOIN varieties as v
 		ON v.nombre=p.variedad
+		LEFT JOIN ld_variedades as ld_v
+		ON ld_v.nombre=p.variedad
 		INNER JOIN seasons as s
 		ON s.nombre=p.temporada
 		LEFT JOIN (SELECT variedad,programa,ciclo FROM program group by 1,2,3 
@@ -186,8 +199,11 @@ use Carbon\Carbon;
 	if(aa.calc_conciclo=7,
 	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.ciclo week),s.fecha_pico), interval - 0 week )
 	,
+	if(aa.calc_conciclo=8,
+	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.ciclo week),s.fecha_pico), interval - 0 week )
+	,
 	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.ciclo week),s.fecha_pico), interval - pr.ciclo  + pr.ciclo week )
-	)))))))
+	))))))))
 	,interval a.valor * if(aa.calc_conciclo=6,-1,1) day) as fecha_aplica
 	FROM plane AS p
 	INNER JOIN arrangements as a
@@ -321,17 +337,38 @@ use Carbon\Carbon;
 					<th>Variedad</th><th>Temporada</th>
 					<th>#Cama Fisica</th><th>#Cama Real</th>
 					<th>Realizado</th>
+					<th>Barcode</th>
 				</tr>
 					<?php
 					while($f = $res->fetch_object())
 					{
-						echo "<tr><td>" .$f->bloque. "</td><td>" .$f->aplicar. "</td><td>" .$f->variedad. "</td>
-						<td>" .$f->temporada. "</td>
-						<td>" .number_format($f->camas,0,'','.'). "</td><td>" .number_format($f->ncamas,0,'','.'). "</td><td></td></tr>";
+						// Generar los datos para el código de barras
+						$codigo = '*'.($f->finca === 'INVERPALMAS' ? '10' : '20').$f->bloque.$f->codigo.$f->temporada.'*';
+						$barcode = new Barcode39($codigo);
+						
+						// Suponiendo que la clase Barcode39 tiene un método para ocultar el texto:
+						//$barcode->setShowText(false);
+					
+						ob_start(); // Iniciar el almacenamiento en el búfer
+						$barcode->draw(); // Dibujar el código de barras directamente en el búfer
+						$barcodeImg = ob_get_clean(); // Guardar el contenido del búfer en una variable
+					
+						echo "<tr>";
+						echo "<td>" . $f->bloque . "</td>";
+						echo "<td>" . $f->aplicar . "</td>";
+						echo "<td>" . $f->variedad . "</td>";
+						echo "<td>" . $f->temporada . "</td>";
+						echo "<td>" . number_format($f->camas, 0, '', '.') . "</td>";
+						echo "<td>" . number_format($f->ncamas, 0, '', '.') . "</td>";
+						echo "<td></td>";
+						echo "<td><img src='data:image/png;base64," . base64_encode($barcodeImg) . "' alt='Código de Barras'></td>";
+						echo "</tr>";
 					}
 					?>
-					<?php for ($i=0;$i<5;$i++){ ?>
+					
+					<?php for ($i=0;$i<1;$i++){ ?>
 						<tr style="height:30px">
+							<td></td>
 							<td></td>
 							<td></td>
 							<td></td>
@@ -366,7 +403,7 @@ use Carbon\Carbon;
 			<h7><stong>Resumen por tipo de aplicación</strong></h7>
 				<table class="table table-sm">
 				<tr>
-					<th>Aplicar</th><th>#Cama Fisica</th><th>#Cama Real</th>
+					<th>Hacer</th><th>#Cama Fisica</th><th>#Cama Real</th>
 				</tr>
 				<?php
 				while($f = $res3->fetch_object())

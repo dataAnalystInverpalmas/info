@@ -66,18 +66,18 @@ $directorio = $_GLOBALS['src'];
       <a class="dropdown-item" href="home.php?menu=tables&table=12">Cargar Presupuesto de Siembras con Asignaciones de Area</a>
       <a class="dropdown-item" href="home.php?menu=tables&table=13">Cargar Plano Historico de Siembras</a>
       <a class="dropdown-item" href="home.php?menu=tables&table=14">Generar Informes de Propagación y Siembras</a>
-      <a class="dropdown-item" href="home.php?menu=tables&table=16">Cargar Labores Presiembra</a>
+      <!-- <a class="dropdown-item" href="home.php?menu=tables&table=16">Cargar Labores Presiembra</a> -->
       <a class="dropdown-item" href="home.php?menu=tables&table=17">Cargar Presupuesto Adicionales con Asignación</a>
-      <a class="dropdown-item" href="home.php?menu=tables&table=18">Cargar Planos de Bloques</a>
+      <!-- <a class="dropdown-item" href="home.php?menu=tables&table=18">Cargar Planos de Bloques</a> -->
       <a class="dropdown-item" href="home.php?menu=tables&table=19">Cargar Presupuesto Adicionales</a>
       <a class="dropdown-item" href="home.php?menu=tables&table=loadQualities">Cargar Tabla Calidades</a>
       <a class="dropdown-item" href="home.php?menu=tables&table=loadEvaluations">Cargar Tabla Evaluaciones</a>
       <a class="dropdown-item" href="home.php?menu=tables&table=loadNalcauses">Cargar Tabla Causas Nacional</a>
-      <a class="dropdown-item" href="home.php?menu=tables&table=loadComments">Cargar Tabla Comentarios</a>
+      <!-- <a class="dropdown-item" href="home.php?menu=tables&table=loadComments">Cargar Tabla Comentarios</a> -->
       <a class="dropdown-item" href="home.php?menu=tables&table=loadCurves">Cargar Tabla Curvas</a>
-      <a class="dropdown-item" href="home.php?menu=tables&table=loadFeatures">Cargar Tabla Caracteristicas</a>
+      <!--<a class="dropdown-item" href="home.php?menu=tables&table=loadFeatures">Cargar Tabla Caracteristicas</a> -->
       <a class="dropdown-item" href="home.php?menu=tables&table=loadSupervisors">Cargar Tabla Supervisores</a>
-      <a class="dropdown-item" href="home.php?menu=tables&table=loadAssistances">Cargar Tabla Asistencias</a>
+      <!-- <a class="dropdown-item" href="home.php?menu=tables&table=loadAssistances">Cargar Tabla Asistencias</a> -->
       <!-- <a class="dropdown-item" href="home.php?menu=tables&table=withoutdatacovid">Verificar personal sin datos COVID</a> -->
       <a class="dropdown-item" href="home.php?menu=tables&table=generateViewBudget">Generar Datos Pto Siembras</a>
     </div>

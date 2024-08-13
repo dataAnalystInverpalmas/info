@@ -611,7 +611,7 @@ echo $error;
                         ?>
                           <h6 class="font-weight-bold">
                             <?php
-                              echo $fs->format('d-m-Y/W');
+                              echo $fs->format('yW');
                             ?>
                           </h6>
                         <?php
@@ -619,14 +619,14 @@ echo $error;
                         ?>
                           <h6 class="font-weight-bold">
                             <?php
-                              echo $fst->format('d-m-Y/W');
+                              echo $fst->format('yW');
                             ?>
                           </h6>
                         <?php
                       }
                   ?> 
                 </div>
-      					<div class="col-2 sinBorde1"><h6 class="font-weight-bold"><?php		echo $fs->format('d-m-Y/W'); ?> </h4></div>
+      					<div class="col-2 sinBorde1"><h6 class="font-weight-bold"><?php		echo $fs->format('yW'); ?> </h4></div>
       					<div class="col-2 sinBorde1"><h6 class="font-weight-bold"><?php    echo $p3.'-'.$p2.'-'.$p1.'-'.$p ?></div>
                 <div class="col-2 sinBorde1"><h6><?php		echo ""; ?> </div>
                 <div class="col-2 sinBorde1"><p class="small"><?php		echo $r->origen; ?></p> </div>
@@ -645,7 +645,7 @@ echo $error;
                   <div class=""><p class="small"><?php		echo $r->nmanguera; ?></p> </div>
                 </div>
                 <div class="col-4 sinBorde1">
-                  <div class=""><p class="small"><?php		echo "Fecha Erradicación (aaaass): ". $r->ferradica; ?></p> </div>
+                  <div class=""><p class="small"><?php		echo "Fecha Erradicación: ". substr($r->ferradica, -4);; ?></p> </div>
                 </div>
               </div>
             </div>
@@ -765,7 +765,7 @@ echo $error;
               $fechap=new Carbon($fechas->addWeeks($rA->ciclo));
             }
             ///////////////////////////////////////////////////////////////////////////////  
-          $faplicar=$fechap->subWeeks($rA->ciclo)->addDays($rA->valor)->format('d-m-Y/W');  
+          $faplicar=$fechap->subWeeks($rA->ciclo)->addDays($rA->valor)->format('yW');  
         }
         elseif ($rA->cc==5){
           $faplicar=$fechas->addDays($rA->valor)->endOfWeek()->subDays(3)->format('yW');
@@ -789,6 +789,15 @@ echo $error;
           ///////////////////////////////////////////////////////////////////////////
           $faplicar=$fechap->addDays($rA->valor)->format('yW'); 
         }
+        elseif ($rA->cc==8) {
+          if ($r->tipo_siembra != 'REEMPLAZO' && $r->tipo_siembra != 'ADICIONAL' ){
+            $fechap=new Carbon($rA->fecha_pico);//fecha de pico
+          }else {
+            $fechap=new Carbon($fechas->addWeeks($rA->ciclo));
+          }
+        //////////////////////////////////////////////////////////////////////////  
+        $faplicar=$fechap->subDays($rA->valor)->endOfWeek()->subDays(3)->format('yW');
+      }
 
 				 ?>
 
@@ -803,8 +812,8 @@ echo $error;
               echo $rA->tipo;
             }
            } ?>	</p></div>
-					 <div class="col-2 sinBorde"><p> <?php if ($rA->seccion==1){echo $rA->aplicar;} ?>	</p></div>
-					 <div class="col-4 sinBorde"><h6 class="font-weight-bold"> <?php if ($rA->seccion==1){echo $faplicar;}	?> </h></div>
+					 <div class="col-3 sinBorde"><p> <?php if ($rA->seccion==1){echo $rA->aplicar;} ?>	</p></div>
+					 <div class="col-3 sinBorde"><h6 class="font-weight-bold"> <?php if ($rA->seccion==1){echo $faplicar;}	?> </h></div>
 					 <div class="col-3 sinBorde"></div>
 					</div>
         <?php 
@@ -887,7 +896,7 @@ echo $error;
             }
               } ?>
 	 </div>
-   <span> Nota: Formato Fecha Completa, dia-mes-año/semana; Formato Fecha Corta, año-semana </span></div>
+   <span> Nota: Formato Fecha Completa, dia-mes-año/semana; Formato Fecha Corta,: AASS </span></div>
    <div class="saltoDePagina d-print-block" id="saltoDePagina "></div>
 		<?php } ?>
 		<?php
