@@ -665,7 +665,7 @@ echo $error;
 				 <div class="col-6 ">
 					 <div class="row">
 						 <div class="col-4 sinBorde"><strong>Aplicaciones</strong></div>
-						 <div class="col-4 sinBorde"><strong>Tipo</strong></div>
+						 <div class="col-2 sinBorde"><strong>Tipo</strong></div>
 						 <div class="col-2 sinBorde"><strong>Fecha</strong></div>
 						 <div class="col-2 sinBorde"><p class="small">Dato_Real</p></div>
 					 </div>
