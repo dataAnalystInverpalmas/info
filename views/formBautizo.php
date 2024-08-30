@@ -812,7 +812,7 @@ echo $error;
               echo $rA->tipo;
             }
            } ?>	</p></div>
-					 <div class="col-3 sinBorde4"><p> <?php if ($rA->seccion==1){echo $rA->aplicar;} ?>	</p></div>
+					 <div class="col-3 sinBorde"><p> <?php if ($rA->seccion==1){echo $rA->aplicar;} ?>	</p></div>
 					 <div class="col-3 sinBorde"><h6 class="font-weight-bold"> <?php if ($rA->seccion==1){echo $faplicar;}	?> </h></div>
 					 <div class="col-3 sinBorde"></div>
 					</div>
