@@ -765,7 +765,7 @@ echo $error;
               $fechap=new Carbon($fechas->addWeeks($rA->ciclo));
             }
             ///////////////////////////////////////////////////////////////////////////////  
-          $faplicar=$fechap->subWeeks($rA->ciclo)->addDays($rA->valor)->format('yW');  
+          $faplicar=$fechap->subWeeks($rA->ciclo)->addDays($rA->valor)->format('d-m-y');  
         }
         elseif ($rA->cc==5){
           $faplicar=$fechas->addDays($rA->valor)->endOfWeek()->subDays(3)->format('yW');
