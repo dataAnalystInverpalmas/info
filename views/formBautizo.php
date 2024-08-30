@@ -665,7 +665,7 @@ echo $error;
 				 <div class="col-6 ">
 					 <div class="row">
 						 <div class="col-4 sinBorde"><strong>Aplicaciones</strong></div>
-						 <div class="col-2 sinBorde"><strong>Tipo</strong></div>
+						 <div class="col-4 sinBorde"><strong>Tipo</strong></div>
 						 <div class="col-2 sinBorde"><strong>Fecha</strong></div>
 						 <div class="col-2 sinBorde"><p class="small">Dato_Real</p></div>
 					 </div>
@@ -804,7 +804,7 @@ echo $error;
 				 <div class="row justify-content-md-center">
            <?php if ($rA->seccion==1){
             if ($kind==$rA->tipo){ ?>
-              <div class="col-3 sinBorde4"><p>
+              <div class="col-3 sinBorde3"><p>
               <?php
             }else { ?>
               <div class="col-3 sinBorde5"><p>
