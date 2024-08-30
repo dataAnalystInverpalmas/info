@@ -739,7 +739,7 @@ echo $error;
         //cc es la variable que me indica que hago calculos con ciclo y es = a 1 sino es 0
         if($rA->cc==1){
           echo $fechas;
-          $faplicar=$fechas->addDays($rA->valor)->addWeeks($rA->ciclo)->endOfWeek()->subDays(3)->format('d-m-y'); 
+          $faplicar=$fechas->addDays($rA->valor)->addWeeks($rA->ciclo)->endOfWeek()->subDays(3)->format('yW'); 
         }elseif ($rA->cc==2) {//si es dos es caso especial y multiplicamos el ciclo por 2 mas 2 semanas
           if ($r->tipo_siembra != 'REEMPLAZO' && $r->tipo_siembra != 'ADICIONAL' ){
             $fechap=new Carbon($rA->fecha_pico);//fecha de pico
