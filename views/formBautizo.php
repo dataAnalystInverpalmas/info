@@ -804,7 +804,7 @@ echo $error;
 				 <div class="row justify-content-md-center">
            <?php if ($rA->seccion==1){
             if ($kind==$rA->tipo){ ?>
-              <div class="col-3 sinBorde3"><p>
+              <div class="col-3 sinBorde4"><p>
               <?php
             }else { ?>
               <div class="col-3 sinBorde5"><p>
@@ -812,7 +812,7 @@ echo $error;
               echo $rA->tipo;
             }
            } ?>	</p></div>
-					 <div class="col-3 sinBorde"><p> <?php if ($rA->seccion==1){echo $rA->aplicar;} ?>	</p></div>
+					 <div class="col-4 sinBorde"><p> <?php if ($rA->seccion==1){echo $rA->aplicar;} ?>	</p></div>
 					 <div class="col-3 sinBorde"><h6 class="font-weight-bold"> <?php if ($rA->seccion==1){echo $faplicar;}	?> </h></div>
 					 <div class="col-3 sinBorde"></div>
 					</div>
