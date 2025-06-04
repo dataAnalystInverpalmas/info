@@ -36,7 +36,7 @@ $sql1 = "CREATE OR REPLACE VIEW print_budget AS
      LEFT JOIN seasons AS s ON s.nombre=p.temporada_obj
      LEFT JOIN ( SELECT program.variedad,program.temporada_obj,GROUP_CONCAT(breeders.nombre) as casa FROM program left join breeders on breeders.id=program.casa_id group by 1,2 ) AS tem 
      ON tem.variedad=p.variedad AND tem.temporada_obj=p.temporada_obj
-     WHERE p.plantas>0 GROUP BY p.variedad,p.temporada_obj,p.producto,p.fecha_siembra,p.fecha_pico,p.finca,p.bloque 
+     WHERE p.plantas>0 GROUP BY p.variedad,p.temporada_obj,p.producto,p.fecha_siembra,p.ciclo,p.finca,p.bloque 
      ORDER BY p.fecha_temporada,p.fecha_siembra,p.producto,p.variedad ASC";
 
 $query1=$conexion->query($sql1);

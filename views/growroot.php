@@ -13,10 +13,10 @@ use Mpdf\Mpdf;
 ////////////producto='".$producto."' ";
 //inicializa variable vacia
 
-$where=" WHERE p.plantas>0 AND p.raiz=0 ";
+$where=" WHERE p.plantas>0 AND p.raiz=0 AND p.estado=1 ";
 $programa="";
 $fecha_ensarte="";
-$tbanco=17000;
+$tbanco=18000;
 
 if (isset($_POST['tipo'])){
   $tabla = $_POST['tipo'];
@@ -156,6 +156,7 @@ if(isset($_POST['buscar'])){
     <table class="table table-sm">
           <thead>
           <tr>
+            <td>Sem_Maq</td>
             <th>Semana</th>
             <th>Producto</th>
             <th style="width:40px">No Banco</th>
@@ -171,7 +172,7 @@ if(isset($_POST['buscar'])){
             <th style="width:70px">#Plantas Real_Cosecha</th>
             <th style="width:70px">#Plantas Perdidas</th>
             <th>Casa</th>
-            <th>Observaciones_Enraizamiento</th>
+            <th>Observaciones</th>
         </tr>
       </thead>
         <?php
@@ -182,6 +183,7 @@ if(isset($_POST['buscar'])){
       $fechac=new carbon($f->fecha_cosecha);
         if (isset($_POST['buscar'])){ ?>
           <tr style="height:30px">
+            <td></td>
             <td><h5 class=""><?php echo $fechae->startOfWeek()->addDays(3)->format('W'); ?></h></td>
             <td><h5 class=""><?php echo $f->producto; ?></h></td>
             <td></td>
@@ -201,30 +203,11 @@ if(isset($_POST['buscar'])){
           </tr>
         <?php
         $tplantas+=$f->plantas;  
-      }/* else{
-        ?> 
-          <tr style="height:30px">
-            <td><?php echo $fechae->startOfWeek()->addDays(3)->format('W'); ?></td>
-            <td><?php echo $f->producto; ?></td>
-            <td></td>
-            <td><?php echo $f->variedad; ?></td>
-            <td></td> 
-            <td><?php echo number_format($f->plantas,0,',','.'); ?></td>
-            <td></td>
-            <td><?php echo $fechae->startOfWeek()->addDays(3)->format('d-m-Y'); ?></td>
-            <td></td>
-            <td><?php echo $f->cod_temporada; ?></td>
-            <td><?php echo $fechac->startOfWeek()->format('d-m-Y'); ?></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-        <?php  
-        } */
+      }
     }
     ?>
     <tr style="height:30px">
+      <td></td>
       <td></td>
       <td></td>
       <td></td>
@@ -248,6 +231,7 @@ if(isset($_POST['buscar'])){
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
       
       <td>#Bancos:</td>
       <td><h5><?php echo number_format($tplantas/$tbanco,2,',','.'); ?></h5></td>
@@ -264,7 +248,7 @@ if(isset($_POST['buscar'])){
     </tr>
     <?php for ($i=0;$i<5;$i++){ ?>
     <tr style="height:30px">
-      <?php for ($j=1;$j<=16;$j++){ ?> 
+      <?php for ($j=1;$j<=17;$j++){ ?> 
         <td></td>
       <?php } ?> 
     </tr>

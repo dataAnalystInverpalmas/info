@@ -876,6 +876,45 @@ if (isset($_GET['report']))
 			echo "<h1>No tiene permisos</h1>";
 		}
 	}
+	else if ($_GET['report']==103)
+	{
+		$dir="views/report_pb_clavel.php";	
+		$query="SELECT dir FROM roles WHERE users_role=".$_SESSION['role']." 
+				AND dir='".$dir."' ";
+		$resQ=$conexion->query($query);
+		if ($resQ->num_rows>0)
+		{
+			include "$dir";
+		}else{
+			echo "<h1>No tiene permisos</h1>";
+		}
+	}
+	else if ($_GET['report']==104)
+	{
+		$dir="views/report_pb_curvas.php";	
+		$query="SELECT dir FROM roles WHERE users_role=".$_SESSION['role']." 
+				AND dir='".$dir."' ";
+		$resQ=$conexion->query($query);
+		if ($resQ->num_rows>0)
+		{
+			include "$dir";
+		}else{
+			echo "<h1>No tiene permisos</h1>";
+		}
+	}
+	else if ($_GET['report']==105)
+	{
+		$dir="views/report_trazabilidad.php";	
+		$query="SELECT dir FROM roles WHERE users_role=".$_SESSION['role']." 
+				AND dir='".$dir."' ";
+		$resQ=$conexion->query($query);
+		if ($resQ->num_rows>0)
+		{
+			include "$dir";
+		}else{
+			echo "<h1>No tiene permisos</h1>";
+		}
+	}
 	else if ($_GET['report']==1000)
 	{
 		$dir="covid/covid.php";	

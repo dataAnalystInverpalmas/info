@@ -50,35 +50,35 @@ SELECT
     subquery.NO_CONFORME,
    if(subquery_incf.inconformidad is null, 'No hay inconformidades', subquery_incf.inconformidad) as inconformidad_florero
 FROM
-    flower_vases AS f
+    informes.flower_vases AS f
         LEFT JOIN
-    fv_causes AS c ON f.id = c.fv_id
+    informes.fv_causes AS c ON f.id = c.fv_id
         LEFT JOIN
-    fv_causes_items AS ci ON ci.id = c.causes_item_id
+    informes.fv_causes_items AS ci ON ci.id = c.causes_item_id
         LEFT JOIN
-    fv_evaluations AS e ON e.id = c.fv_id
+    informes.fv_evaluations AS e ON e.id = c.fv_id
         LEFT JOIN
-    fv_evaluation_items AS ei ON ei.id = e.evaluation_item_id
+    informes.fv_evaluation_items AS ei ON ei.id = e.evaluation_item_id
         LEFT JOIN
-    varieties AS v ON v.id = f.variedad_id
+    informes.varieties AS v ON v.id = f.variedad_id
         LEFT JOIN
-    fv_origens AS o ON o.id = f.origen_id
+    informes.fv_origens AS o ON o.id = f.origen_id
         LEFT JOIN
-    fv_kinds AS k ON k.id = f.tipo_id
+    informes.fv_kinds AS k ON k.id = f.tipo_id
         LEFT JOIN
     (SELECT 
         fv_id AS id,
             ROUND(SUM(ca.dias / 15 * ca.cantidad / fl.tallos) * 15) AS vida
     FROM
-        `fv_causes` AS ca
-    INNER JOIN flower_vases AS fl ON fl.id = ca.fv_id
+        informes.fv_causes AS ca
+    INNER JOIN informes.flower_vases AS fl ON fl.id = ca.fv_id
     GROUP BY fv_id) AS fin ON fin.id = f.id
         LEFT JOIN
     (SELECT 
         fv_id, ROUND(AVG(t2.puntaje) / 3 * 100) AS puntaje
     FROM
-        `fv_evaluations` AS t1
-    INNER JOIN fv_evaluation_items AS t2 ON t2.id = t1.evaluation_item_id
+        informes.fv_evaluations AS t1
+    INNER JOIN informes.fv_evaluation_items AS t2 ON t2.id = t1.evaluation_item_id
     GROUP BY 1) AS eval ON eval.fv_id = f.id
         LEFT JOIN
     (SELECT 
@@ -94,9 +94,9 @@ FROM
             CONCAT_WS(' - ', CONCAT(fc.nombre, ' ', CONCAT(ROUND(AVG(c.cantidad) / SUM(f.tallos) * 100, 0), '%')), ROUND(AVG(c.dias), 0)) AS inconformidad
     FROM
         informes.flower_vases AS f
-    LEFT JOIN varieties AS v ON v.id = f.variedad_id
-    LEFT JOIN fv_causes AS c ON c.fv_id = f.id
-    LEFT JOIN fv_causes_items AS fc ON fc.id = c.causes_item_id
+    LEFT JOIN informes.varieties AS v ON v.id = f.variedad_id
+    LEFT JOIN informes.fv_causes AS c ON c.fv_id = f.id
+    LEFT JOIN informes.fv_causes_items AS fc ON fc.id = c.causes_item_id
     WHERE
         fc.id <> 1
     GROUP BY c.id , fc.id) AS t
@@ -121,19 +121,19 @@ FROM
             END) AS NO_CONFORME
     FROM
         informes.flower_vases AS f
-    LEFT JOIN varieties AS v ON v.id = f.variedad_id
-    LEFT JOIN fv_causes AS c ON c.fv_id = f.id
+    LEFT JOIN informes.varieties AS v ON v.id = f.variedad_id
+    LEFT JOIN informes.fv_causes AS c ON c.fv_id = f.id
     LEFT JOIN (SELECT 
         f.id,
             SUM(ROUND(c.cantidad / f.tallos * 100, 0)) AS sum_incof
     FROM
-        flower_vases AS f
-    LEFT JOIN fv_causes AS c ON c.fv_id = f.id
-    LEFT JOIN fv_causes_items AS fc ON fc.id = c.causes_item_id
+        informes.flower_vases AS f
+    LEFT JOIN informes.fv_causes AS c ON c.fv_id = f.id
+    LEFT JOIN informes.fv_causes_items AS fc ON fc.id = c.causes_item_id
     WHERE
         fc.id <> 1
     GROUP BY c.fv_id) AS t ON t.id = f.id
-    LEFT JOIN fv_causes_items AS fc ON fc.id = c.causes_item_id
+    LEFT JOIN informes.fv_causes_items AS fc ON fc.id = c.causes_item_id
     LEFT JOIN (SELECT 
         fv_id,
             items.nombre,
@@ -163,8 +163,8 @@ FROM
                 ELSE 0
             END) AS FOLLAJE
     FROM
-        fv_evaluations AS eval
-    LEFT JOIN fv_evaluation_items AS items ON items.id = eval.evaluation_item_id
+        informes.fv_evaluations AS eval
+    LEFT JOIN informes.fv_evaluation_items AS items ON items.id = eval.evaluation_item_id
     GROUP BY fv_id
     ORDER BY fv_id DESC) AS eval ON eval.fv_id = f.id
     GROUP BY c.id , fc.id

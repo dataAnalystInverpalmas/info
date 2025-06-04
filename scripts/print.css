@@ -4,21 +4,21 @@
     @page { size: portrait; 
             margin-right: 2mm;
             margin-left: 3mm;
-            margin-top: 10mm;
+            margin-top: 20mm;
 
     }
     .landscape{
           margin-bottom: 1.5cm;
-          margin-top: 15mm!important;
+          margin-top: 25mm!important;
           zoom: 50%;
       }
     .landscape2{
         margin-bottom: 0.5cm;
-        margin-top: 3.5cm!important;
-        zoom: 45%;
+        margin-top: 4.0cm!important;
+        zoom: 70%!important;
+        font-size: large!important;
     }  
-    .portrait{    
-          
+    .portrait{     
           margin-bottom: 0.5cm;
           zoom: 100%;
     }

@@ -63,4 +63,8 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 	$sqlSt="update varieties as a set estado=1 where a.nombre=(select variedad from plane as b where a.nombre=b.variedad group by 1)";
 	$update = $conexion->query($sqlSt);
 
+	$sql_FM="UPDATE plane p JOIN ld_plano_cultivo_FM f ON p.finca = f.finca AND p.bloque = f.bloque AND p.variedad = f.nvari AND p.pico = f.cosecha SET p.FM_pico_actual = f.fm_p_act";
+
+	$update = $conexion->query($sql_FM);
+
  ?> 

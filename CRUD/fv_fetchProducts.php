@@ -2,7 +2,7 @@
 //lamar conexion
 include ('../funciones/conexion.php');
 
- $sql=$conexion->query("select distinct nombre from products");
+ $sql=$conexion->query("select distinct nombre from informes.products");
  ?>
 <option value="">Flor</option>
  <?php

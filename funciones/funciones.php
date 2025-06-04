@@ -40,7 +40,7 @@ function roundC($valor){
 }
 
 function exist_data($order,$variety,$item){
-    $sql = "SELECT id FROM orders_details WHERE order_id=$order AND variety_id=$variety AND eval_goals_id=$item";
+    $sql = "SELECT id FROM informes.orders_details WHERE order_id=$order AND variety_id=$variety AND eval_goals_id=$item";
     $result = $conexion->query($sql); 
     $row = $result->fetch_assoc(); 
     $evaluador_id = $row['id'];

@@ -38,7 +38,7 @@ $(document).ready(function(){
                 "order": [[ 0, "desc" ]],
                 "scrollY": "300px",
                 "scrollCollapse": true,
-/*                 "footerCallback": function ( row, data, start, end, display ) {
+                 "footerCallback": function ( row, data, start, end, display ) {
                     var api = this.api(), data;
  
                     // converting to interger to find total
@@ -68,7 +68,7 @@ $(document).ready(function(){
                 $( api.column( 0 ).footer() ).html('Total');
                     $( api.column( 6 ).footer() ).html(monTotal);
                     $( api.column( 7 ).footer() ).html(tueTotal);
-                }, */
+                }, 
                 'scrollX': true,
                 'processing': true,
                 'serverSide': false,

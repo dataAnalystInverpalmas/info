@@ -13,7 +13,7 @@ $nombrearchivo='../archivos/tabla_hplano.xlsx';
 	$objPHPExcel->setActiveSheetIndex(0);
 	$numRows=$objPHPExcel->setActiveSheetIndex(0)->getHighestRow();
 	$y=date("Y");
-	//$y=2022;
+	//$y=2024;
 	//Our SQL statement. This will empty / truncate the table "plane"
 	$sqlp = "delete from hplane where year(fecha_siembra)>=$y";
 	$conexion->query($sqlp);

@@ -1,25 +1,27 @@
 <?php
+ob_start();
+
+if(!isset($_SESSION)) 
+{      
+    error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);
+    session_start(); 
+} 
+
 //variables
-$host='172.10.18.220';
+$host='db';
 $username='inverpalmas';
 $password='Inver2020!';
 $database='informes';
+$port = 3306;
 // Create connection
-$conexion = new mysqli("127.0.0.1", "inverpalmas", "Inver2020!", "informes");
+$conexion = new mysqli("db", "inverpalmas", "Inver2020!", "informes", 3306);
 $conexion->set_charset("utf8");
-//sesion
-
-if(!isset($_SESSION)) 
-    { 
-        session_start(); 
-    } 
-//variable del directorio
 
 $ip=$_SERVER['REMOTE_ADDR'];
-if (substr($ip,0,9)=='172.10.18'){
-    $_GLOBALS['src'] = 'http://172.10.18.220:9257';
+if (substr($ip,0,9)=='localhost'){
+    $_GLOBALS['src'] = 'http://172.10.18.128:9258';
 }else{
-    $_GLOBALS['src'] = 'http://190.60.223.98:9257';
+    $_GLOBALS['src'] = 'http://172.10.18.128:9258';
 }
 
 ?>

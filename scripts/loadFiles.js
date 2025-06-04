@@ -19,8 +19,16 @@ $(document).ready(function(){
                     window.location.href = "home.php?menu=tables&table=1";
                 }else if(miArchivo.name == "tabla_variedades.xlsx"){
                     window.location.href = "home.php?menu=tables&table=2";
+                }else if(miArchivo.name == "tabla_hplano.xlsx"){
+                    window.location.href = "home.php?menu=tables&table=13";
+                }else if(miArchivo.name == "tabla_arreglos.xlsx"){
+                    window.location.href = "home.php?menu=tables&table=6";
+                }else if(miArchivo.name == "tabla_presupuesto.xlsx"){
+                    window.location.href = "home.php?menu=tables&table=3";
+                } 
+                else{
+                    alert("Archivo subido con exito!")
                 }
-                else{}
             }      //window.location.reload();
         }).fail(function(data){
             alert("Error")

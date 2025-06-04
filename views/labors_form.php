@@ -49,6 +49,8 @@ if (is_file("funciones/conexion.php")){
                             <th>Esquejes Ensartados</th>
                             <th>Fecha Cosecha</th>
                             <th>Esquejes Cosechados</th>
+                            <th>Banco</th>
+                            <th>Esquejes</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -114,6 +116,14 @@ if (is_file("funciones/conexion.php")){
                         <input type="number" class="form-control" id="esquejes_cosecha">
                         </div>            
                     </div>  
+                </div>
+                <div class="row">
+                    <div class="col-lg-10">
+                        <div class="form-group">
+                            <label for="" class="col-form-label">Banco</label>
+                            <input type="text" class="form-control" id="banco">
+                        </div>
+                    </div>
                 </div>                
             </div>
             <div class="modal-footer">

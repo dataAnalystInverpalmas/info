@@ -1,0 +1,278 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: "Segoe UI", sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* Contenedor principal */
+#pantallaExpandida {
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+    background-color: white;
+}
+
+/* panel  izquierdo */
+.panel-izquierdo {
+    width: 300px;
+    background-color: #fff;
+    border-right: 1px solid #ccc;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* panel derecho detalle bautizo */
+.panel-derecho {
+    flex-grow: 1;
+    padding: 0.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+}
+
+/* envabezado visual detalle bautizos */
+.encabezado-info {
+    font-size: 14px;
+    font-weight: bold;
+    background-color: #e9f5ec;
+    border-bottom: 2px solid #218838;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    color: #1a4d32;
+}
+
+/* mensaje de contenido vacio */
+.formato-placeholder {
+    font-size: 1.2rem;
+    color: #888;
+    text-align: center;
+    margin-top: 3rem;
+}
+
+/* nota al final */
+.nota-informativa {
+    font-size: 12px;
+    color: #555;
+    border-top: 1px solid #ccc;
+    margin-top: auto;
+    background-color: #f9f9f9;
+}
+
+/* boton de accion inferior detalle bautizos */
+#btnObtenerSeleccionados {
+    font-size: 14px;
+    padding: 0.45rem;
+    border-radius: 6px;
+    margin-top: auto;
+}
+
+/* tarjetas de bautizos */
+.formato-item {
+    border: 1px solid #ccc;
+    padding: 0.6rem 0.8rem;
+    border-radius: 8px;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden; 
+    transition: background-color 0.4s ease, color 0.4s ease;
+    margin-bottom: 0.7rem;
+}
+
+/* fondo animado verde */
+.formato-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0;
+    background-color: #198754;
+    transition: width 0.4s ease;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.formato-item.seleccionado::before {
+    width: 100%;
+}
+
+.formato-contenido{
+    font-size: 13.5px;
+    flex: 1;
+    padding-right: 0.3rem;
+}
+
+.formato-contenido div {
+    margin-bottom: 0.4rem;
+}
+
+.formato-contenido > div  {
+    padding-left: 0.1rem;
+}
+
+.formato-contenido, .formato-accion {
+    position: relative;
+    z-index: 1;
+    color: #333;
+}
+
+
+/* colores del contenido e iconos */
+.formato-item .formato-contenido,
+.formato-item .formato-accion {
+    position: relative;
+    z-index: 1;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+/* icono en la tarjeta */
+.formato-item .formato-accion i {
+    font-size: 1.4rem;
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+    transition: transform 0.2s ease;
+}
+
+/*al seleccionar cambia:  texto blanco y animacion */
+.formato-item.seleccionado .formato-contenido,
+.formato-item.seleccionado .formato-accion {
+    color: #fff;
+}
+
+.formato-item.seleccionado .formato-accion i {
+    animation: pulse 0.25s ease;
+}
+
+/* rebote  del icono */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.formato-fila-horizontal {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.4rem;
+    padding-left: 0.1rem; 
+}
+
+.encabezado-bautizo {
+    border-collapse: collapse;
+    width: 100%;
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+}
+
+.encabezado-bautizo td {
+    border: 1px solid black;
+    padding: 3px 5px;
+    vertical-align: top;
+}
+
+.label {
+    font-weight: normal;
+    font-size: 12px;
+}
+
+.valor {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.valor.cursiva {
+    font-weight: normal;
+    font-style: italic;
+    font-size: 11px;
+}
+
+.titulo {
+    font-size: 12px;
+    font-family: Arial, sans-serif;
+    margin-bottom: 5px;
+}
+
+.alinear-derecha {
+    text-align: right;
+}
+
+.flecha {
+    text-align: center;
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.fila1{
+    text-align: center;
+    font-size: 36px;
+    font-weight: bold;
+}
+
+.fila2{
+    text-align: start;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.fila3{
+    text-align: start;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.fila4{
+    text-align: start;
+    font-size: 13.5px;
+}
+
+.tabla-inferior {
+    border-collapse: collapse;
+    width: 100%;
+    font-family: Arial, sans-serif;
+    font-size: 10.5px;
+    margin-top: 10px;
+}
+
+.tabla-inferior th,
+.tabla-inferior td {
+    border: 1px solid black;
+    padding: 4px 5px;
+    vertical-align: top;
+    text-align: left;
+}
+
+.tabla-labores {
+    width: 49.5%;
+    float: left;
+}
+
+.tabla-aplicaciones {
+    width: 49.5%;
+    float: right;
+}
+
+.clear {
+    clear: both;
+}
+
+.titulo-columna {
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 11px;
+}
+
+.contenido {
+    font-size: 11px;
+}

@@ -19,8 +19,8 @@ $conexion->query($sqlv);
 	for ($i=2;$i<=$numRows;$i++){
 
 		$nombre=$objPHPExcel->getActiveSheet()->getCell('B'.$i)->getCalculatedValue();
-		$producto=$objPHPExcel->getActiveSheet()->getCell('D'.$i)->getCalculatedValue();
-		$color=$objPHPExcel->getActiveSheet()->getCell('C'.$i)->getCalculatedValue();
+		$producto=$objPHPExcel->getActiveSheet()->getCell('C'.$i)->getCalculatedValue();
+		$color=$objPHPExcel->getActiveSheet()->getCell('D'.$i)->getCalculatedValue();
 		$ciclo=$objPHPExcel->getActiveSheet()->getCell('E'.$i)->getCalculatedValue();
 		$codvari=$objPHPExcel->getActiveSheet()->getCell('F'.$i)->getCalculatedValue();
 		$casa=$objPHPExcel->getActiveSheet()->getCell('G'.$i)->getCalculatedValue();
