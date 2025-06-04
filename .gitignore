@@ -3,7 +3,7 @@
 
 ### Composer ###
 composer.phar
-/vendor/
+#/vendor/
 /PDF/
 /py/
 /covid/
