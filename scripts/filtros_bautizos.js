@@ -212,7 +212,21 @@ function expandirVista(item) {
               camas: item.dataset.total_camas,
               plantas: item.dataset.total_plantas,
               desde: item.dataset.desde,
-              hasta: item.dataset.hasta
+              hasta: item.dataset.hasta,
+              tabla: item.dataset.tabla || '',
+              origen: item.dataset.origen || '',
+              pico: item.dataset.pico || '',
+              ciclo: item.dataset.ciclo || '',
+              plantasm2: item.dataset.plantasm2 || '',
+              casa_comercial: item.dataset.casa_comercial || '',
+              semana_pico_t: item.dataset.semana_pico_t || '',
+              semana_pico_r: item.dataset.semana_pico_r || '',
+              cosecha_reem: item.dataset.cosecha_reem || '',
+              variedad_reem: item.dataset.variedad_reem || '',
+              tipo_suelo: item.dataset.tipo_suelo || '',
+              nmanguera: item.dataset.nmanguera || '',
+              ferradica: item.dataset.ferradica || '',
+              fecha_siembra_t: item.dataset.fecha_siembra_t || ''
             });
           });
 
@@ -312,18 +326,33 @@ function seleccionarDesdeTarjeta(btn, item) {
               seleccionadosActuales.splice(index, 1); // valida si ya esta seleccionado
             } else {
               seleccionadosActuales.push({
-                finca: g.finca,
-                bloque: g.bloque,
-                variedad: g.variedad,
-                temporada: g.temporada,
-                tipo_siembra: g.tipo_siembra,
-                fecha_siembra: g.fecha_siembra,
-                fecha_siembra_r: g.fecha_siembra_r,
-                camas: g.total_camas,
-                plantas: g.total_plantas,
-                desde: g.desde,
-                hasta: g.hasta
-              });
+              finca: g.finca,
+              bloque: g.bloque,
+              variedad: g.variedad,
+              temporada: g.temporada,
+              tipo_siembra: g.tipo_siembra,
+              fecha_siembra: g.fecha_siembra,
+              fecha_siembra_r: g.fecha_siembra_r,
+              camas: g.total_camas,
+              plantas: g.total_plantas,
+              desde: g.desde,
+              hasta: g.hasta,
+              tabla: g.tabla || '',
+              origen: g.origen || '',
+              pico: g.pico || '',
+              ciclo: g.ciclo || '',
+              plantasm2: g.plantasm2 || '',
+              casa_comercial: g.casa_comercial || '',
+              semana_pico_t: g.semana_pico_t || '',
+              semana_pico_r: g.semana_pico_r || '',
+              cosecha_reem: g.cosecha_reem || '',
+              variedad_reem: g.variedad_reem || '',
+              tipo_suelo: g.tipo_suelo || '',
+              nmanguera: g.nmanguera || '',
+              ferradica: g.ferradica || '',
+              fecha_siembra_t: g.fecha_siembra_t || ''
+            });
+
             }
           });
 
@@ -425,6 +454,22 @@ function verAgrupamientosEnConsola(finca, bloque, variedad, temporada, tipo_siem
                 tarjeta.dataset.total_plantas = g.total_plantas;
                 tarjeta.dataset.desde = g.desde;
                 tarjeta.dataset.hasta = g.hasta;
+
+                tarjeta.dataset.tabla = g.tabla || '';
+                tarjeta.dataset.origen = g.origen || '';
+                tarjeta.dataset.pico = g.pico || '';
+                tarjeta.dataset.ciclo = g.ciclo || '';
+                tarjeta.dataset.plantasm2 = g.plantasm2 || '';
+                tarjeta.dataset.casa_comercial = g.casa_comercial || '';
+                tarjeta.dataset.semana_pico_t = g.semana_pico_t || '';
+                tarjeta.dataset.semana_pico_r = g.semana_pico_r || '';
+                tarjeta.dataset.cosecha_reem = g.cosecha_reem || '';
+                tarjeta.dataset.variedad_reem = g.variedad_reem || '';
+                tarjeta.dataset.tipo_suelo = g.tipo_suelo || '';
+                tarjeta.dataset.nmanguera = g.nmanguera || '';
+                tarjeta.dataset.ferradica = g.ferradica || '';
+                tarjeta.dataset.fecha_siembra_t = g.fecha_siembra_t || '';
+
               
                 //aqui se cargan las tarjetas del panel izquierdo
                 tarjeta.innerHTML = `
@@ -694,6 +739,7 @@ function imprimirSeleccionados() {
               hasta: sel.hasta,
               total_camas: sel.camas,
               total_plantas: sel.plantas,
+              origen: sel.origen,
               tabla: headerData[0].tabla
             });
 
