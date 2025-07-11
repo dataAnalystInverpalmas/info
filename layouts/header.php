@@ -54,7 +54,7 @@ $directorio = $_GLOBALS['src'];
       <!-- <a class="dropdown-item" href="home.php?menu=tables&table=loadEmployees">Cargar Empleados</a>
       <a class="dropdown-item" href="home.php?menu=tables&table=1">Cargar Plano de Siembra</a> -->
       <a class="dropdown-item" href="home.php?menu=tables&table=2">Cargar Variedades</a>
-      <a class="dropdown-item" href="home.php?menu=tables&table=3">Cargar Presupuesto de Siembras</a>
+      <!--<a class="dropdown-item" href="home.php?menu=tables&table=3">Cargar Presupuesto de Siembras</a>-->
       <a class="dropdown-item" href="home.php?menu=tables&table=4">Cargar Temporadas</a>
       <!-- <a class="dropdown-item" href="home.php?menu=tables&table=5">Cargar Datos Fusarium</a>-->
       <a class="dropdown-item" href="home.php?menu=tables&table=6">Cargar Arreglos</a>

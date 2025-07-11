@@ -36,7 +36,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 		$variedad=strtoupper($variedad);
 		//$fecha_siembra=date('Y-m-d',$fechai);
 		//consulta de registro actual
-		$consulta = "SELECT id FROM program where variedad='$variedad' and ciclo=$ciclo and fecha_siembra='$fecha_siembra' and casa_id=$casa_id and raiz=$raiz group by variedad,fecha_siembra,casa_id,raiz,ciclo ";
+		$consulta = "SELECT id FROM program where estado=1 and variedad='$variedad' and ciclo=$ciclo and fecha_siembra='$fecha_siembra' and casa_id=$casa_id and raiz=$raiz group by variedad,fecha_siembra,casa_id,raiz,ciclo ";
 		$query = $conexion->query($consulta);
 		$cuenta = $query->fetch_row();
 		$id = $cuenta['0'];

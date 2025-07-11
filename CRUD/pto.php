@@ -7,7 +7,7 @@ if (is_file("funciones/conexion.php")){
 	  include ("../funciones/conexion.php");
 }
 
-$where = " WHERE 1 ";
+$where = " WHERE estado=1 ";
 
 if ($_POST){
 

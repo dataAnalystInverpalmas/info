@@ -7,7 +7,7 @@ if (is_file("funciones/conexion.php")){
 	  include ("../funciones/conexion.php");
 }
 
-$where = "WHERE 1 AND producto in('CLAVEL','MINICLAVEL','CLAVEL STANDARD','CLAVEL MINIATURA')";
+$where = "WHERE estado=1 AND producto in('CLAVEL','MINICLAVEL','CLAVEL STANDARD','CLAVEL MINIATURA')";
 
 if ($_POST){
 	$finicial=strval($_POST['fini']);
