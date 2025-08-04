@@ -34,7 +34,7 @@ if (is_file("funciones/conexion.php")){
             </div> 
             <div class="row">
                                 <!-- PDF Viewer -->
-                <iframe src="PDF" frameborder="0" style="width:100%; height:500px;"></iframe>
+                <!--<iframe src="PDF" frameborder="0" style="width:100%; height:500px;"></iframe>-->
 
                 <!-- Comment Form -->
                 <form>
