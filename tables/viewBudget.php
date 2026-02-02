@@ -30,7 +30,7 @@ $query=$conexion->query($sql);
 
 $sql1 = "CREATE OR REPLACE VIEW print_budget AS 
     SELECT p.variedad,p.temporada_obj,p.producto,p.ciclo, p.fecha_siembra,p.fecha_pico,p.finca,p.bloque,f.abreviatura,
-     sum(p.plantas) as plantas,ROUND(sum(p.plantas)/960,0) as ncamas, tem.casa as casa, s.año as programa 
+     sum(p.plantas) as plantas,ROUND(sum(p.plantas)/960,0) as ncamas, tem.casa as casa, programa 
      FROM programf as p 
      LEFT JOIN farms AS f ON f.nombre=p.finca 
      LEFT JOIN seasons AS s ON s.nombre=p.temporada_obj

@@ -30,6 +30,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 		$casa_id=$objPHPExcel->getActiveSheet()->getCell('K'.$i)->getCalculatedValue();
 		$raiz=$objPHPExcel->getActiveSheet()->getCell('L'.$i)->getCalculatedValue();
 		$ferradica=$objPHPExcel->getActiveSheet()->getCell('M'.$i)->getCalculatedValue();
+		$cantidad_pedida=$objPHPExcel->getActiveSheet()->getCell('N'.$i)->getCalculatedValue();
 
 		$producto=strtoupper($producto);
 		$temporada_obj=strtoupper($temporada_obj);
@@ -48,8 +49,8 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 		}else{
 
-			$sql="INSERT INTO program (producto,color,variedad,ciclo,fecha_siembra,fecha_ensarte,fecha_cosecha,temporada_obj,ncamas,programa,casa_id,raiz,ferradica)";
-			$sql=$sql." VALUES ('$producto','$color','$variedad',$ciclo,'$fecha_siembra','$fecha_ensarte','$fecha_cosecha','$temporada_obj',$ncamas,$programa,$casa_id,$raiz,'$ferradica')";
+			$sql="INSERT INTO program (producto,color,variedad,ciclo,fecha_siembra,fecha_ensarte,fecha_cosecha,temporada_obj,ncamas,programa,casa_id,raiz,ferradica,cantidad_pedida)";
+			$sql=$sql." VALUES ('$producto','$color','$variedad',$ciclo,'$fecha_siembra','$fecha_ensarte','$fecha_cosecha','$temporada_obj',$ncamas,$programa,$casa_id,$raiz,'$ferradica',$cantidad_pedida)";
 			$result=$conexion->query($sql);
 
 			if (!$result){

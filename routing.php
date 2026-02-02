@@ -78,28 +78,28 @@ if (is_file("funciones/conexion.php")){
  ?>
 
 <style>
-						.embed-responsive {
-							position: relative;
-							width: 100%;
-							padding-bottom: 56.25%; /* Proporción de aspecto 16:9 (ajusta esto según tu necesidad) */
-							overflow: hidden;
-						}
+  .embed-responsive {
+    position: relative;
+    width: 100%;
+    padding-bottom: 75%; /* Ajustado para mejor visualización del informe */
+    overflow: hidden;
+  }
 
-						.embed-responsive iframe {
-							position: absolute;
-							top: 0;
-							left: 0;
-							width: 100%;
-							height: 85%;
-						}
+  .embed-responsive iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 75%; /* Ocupa todo el espacio del contenedor */
+  }
 
-						@media print {
-							.button {
-							display: none;
-							}
-						}
+  @media print {
+    .button {
+      display: none;
+    }
+  }
 
-						.button {
-							float: right;
-						}
+  .button {
+    float: right;
+  }
 </style>

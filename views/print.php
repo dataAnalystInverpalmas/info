@@ -14,7 +14,7 @@ use Mpdf\Mpdf;
 Carbon::setLocale('es');
 
 // Inicializa variable vacía
-$where = " WHERE p.plantas > 0 ";
+$where = " WHERE p.plantas > 0 and p.estado=1";
 $producto = "";
 $temporada = "";
 $fecha_ensarte = "";

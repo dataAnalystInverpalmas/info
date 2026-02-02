@@ -62,27 +62,27 @@ use Carbon\Carbon;
 			  DATE_ADD(
 		if(
 		aa.calc_conciclo=0,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - pr.pico week),
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week),
 		if(aa.calc_conciclo=2,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval + pr.pico week),
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval + COALESCE(pr.pico, v.ciclo) week),
 		if(aa.calc_conciclo=3,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - pr.pico week),
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week),
 		if(aa.calc_conciclo=4,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - pr.pico week )
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week )
 		,
 		if(aa.calc_conciclo=5,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - pr.pico week )
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week )
 		,
 		if(aa.calc_conciclo=6,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - 0 week )
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
 		,
 		if(aa.calc_conciclo=7,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - 0 week )
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
 		,
 		if(aa.calc_conciclo=8,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - 0 week )
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
 		,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - pr.pico  + pr.pico week )
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo)  + COALESCE(pr.pico, v.ciclo) week )
 		))))))))
 		,interval a.valor * if(aa.calc_conciclo=6,-1,1) day)
 		between '$dateIni' AND '$dateEnd' 		   		  
@@ -93,27 +93,27 @@ use Carbon\Carbon;
 		DATE_ADD(
 		if(
 		aa.calc_conciclo=0,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - pr.pico week),
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week),
 		if(aa.calc_conciclo=2,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval + pr.pico week),
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval + COALESCE(pr.pico, v.ciclo) week),
 		if(aa.calc_conciclo=3,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - pr.pico week),
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week),
 		if(aa.calc_conciclo=4,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - pr.pico week )
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week )
 		,
 		if(aa.calc_conciclo=5,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - pr.pico week )
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week )
 		,
 		if(aa.calc_conciclo=6,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - 0 week )
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
 		,
 		if(aa.calc_conciclo=7,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - 0 week )
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
 		,
 		if(aa.calc_conciclo=8,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - 0 week )
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
 		,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - pr.pico  + pr.pico week )
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo)  + COALESCE(pr.pico, v.ciclo) week )
 		))))))))
 		,interval a.valor * if(aa.calc_conciclo=6,-1,1) day)
 		between '$dateIni' AND '$dateEnd' 		  
@@ -132,27 +132,27 @@ use Carbon\Carbon;
 		DATE_ADD(
 		if(
 			aa.calc_conciclo=0,
-			date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - pr.pico week),
+			   date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week),
 		if(aa.calc_conciclo=2,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval + pr.pico week),
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval + COALESCE(pr.pico, v.ciclo) week),
 		if(aa.calc_conciclo=3,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - pr.pico week),
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week),
 		if(aa.calc_conciclo=4,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - pr.pico week )
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week )
 		,
 		if(aa.calc_conciclo=5,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - pr.pico week )
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week )
 		,
 		if(aa.calc_conciclo=6,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - 0 week )
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
 		,
 		if(aa.calc_conciclo=7,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - 0 week )
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
 		,
 		if(aa.calc_conciclo=8,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - 0 week )
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
 		,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - pr.pico  + pr.pico week )
+		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo)  + COALESCE(pr.pico, v.ciclo) week )
 		))))))))
 		,interval a.valor * if(aa.calc_conciclo=6,-1,1) day) as fecha_aplica
 		FROM plane AS p
@@ -164,9 +164,9 @@ use Carbon\Carbon;
 		ON ld_v.nombre=p.variedad
 		INNER JOIN seasons as s
 		ON s.nombre=p.temporada
-		LEFT JOIN (SELECT variedad,programa,pico FROM program group by 1,2,3 
+		LEFT JOIN (SELECT variedad,temporada_obj,pico FROM program group by 1,2,3 
 		) as pr
-		ON pr.variedad=p.variedad and pr.programa=s.año
+		ON pr.variedad=p.variedad and pr.temporada_obj=s.nombre
 		left join arrangement as aa
 		on a.tipo=aa.tipo and a.aplicar=aa.aplicar
 		$where
@@ -182,27 +182,27 @@ use Carbon\Carbon;
 	DATE_ADD(
 	if(
 	aa.calc_conciclo=0,
-	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - pr.pico week),
+	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week),
 	if(aa.calc_conciclo=2,
-	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval + pr.pico week),
+	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval + COALESCE(pr.pico, v.ciclo) week),
 	if(aa.calc_conciclo=3,
-	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - pr.pico week),
+	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week),
 	if(aa.calc_conciclo=4,
-	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - pr.pico week )
+	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week )
 	,
 	if(aa.calc_conciclo=5,
-	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - pr.pico week )
+	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week )
 	,
 	if(aa.calc_conciclo=6,
-	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - 0 week )
+	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
 	,
 	if(aa.calc_conciclo=7,
-	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - 0 week )
+	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
 	,
 	if(aa.calc_conciclo=8,
-	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - 0 week )
+	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
 	,
-	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + pr.pico week),s.fecha_pico), interval - pr.pico  + pr.pico week )
+	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo)  + COALESCE(pr.pico, v.ciclo) week )
 	))))))))
 	,interval a.valor * if(aa.calc_conciclo=6,-1,1) day) as fecha_aplica
 	FROM plane AS p
@@ -212,9 +212,9 @@ use Carbon\Carbon;
 	ON v.nombre=p.variedad
 	INNER JOIN seasons as s
 	ON s.nombre=p.temporada
-	LEFT JOIN (SELECT variedad,programa,pico FROM program group by 1,2,3 
+	LEFT JOIN (SELECT variedad,temporada_obj,pico FROM program group by 1,2,3 
 	) as pr
-	ON pr.variedad=p.variedad and pr.programa=s.año
+	ON pr.variedad=p.variedad and pr.temporada_obj=s.nombre
 	left join arrangement as aa
 	on a.tipo=aa.tipo and a.aplicar=aa.aplicar
 	$where
@@ -412,4 +412,3 @@ use Carbon\Carbon;
 			//cerrar conexion
 			$conexion->close();
  	?>   
-

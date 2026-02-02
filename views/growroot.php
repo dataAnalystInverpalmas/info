@@ -28,7 +28,7 @@ if (isset($_POST['tipo'])){
     $programa=$_POST['xprograma'];
   }
   else{
-    $prg="SELECT max(programa) as y FROM programf ";
+    $prg="SELECT max(programa) as y FROM program ";
     $result=$conexion->query($prg);
 
     $row = $result -> fetch_assoc();
@@ -66,7 +66,8 @@ if(isset($_POST['buscar'])){
     ORDER BY p.fecha_temporada,p.fecha_siembra,p.producto,p.variedad ASC
     ";
     $result=$conexion->query($sql);
-    
+
+    //echo $sql;
     //CONSULTA PARA COMBO
     $slqCOMBO="SELECT programa FROM program GROUP BY programa";
     $COM=$conexion->query($slqCOMBO);

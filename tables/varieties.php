@@ -37,8 +37,24 @@ $conexion->query($sqlv);
 	echo $sql;
 	}
 
-$sqlSt="update varieties as a set estado=1 where a.nombre=(select variedad from plane as b where a.nombre=b.variedad group by 1)";
-$update = $conexion->query($sqlSt);
+$sqlSt0 = "UPDATE varieties AS a 
+	SET a.estado = 1 
+	WHERE a.nombre IN (
+		SELECT DISTINCT variedad 
+		FROM plane
+	)";
+$update0 = $conexion->query($sqlSt0);
+
+
+$sqlSt1 = "UPDATE varieties AS a
+           SET a.estado = 1
+           WHERE EXISTS (
+               SELECT 1 
+               FROM program AS b  
+               WHERE b.variedad = a.nombre 
+                 AND DATE(b.fecha_siembra) > CURDATE()
+           )";
+$update1 = $conexion->query($sqlSt1);
 
 $sqlvar1 ="update varieties as a set producto='VITRINAS MINICLAVEL' where a.nombre=(select variedad from plane as b where a.nombre=b.variedad and temporada='VITRINAS' AND producto='MINICLAVEL' group by 1)";
 $sqlvar2 ="update varieties as a set producto='VITRINAS MINICLAVEL' where a.nombre=(select variedad from plane as b where a.nombre=b.variedad and temporada='VITRINAS' AND producto='MINICLAVEL' group by 1)";

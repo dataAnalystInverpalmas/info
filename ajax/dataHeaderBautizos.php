@@ -14,13 +14,14 @@ $sql = "
         a.finca,
         a.bloque,
         a.temporada,
+	concat(c.fiesta, right(year(c.fecha_pico), 2)) as fiesta,
         a.variedad,
         a.producto,
         a.tabla,
         a.nave,
         a.cama,
         COUNT(a.cama) AS camas,
-        SUM(a.plantas) AS plantas,
+        a.plantas AS plantas,
         53.30 AS plantasm2,
         c.fecha_pico,
         CASE
@@ -84,12 +85,13 @@ $sql = "
         informes.breeders AS e ON d.casa_comercial = e.id
             LEFT JOIN
         (SELECT 
-            variedad, programa, pico AS ciclo
+            variedad, temporada_obj, pico AS ciclo
         FROM
             informes.program
+        WHERE informes.program.estado=1
         GROUP BY 1 , 2 , 3) AS pr ON pr.variedad = a.variedad
-            AND pr.programa = c.año
-        where a.finca = ? and a.bloque = ? and a.variedad = ? and a.temporada = ? and a.tipo_siembra = ?
+            AND pr.temporada_obj = c.nombre
+    WHERE a.finca = ? and a.bloque = ? and a.variedad = ? and a.temporada = ? and a.tipo_siembra = ?
     GROUP BY a.finca ,
     a.bloque ,
     a.temporada ,

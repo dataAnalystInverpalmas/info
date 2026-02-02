@@ -29,12 +29,12 @@ $nombrearchivo='../archivos/tabla_asignacion.xlsx';
 		$ncamas = $objPHPExcel->getActiveSheet()->getCell('H'.$i)->getCalculatedValue();
 		$ciclo = $objPHPExcel->getActiveSheet()->getCell('I'.$i)->getCalculatedValue();
 		$fsiembra = $objPHPExcel->getActiveSheet()->getCell('J'.$i)->getCalculatedValue();
-		$producto=strtoupper($producto);
+		$ferradica = $objPHPExcel->getActiveSheet()->getCell('K'.$i)->getCalculatedValue();
 		$temporada_obj=strtoupper($temporada_obj);
 		$variedad=strtoupper($variedad);
 		//$fecha_siembra=date('Y-m-d',$fechai);
-		$sql="INSERT INTO programf (producto,variedad,temporada_obj,plantas,programa,finca,bloque,ncamas,ciclo,fecha_siembra)";
-		$sql=$sql." VALUES ('$producto','$variedad','$temporada_obj',$matas,$programa,'$finca',$bloque,$ncamas,$ciclo,'$fsiembra')";
+		$sql="INSERT INTO programf (producto,variedad,temporada_obj,plantas,programa,finca,bloque,ncamas,ciclo,fecha_siembra,ferradica)";
+		$sql=$sql." VALUES ('$producto','$variedad','$temporada_obj',$matas,$programa,'$finca',$bloque,$ncamas,$ciclo,'$fsiembra','$ferradica')";
 		$result=$conexion->query($sql);
 		
 		if (!$result){		

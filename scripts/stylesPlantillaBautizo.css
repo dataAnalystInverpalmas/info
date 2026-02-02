@@ -185,6 +185,9 @@ body, html {
 .label {
     font-weight: normal;
     font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .valor {
@@ -218,12 +221,18 @@ body, html {
     text-align: center;
     font-size: 32px;
     font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .fila2{
     text-align: start;
     font-size: 22px;
     font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .fila3{
@@ -235,6 +244,29 @@ body, html {
 .fila4{
     text-align: start;
     font-size: 13.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.item-casa-comercial{
+    text-align: start;
+    font-size: 14px;
+    font-weight: bold;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.sub-item-fila{
+    text-align: start;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.contenedor-inline{
+    display: flex;
+    align-items: flex-end;
+    gap: 30px;
 }
 
 .tabla-inferior {

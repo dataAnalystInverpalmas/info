@@ -10,6 +10,12 @@ require "vendor/autoload.php";
 <div id="mostrar_listo" style="display:none;"></div>
 <div id="mostrar_error" style="display:none;"></div>
 <script src="scripts/loadFiles.js"></script>
+<?php
+// Mostrar enlace al report programs en el menú si el rol tiene permiso
+$dir_menu = "views/programs.php";
+$qmenu = "SELECT dir FROM roles WHERE users_role=".$_SESSION['role']." AND dir='".$dir_menu."' ";
+$rmenu = $conexion->query($qmenu);
+?>
 <script>
 	function listar_tabla(link){
 		$.ajax({
@@ -759,6 +765,19 @@ if (isset($_GET['report']))
 			echo "<h1>No tiene permisos</h1>";
 		}
 	}
+	else if ($_GET['report']=='programs')
+	{
+		$dir="views/programs.php";
+		$query="SELECT dir FROM roles WHERE users_role=".$_SESSION['role']." 
+				AND dir='".$dir."' ";
+		$resQ=$conexion->query($query);
+		if ($resQ->num_rows>0)
+		{
+			include "$dir";
+		}else{
+			echo "<h1>No tiene permisos</h1>";
+		}
+	}
 	else if ($_GET['report']=='orders')
 	{
 		$dir="views/orders.php";	
@@ -915,6 +934,32 @@ if (isset($_GET['report']))
 			echo "<h1>No tiene permisos</h1>";
 		}
 	}
+	else if ($_GET['report']==106)
+	{
+		$dir="views/report_pb_demandas.php";	
+		$query="SELECT dir FROM roles WHERE users_role=".$_SESSION['role']." 
+				AND dir='".$dir."' ";
+		$resQ=$conexion->query($query);
+		if ($resQ->num_rows>0)
+		{
+			include "$dir";
+		}else{
+			echo "<h1>No tiene permisos</h1>";
+		}
+	}
+	else if ($_GET['report']==107)
+	{
+		$dir="views/report_pb_compara_prod.php";	
+		$query="SELECT dir FROM roles WHERE users_role=".$_SESSION['role']." 
+				AND dir='".$dir."' ";
+		$resQ=$conexion->query($query);
+		if ($resQ->num_rows>0)
+		{
+			include "$dir";
+		}else{
+			echo "<h1>No tiene permisos</h1>";
+		}
+	}
 	else if ($_GET['report']==1000)
 	{
 		$dir="covid/covid.php";	
@@ -970,6 +1015,19 @@ if (isset($_GET['report']))
 	else if ($_GET['report']==1004)
 	{
 		$dir="covid/reportout.php";	
+		$query="SELECT dir FROM roles WHERE users_role=".$_SESSION['role']." 
+				AND dir='".$dir."' ";
+		$resQ=$conexion->query($query);
+		if ($resQ->num_rows>0)
+		{
+			include "$dir";
+		}else{
+			echo "<h1>No tiene permisos</h1>";
+		}
+	}
+	else if ($_GET['report']==programs)
+	{
+		$dir="views/programs.php";	
 		$query="SELECT dir FROM roles WHERE users_role=".$_SESSION['role']." 
 				AND dir='".$dir."' ";
 		$resQ=$conexion->query($query);

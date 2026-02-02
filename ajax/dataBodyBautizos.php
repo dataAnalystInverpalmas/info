@@ -116,9 +116,9 @@ $sql = "
                 temporada_obj
         FROM
             informes.program
+        WHERE informes.program.estado=1
         GROUP BY 1 , 2 , 3 , 4 , 5) AS pr ON pr.variedad = p.variedad
             AND pr.temporada_obj = p.temporada
-            AND pr.programa = s.año
             LEFT JOIN
         informes.arrangement AS aa ON a.tipo = aa.tipo
             AND a.aplicar = aa.aplicar

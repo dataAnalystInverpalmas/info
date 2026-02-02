@@ -53,17 +53,17 @@ $directorio = $_GLOBALS['src'];
 	<div class="dropdown-menu scrollable-menu" aria-labelledby="dropdownMenuOffset">
       <!-- <a class="dropdown-item" href="home.php?menu=tables&table=loadEmployees">Cargar Empleados</a>
       <a class="dropdown-item" href="home.php?menu=tables&table=1">Cargar Plano de Siembra</a> -->
-      <a class="dropdown-item" href="home.php?menu=tables&table=2">Cargar Variedades</a>
-      <!--<a class="dropdown-item" href="home.php?menu=tables&table=3">Cargar Presupuesto de Siembras</a>-->
+      <!--<a class="dropdown-item" href="home.php?menu=tables&table=2">Cargar Variedades</a>-->
+      <a class="dropdown-item" href="home.php?menu=tables&table=3">Cargar Presupuesto de Siembras</a>
       <a class="dropdown-item" href="home.php?menu=tables&table=4">Cargar Temporadas</a>
       <!-- <a class="dropdown-item" href="home.php?menu=tables&table=5">Cargar Datos Fusarium</a>-->
-      <a class="dropdown-item" href="home.php?menu=tables&table=6">Cargar Arreglos</a>
+      <!--<a class="dropdown-item" href="home.php?menu=tables&table=6">Cargar Arreglos</a> -->
       <!-- <a class="dropdown-item" href="home.php?menu=tables&table=7">Cargar Empresas</a>
       <a class="dropdown-item" href="home.php?menu=tables&table=8">Cargar Fincas</a>
       <a class="dropdown-item" href="home.php?menu=tables&table=9">Cargar Productos</a> -->
       <!-- <a class="dropdown-item" href="home.php?menu=tables&table=10">Cargar Variedades Adicionales</a> -->
 			<!-- <a class="dropdown-item" href="home.php?menu=tables&table=11">Cargar Areas de Producción</a> -->
-      <!-- <a class="dropdown-item" href="home.php?menu=tables&table=12">Cargar Presupuesto de Siembras con Asignaciones de Area</a> -->
+      <a class="dropdown-item" href="home.php?menu=tables&table=12">Cargar Presupuesto de Siembras con Asignaciones de Area</a>
       <a class="dropdown-item" href="home.php?menu=tables&table=13">Cargar Plano Historico de Siembras</a>
       <a class="dropdown-item" href="home.php?menu=tables&table=14">Generar Informes de Propagación y Siembras</a>
       <!-- <a class="dropdown-item" href="home.php?menu=tables&table=16">Cargar Labores Presiembra</a> -->
@@ -74,9 +74,9 @@ $directorio = $_GLOBALS['src'];
       <a class="dropdown-item" href="home.php?menu=tables&table=loadEvaluations">Cargar Tabla Evaluaciones</a>
       <a class="dropdown-item" href="home.php?menu=tables&table=loadNalcauses">Cargar Tabla Causas Nacional</a> -->
       <!-- <a class="dropdown-item" href="home.php?menu=tables&table=loadComments">Cargar Tabla Comentarios</a> -->
-      <a class="dropdown-item" href="home.php?menu=tables&table=loadCurves">Cargar Tabla Curvas</a>
+      <!-- <a class="dropdown-item" href="home.php?menu=tables&table=loadCurves">Cargar Tabla Curvas</a>-->
       <!--<a class="dropdown-item" href="home.php?menu=tables&table=loadFeatures">Cargar Tabla Caracteristicas</a> -->
-      <a class="dropdown-item" href="home.php?menu=tables&table=loadSupervisors">Cargar Tabla Supervisores</a>
+      <!-- <a class="dropdown-item" href="home.php?menu=tables&table=loadSupervisors">Cargar Tabla Supervisores</a> -->
       <!-- <a class="dropdown-item" href="home.php?menu=tables&table=loadAssistances">Cargar Tabla Asistencias</a> -->
       <!-- <a class="dropdown-item" href="home.php?menu=tables&table=withoutdatacovid">Verificar personal sin datos COVID</a> -->
       <a class="dropdown-item" href="home.php?menu=tables&table=generateViewBudget">Generar Datos Pto Siembras</a>
@@ -109,7 +109,7 @@ $directorio = $_GLOBALS['src'];
     <a class="dropdown-item" href="home.php?menu=tables&report=102">Info de bloques</a>
     <a class="dropdown-item" href="home.php?menu=tables&report=13">Reporte Calidades</a>
     <a class="dropdown-item" href="home.php?menu=tables&report=53">Reporte Evaluaciones</a>
-    <a class="dropdown-item" href="home.php?menu=tables&report=105">Trazabilidad</a>
+    <a class="dropdown-item" href="home.php?menu=tables&report=programs">Editar programa siembras</a>
 	</div>
 </div>
 
@@ -126,6 +126,8 @@ $directorio = $_GLOBALS['src'];
     <a class="dropdown-item" href="home.php?menu=tables&report=14">Registra Labores de Siembra</a>
     <a class="dropdown-item" href="home.php?menu=tables&report=orders">Registra Evaluaciones</a>
     <a class="dropdown-item" href="home.php?menu=tables&report=months">Registra Información Reportes</a>
+    <!-- Submenú adicional para administración del programa de siembras -->
+    <a class="dropdown-item" href="home.php?menu=tables&report=programs">Editar programa siembras</a>
   </div>
 </div>
 
@@ -136,6 +138,8 @@ $directorio = $_GLOBALS['src'];
   <div class="dropdown-menu" aria-labelledby="dropdownMenuOffset">
     <a class="dropdown-item" href="home.php?menu=tables&report=103">Informe de Clavel</a>
     <a class="dropdown-item" href="home.php?menu=tables&report=104">Proyecciones real - quipus - inver</a>
+    <a class="dropdown-item" href="home.php?menu=tables&report=106">Demandas</a>
+    <a class="dropdown-item" href="home.php?menu=tables&report=107">Compara Producción</a>
   </div>
 </div>
 

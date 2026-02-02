@@ -7,21 +7,19 @@ if(!isset($_SESSION))
     session_start(); 
 } 
 
-//variables
-$host='db';
-$username='inverpalmas';
-$password='Inver2020!';
-$database='informes';
-$port = 3306;
-// Create connection
-$conexion = new mysqli("db", "inverpalmas", "Inver2020!", "informes", 3306);
+//variables — usar variables de entorno si están definidas, si no usar valores por defecto
+$host = getenv('DB_HOST') ?: 'db';
+$username = getenv('DB_USER') ?: 'inverpalmas';
+$password = getenv('DB_PASS') ?: 'Inver2020!';
+$database = getenv('DB_NAME') ?: 'informes';
+$port = getenv('DB_PORT') ?: 3306;
+
+// Create connection (mysqli)
+$conexion = new mysqli($host, $username, $password, $database, (int)$port);
 $conexion->set_charset("utf8");
 
-$ip=$_SERVER['REMOTE_ADDR'];
-if (substr($ip,0,9)=='localhost'){
-    $_GLOBALS['src'] = 'http://172.10.18.128:9258';
-}else{
-    $_GLOBALS['src'] = 'http://172.10.18.128:9258';
-}
+$ip = $_SERVER['REMOTE_ADDR'] ?? '';
+// APP_SRC puede definirse en .env; si no, se mantiene el valor histórico
+$_GLOBALS['src'] = getenv('APP_SRC') ?: 'http://172.10.18.128:9258';
 
 ?>

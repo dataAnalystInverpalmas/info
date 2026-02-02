@@ -12,10 +12,10 @@ $nombrearchivo='../archivos/tabla_hplano.xlsx';
 	$objPHPExcel=IOFactory::load($nombrearchivo);
 	$objPHPExcel->setActiveSheetIndex(0);
 	$numRows=$objPHPExcel->setActiveSheetIndex(0)->getHighestRow();
-	$y=date("Y");
-	//$y=2024;
+	//$y=date("Y");
+	$y=2025;
 	//Our SQL statement. This will empty / truncate the table "plane"
-	$sqlp = "delete from hplane where year(fecha_siembra)>=$y";
+	$sqlp = "delete from hplane where yearweek(fecha_siembra,3) >= 202601 ";
 	$conexion->query($sqlp);
 
 	for ($i=2;$i<=$numRows;$i++){

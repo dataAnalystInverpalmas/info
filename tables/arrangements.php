@@ -10,8 +10,11 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 ///////////////////////////////////////////
 	$nombrearchivo='../archivos/tabla_arreglos.xlsx';
 	$objPHPExcel=IOFactory::load($nombrearchivo);
-	$objPHPExcel->setActiveSheetIndex(0);
-	$numRows=$objPHPExcel->setActiveSheetIndex(0)->getHighestRow();
+	// Seleccionar hoja llamada "Hoja1"
+    $sheet = $objPHPExcel->getSheetByName('arreglos');
+
+// Si quieres obtener el número de filas:
+	$numRows = $sheet->getHighestRow();
 
 	//Our SQL statement. This will empty / truncate the table "plane"
 $sqlp = "TRUNCATE TABLE arrangements";

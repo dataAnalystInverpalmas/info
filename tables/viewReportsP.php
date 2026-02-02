@@ -1,166 +1,325 @@
 <?php
-				//traer conexion
+// Traer conexión
 require("../funciones/conexion.php");
 
-$sqlT="TRUNCATE TABLE viewsowing";
-$conexion->query($sqlT);
-/////////////////////////////////////////PERDIDAS,INVENTARIO,RECIBIDO/////////////////////////////////////
-$queryLabores=" INSERT INTO viewsowing 
-	SELECT a.fecha,a.ubicacion AS finca,a.bloque,v.producto,a.variedad,b.año,
-	a.temporada,a.tipo,b.fecha_pico,'' as tipo_siembra,'' as maquilador,sum(a.valor) as valor 
-	FROM labors_sowing as a 
-	LEFT JOIN seasons as b on b.nombre=a.temporada
-	LEFT JOIN varieties AS v ON v.nombre=a.variedad
-	WHERE a.valor>0 and v.producto IN ('CLAVEL','MINICLAVEL')
-	GROUP by a.fecha,a.variedad,a.temporada,a.tipo,b.fecha_pico,a.ubicacion,a.bloque
-";
-//////////////////////////////////////TEO SIEMBRAS/////////////////////////////////////////////////////////
-$queryTeoSiembra=" INSERT INTO viewsowing 
-	SELECT a.fecha_siembra,a.finca,a.bloque as bloque,v.producto,a.variedad,b.año,
-	a.temporada_obj,'TEO_SIEMBRA' AS tipo,b.fecha_pico,a.tipo as tipo_siembra,'' as maquilador,sum(a.plantas) as valor 
-	FROM programf as a 
-	LEFT JOIN seasons as b on b.nombre=a.temporada_obj
-	LEFT JOIN varieties AS v ON v.nombre=a.variedad
-	WHERE a.plantas>0 and v.producto IN ('CLAVEL','MINICLAVEL') AND a.estado=1
-	GROUP by a.fecha_siembra,a.variedad,a.temporada_obj,a.tipo,b.fecha_pico,a.finca,a.bloque
-";
-/////////////////////////////////////////TEO SIEMBRAS//////////////////////////////////////////////////////
-$queryTeoSiembraAdd=" INSERT INTO viewsowing 
-	SELECT a.fecha_siembra,a.finca,a.bloque as bloque,v.producto,a.variedad,b.año,
-	a.temporada_obj,'TEO_SIEMBRA' AS tipo,b.fecha_pico,a.tipo as tipo_siembra,'' as maquilador,sum(a.plantas) as valor 
-	FROM program_add as a 
-	LEFT JOIN seasons as b on b.nombre=a.temporada_obj
-	LEFT JOIN varieties AS v ON v.nombre=a.variedad
-	WHERE a.plantas>0 and v.producto IN ('CLAVEL','MINICLAVEL')
-	GROUP by a.fecha_siembra,a.variedad,a.temporada_obj,a.tipo,b.fecha_pico,a.finca,a.bloque
-";
-//////////////////////////////////////TEO ENSARTE/////////////////////////////////////////////////////////
-$queryTeoEnsarte=" INSERT INTO viewsowing 
-	SELECT a.fecha_ensarte,'' AS finca,'0' as bloque,v.producto,a.variedad,b.año,
-	a.temporada_obj,'TEO_ENSARTE' AS tipo,b.fecha_pico,a.tipo as tipo_siembra,br.nombre as maquilador,sum(a.plantas) as valor
-	FROM program as a
-	LEFT JOIN seasons as b on b.nombre=a.temporada_obj
-	LEFT JOIN varieties AS v ON v.nombre=a.variedad
-	LEFT JOIN breeders AS br ON br.id=a.casa_id
-	WHERE a.plantas>0 and v.producto IN ('CLAVEL','MINICLAVEL') and a.estado=1 and a.raiz=0
-	GROUP by a.fecha_ensarte,a.variedad,a.temporada_obj,a.tipo,b.fecha_pico,br.nombre
-";
-//////////////////////////////////////TEO ENSARTE/////////////////////////////////////////////////////////
-$queryTeoEnsarte_add=" INSERT INTO viewsowing 
-	SELECT a.fecha_ensarte,'' AS finca,'0' as bloque,v.producto,a.variedad,b.año,
-	a.temporada_obj,'TEO_ENSARTE' AS tipo,b.fecha_pico,a.tipo as tipo_siembra,br.nombre as maquilador,sum(a.plantas) as valor
-	FROM program_add_pto as a
-	LEFT JOIN seasons as b on b.nombre=a.temporada_obj
-	LEFT JOIN varieties AS v ON v.nombre=a.variedad
-	LEFT JOIN breeders AS br ON br.id=a.casa_id
-	WHERE a.plantas>0 and v.producto IN ('CLAVEL','MINICLAVEL') and a.estado=1 and a.raiz=0
-	GROUP by a.fecha_ensarte,a.variedad,a.temporada_obj,a.tipo,b.fecha_pico,br.nombre
-";
-////////////////////////////////////////TEO COSECHA///////////////////////////////////////////////////////
-$queryTeoCosecha=" INSERT INTO viewsowing 
-	SELECT a.fecha_cosecha,'' AS finca,'0' as bloque,v.producto,a.variedad,b.año,
-	a.temporada_obj,'TEO_COSECHA' AS tipo,b.fecha_pico,a.tipo as tipo_siembra,br.nombre as maquilador,sum(a.plantas) as valor 
-	FROM program as a 
-	LEFT JOIN seasons as b on b.nombre=a.temporada_obj
-	LEFT JOIN varieties AS v ON v.nombre=a.variedad
-	LEFT JOIN breeders AS br ON br.id=a.casa_id
-	WHERE a.plantas>0 and v.producto IN ('CLAVEL','MINICLAVEL') and a.estado=1 and a.raiz=0
-	GROUP BY a.fecha_cosecha,a.variedad,a.temporada_obj,a.tipo,b.fecha_pico,br.nombre
-";
-////////////////////////////////////////TEO COSECHA///////////////////////////////////////////////////////
-$queryTeoCosecha_pto =" INSERT INTO viewsowing 
-	SELECT a.fecha_cosecha,'' AS finca,'0' as bloque,v.producto,a.variedad,b.año,
-	a.temporada_obj,'TEO_COSECHA' AS tipo,b.fecha_pico,a.tipo as tipo_siembra,br.nombre as maquilador,sum(a.plantas) as valor 
-	FROM program_add_pto as a 
-	LEFT JOIN seasons as b on b.nombre=a.temporada_obj
-	LEFT JOIN varieties AS v ON v.nombre=a.variedad
-	LEFT JOIN breeders AS br ON br.id=a.casa_id
-	WHERE a.plantas>0 and v.producto IN ('CLAVEL','MINICLAVEL') and a.estado=1 and a.raiz=0
-	GROUP BY a.fecha_cosecha,a.variedad,a.temporada_obj,a.tipo,b.fecha_pico,br.nombre
-";
-/////////////////////////////////////SIEMBRA REAL////////////////////////////////////////////////
-$querySiembra=" INSERT INTO viewsowing 
-	SELECT a.fecha_siembra,a.finca,a.bloque as bloque,v.producto,a.variedad,b.año,
-	a.temporada,'SIEMBRA' as tipo,b.fecha_pico,a.tipo_siembra as tipo_siembra,maquilador,sum(a.plantas) as valor
-	FROM hplane as a 
-	LEFT JOIN seasons as b on b.nombre=a.temporada
-	LEFT JOIN varieties AS v ON v.nombre=a.variedad
-	WHERE a.plantas>0 and v.producto IN ('CLAVEL','MINICLAVEL')
-	GROUP BY a.fecha_siembra,a.variedad,a.temporada,b.fecha_pico,a.finca,a.bloque,a.tipo_siembra
+// ============================================================================
+// LIMPIEZA INICIAL
+// ============================================================================
+$sqlTruncate = "TRUNCATE TABLE viewsowing";
+$conexion->query($sqlTruncate);
+
+// ============================================================================
+// DEFINICIÓN DE CONSULTAS SQL
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// SIEMBRAS TEÓRICAS - PROGRAMF
+// ----------------------------------------------------------------------------
+$queryTeoSiembra = "
+    INSERT INTO viewsowing 
+    SELECT 
+        a.fecha_siembra,
+        a.finca,
+        a.bloque AS bloque,
+        v.producto,
+        a.variedad,
+        b.año,
+        a.temporada_obj,
+        'TEO_SIEMBRA' AS tipo,
+        b.fecha_pico,
+        if(a.ciclo=1,'1PICO','CONTINUA') AS tipo_siembra,
+        '' AS maquilador,
+        SUM(a.plantas) AS valor 
+    FROM programf AS a 
+    LEFT JOIN seasons AS b ON b.nombre = a.temporada_obj
+    LEFT JOIN varieties AS v ON v.nombre = a.variedad
+    WHERE a.plantas > 0 
+        AND v.producto IN ('CLAVEL', 'MINICLAVEL') 
+        AND a.estado = 1
+        AND a.fecha_siembra IS NOT NULL
+    GROUP BY a.fecha_siembra, a.variedad, a.temporada_obj, a.tipo, b.fecha_pico, a.finca, a.bloque
 ";
 
-//Actualizar vista de perdidas
-////////////////////////////////////////////////////////////////////////////////////////
-$queryEnsartes="INSERT INTO viewsowing
-	SELECT a.fecha_ensarte as fecha,'PROPAGACION' as finca,'0' as bloque,a.producto,a.variedad,a.programa,a.temporada_obj,
-	'ENSARTE' AS tipo,
-	a.fecha_pico,a.tipo as tipo_siembra,br.nombre as maquilador,a.esquejes_ensarte as valor from program as a
-	LEFT JOIN breeders AS br ON br.id=a.casa_id where a.estado=1  and a.raiz=0
+// ----------------------------------------------------------------------------
+// ENSARTE TEÓRICO - PROGRAM
+// ----------------------------------------------------------------------------
+$queryTeoEnsarte = "
+    INSERT INTO viewsowing 
+    SELECT 
+        a.fecha_ensarte,
+        '' AS finca,
+        '0' AS bloque,
+        v.producto,
+        a.variedad,
+        b.año,
+        a.temporada_obj,
+        'TEO_ENSARTE' AS tipo,
+        b.fecha_pico,
+        a.tipo AS tipo_siembra,
+        br.nombre AS maquilador,
+        SUM(a.plantas) AS valor
+    FROM program AS a
+    LEFT JOIN seasons AS b ON b.nombre = a.temporada_obj
+    LEFT JOIN varieties AS v ON v.nombre = a.variedad
+    LEFT JOIN breeders AS br ON br.id = a.casa_id
+    WHERE a.plantas > 0 
+        AND v.producto IN ('CLAVEL', 'MINICLAVEL') 
+        AND a.estado = 1 
+        AND a.raiz = 0
+        AND a.fecha_ensarte IS NOT NULL
+    GROUP BY a.fecha_ensarte, a.variedad, a.temporada_obj, a.tipo, b.fecha_pico, br.nombre
 ";
 
-$queryCosechas="INSERT INTO viewsowing
-	SELECT a.fecha_cosecha as fecha,'PROPAGACION' as finca,'0' as bloque, a.producto,a.variedad,a.programa,a.temporada_obj,'COSECHA' AS tipo,
-	a.fecha_pico,a.tipo as tipo_siembra,br.nombre as maquilador,a.esquejes_cosecha as valor from program as a
-	LEFT JOIN breeders AS br ON br.id=a.casa_id where a.estado=1  and a.raiz=0
+// ----------------------------------------------------------------------------
+// COSECHA TEÓRICA - PROGRAM
+// ----------------------------------------------------------------------------
+$queryTeoCosecha = "
+    INSERT INTO viewsowing 
+    SELECT 
+        a.fecha_cosecha,
+        '' AS finca,
+        '0' AS bloque,
+        v.producto,
+        a.variedad,
+        b.año,
+        a.temporada_obj,
+        'TEO_COSECHA' AS tipo,
+        b.fecha_pico,
+        a.tipo AS tipo_siembra,
+        br.nombre AS maquilador,
+        SUM(a.plantas) AS valor 
+    FROM program AS a 
+    LEFT JOIN seasons AS b ON b.nombre = a.temporada_obj
+    LEFT JOIN varieties AS v ON v.nombre = a.variedad
+    LEFT JOIN breeders AS br ON br.id = a.casa_id
+    WHERE a.plantas > 0 
+        AND v.producto IN ('CLAVEL', 'MINICLAVEL') 
+        AND a.estado = 1 
+        AND a.raiz = 0
+        AND a.fecha_cosecha IS NOT NULL
+    GROUP BY a.fecha_cosecha, a.variedad, a.temporada_obj, a.tipo, b.fecha_pico, br.nombre
 ";
 
-$queryEnsartes_pto="INSERT INTO viewsowing
-	SELECT a.fecha_ensarte as fecha,'PROPAGACION' as finca,'0' as bloque,a.producto,a.variedad,a.programa,a.temporada_obj,
-	'ENSARTE' AS tipo,
-	a.fecha_pico,a.tipo as tipo_siembra,br.nombre as maquilador,a.esquejes_ensarte as valor from program_add_pto as a
-	LEFT JOIN breeders AS br ON br.id=a.casa_id where a.estado=1  and a.raiz=0
+// ----------------------------------------------------------------------------
+// SIEMBRA REAL - HPLANE
+// ----------------------------------------------------------------------------
+$querySiembra = "
+    INSERT INTO viewsowing 
+    SELECT 
+        a.fecha_siembra,
+        a.finca,
+        a.bloque AS bloque,
+        v.producto,
+        a.variedad,
+        b.año,
+        a.temporada,
+        'SIEMBRA' AS tipo,
+        b.fecha_pico,
+        a.tipo_siembra AS tipo_siembra,
+        maquilador,
+        SUM(a.plantas) AS valor
+    FROM hplane AS a 
+    LEFT JOIN seasons AS b ON b.nombre = a.temporada
+    LEFT JOIN varieties AS v ON v.nombre = a.variedad
+    WHERE a.plantas > 0 
+        AND v.producto IN ('CLAVEL', 'MINICLAVEL')
+        AND a.fecha_siembra IS NOT NULL
+    GROUP BY a.fecha_siembra, a.variedad, a.temporada, b.fecha_pico, a.finca, a.bloque, a.tipo_siembra
 ";
 
-$queryCosechas_pto="INSERT INTO viewsowing
-	SELECT a.fecha_cosecha as fecha,'PROPAGACION' as finca,'0' as bloque, a.producto,a.variedad,a.programa,a.temporada_obj,'COSECHA' AS tipo,
-	a.fecha_pico,a.tipo as tipo_siembra,br.nombre as maquilador,a.esquejes_cosecha as valor from program_add_pto as a
-	LEFT JOIN breeders AS br ON br.id=a.casa_id where a.estado=1  and a.raiz=0
-";
-/////////////////////////////////////////////////////////////////////////////////////////////////
-$queryPerdidasP="INSERT INTO viewsowing
-	select a.fecha,a.finca,'' as bloque,v.producto,a.variedad,'' as año,
-	'' as temporada,'PERDIDAS_P' AS tipo,'0000-00-00' as fecha_pico,'' as tipo_siembra,maquilador,SUM(a.valor)/
-	( SELECT sum(b.valor)
-	FROM viewsowing as b
-	WHERE b.finca=a.finca and b.variedad=a.variedad and b.fecha=a.fecha and b.tipo in('SIEMBRA','PERDIDAS')
-	GROUP BY b.finca,b.variedad,b.fecha )
-	from viewsowing as a
-	LEFT JOIN varieties AS v ON v.nombre=a.variedad
-	where a.tipo='PERDIDAS' and v.producto IN ('CLAVEL','MINICLAVEL')
-	GROUP BY  a.finca,a.variedad,a.fecha
+// ----------------------------------------------------------------------------
+// ENSARTE REAL - PROGRAM
+// ----------------------------------------------------------------------------
+$queryEnsartes = "
+    INSERT INTO viewsowing
+    SELECT 
+        a.fecha_ensarte AS fecha,
+        'PROPAGACION' AS finca,
+        '0' AS bloque,
+        a.producto,
+        a.variedad,
+        a.programa,
+        a.temporada_obj,
+        'ENSARTE' AS tipo,
+        a.fecha_pico,
+        a.tipo AS tipo_siembra,
+        br.nombre AS maquilador,
+        a.esquejes_ensarte AS valor
+    FROM program AS a
+    LEFT JOIN breeders AS br ON br.id = a.casa_id
+    WHERE a.estado = 1 
+        AND a.raiz = 0
+        AND a.fecha_ensarte IS NOT NULL
 ";
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
-$queryCosechasP="INSERT INTO viewsowing
-select fecha_cosecha_r as fecha,'PROPAGACION' AS finca,'0' as bloque,v.producto,a.variedad,b.año,
-	a.temporada_obj as temporada,'COSECHA_P' AS tipo,b.fecha_pico as fecha_pico,
-    a.tipo as tipo_siembra,br.nombre as maquilador,(case when a.esquejes_ensarte=0 then 0 else sum(a.esquejes_cosecha-a.esquejes_ensarte)/sum(a.esquejes_ensarte) end) as valor
-	from program as a 
-    LEFT JOIN breeders AS br ON br.id=a.casa_id
-    LEFT JOIN seasons as b on b.nombre=a.temporada_obj
-	LEFT JOIN varieties AS v ON v.nombre=a.variedad
-	where v.producto IN ('CLAVEL','MINICLAVEL')  AND estado=1
-	GROUP BY a.variedad,a.fecha_cosecha_r,a.temporada_obj,br.nombre";
+// ----------------------------------------------------------------------------
+// COSECHA REAL - PROGRAM
+// ----------------------------------------------------------------------------
+$queryCosechas = "
+    INSERT INTO viewsowing
+    SELECT 
+        a.fecha_cosecha AS fecha,
+        'PROPAGACION' AS finca,
+        '0' AS bloque,
+        a.producto,
+        a.variedad,
+        a.programa,
+        a.temporada_obj,
+        'COSECHA' AS tipo,
+        a.fecha_pico,
+        a.tipo AS tipo_siembra,
+        br.nombre AS maquilador,
+        a.esquejes_cosecha AS valor
+    FROM program AS a
+    LEFT JOIN breeders AS br ON br.id = a.casa_id
+    WHERE a.estado = 1 
+        AND a.raiz = 0
+        AND a.fecha_cosecha IS NOT NULL
+";
 
-//$resultLabores = $conexion->query($queryLabores);
+// ----------------------------------------------------------------------------
+// ENSARTE REAL - PROGRAM_ADD_PTO
+// ----------------------------------------------------------------------------
+$queryEnsartes_pto = "
+    INSERT INTO viewsowing
+    SELECT 
+        a.fecha_ensarte AS fecha,
+        'PROPAGACION' AS finca,
+        '0' AS bloque,
+        a.producto,
+        a.variedad,
+        a.programa,
+        a.temporada_obj,
+        'ENSARTE' AS tipo,
+        a.fecha_pico,
+        a.tipo AS tipo_siembra,
+        br.nombre AS maquilador,
+        a.esquejes_ensarte AS valor
+    FROM program_add_pto AS a
+    LEFT JOIN breeders AS br ON br.id = a.casa_id
+    WHERE a.estado = 1 
+        AND a.raiz = 0
+        AND a.fecha_ensarte IS NOT NULL
+";
+
+// ----------------------------------------------------------------------------
+// COSECHA REAL - PROGRAM_ADD_PTO
+// ----------------------------------------------------------------------------
+$queryCosechas_pto = "
+    INSERT INTO viewsowing
+    SELECT 
+        a.fecha_cosecha_r AS fecha,
+        'PROPAGACION' AS finca,
+        '0' AS bloque,
+        a.producto,
+        a.variedad,
+        a.programa,
+        a.temporada_obj,
+        'COSECHA' AS tipo,
+        a.fecha_pico,
+        a.tipo AS tipo_siembra,
+        br.nombre AS maquilador,
+        a.esquejes_cosecha AS valor
+    FROM program_add_pto AS a
+    LEFT JOIN breeders AS br ON br.id = a.casa_id
+    WHERE a.estado = 1 
+        AND a.raiz = 0
+        AND a.fecha_cosecha_r IS NOT NULL
+";
+
+// ============================================================================
+// EJECUCIÓN DE CONSULTAS
+// ============================================================================
+
+$errores = [];
+$exitosas = 0;
+
+// Consultas activas
 $resultTeoSiembra = $conexion->query($queryTeoSiembra);
-//$resultTeoSiembraAdd = $conexion->query($queryTeoSiembraAdd);
+if (!$resultTeoSiembra) {
+    $errores[] = "Error en TeoSiembra: " . $conexion->error;
+} else {
+    $exitosas++;
+}
+
 $resultTeoEnsarte = $conexion->query($queryTeoEnsarte);
+if (!$resultTeoEnsarte) {
+    $errores[] = "Error en TeoEnsarte: " . $conexion->error;
+} else {
+    $exitosas++;
+}
+
 $resultTeoCosecha = $conexion->query($queryTeoCosecha);
-$resultTeoEnsarte_pto = $conexion->query($queryTeoEnsarte_pto);
-$resultTeoCosecha_pto = $conexion->query($queryTeoCosecha_pto);
+if (!$resultTeoCosecha) {
+    $errores[] = "Error en TeoCosecha: " . $conexion->error;
+} else {
+    $exitosas++;
+}
+
 $resultSiembra = $conexion->query($querySiembra);
+if (!$resultSiembra) {
+    $errores[] = "Error en Siembra: " . $conexion->error;
+} else {
+    $exitosas++;
+}
+
 $resultEnsarte = $conexion->query($queryEnsartes);
+if (!$resultEnsarte) {
+    $errores[] = "Error en Ensartes: " . $conexion->error;
+} else {
+    $exitosas++;
+}
+
 $resultCosecha = $conexion->query($queryCosechas);
+if (!$resultCosecha) {
+    $errores[] = "Error en Cosechas: " . $conexion->error;
+} else {
+    $exitosas++;
+}
+
 $resultEnsarte_pto = $conexion->query($queryEnsartes_pto);
+if (!$resultEnsarte_pto) {
+    $errores[] = "Error en Ensartes_pto: " . $conexion->error;
+} else {
+    $exitosas++;
+}
+
 $resultCosecha_pto = $conexion->query($queryCosechas_pto);
-//$resultPerdidasP = $conexion->query($queryPerdidasP);
-//$resultCosechasP = $conexion->query($queryCosechasP);
+if (!$resultCosecha_pto) {
+    $errores[] = "Error en Cosechas_pto: " . $conexion->error;
+} else {
+    $exitosas++;
+}
 
-//Para valores atipicos se pone 0
-//$update ="UPDATE viewsowing SET valor=0 WHERE tipo='PERDIDAS_P' AND valor=1";
-//$conexion->query($update);
-
+// ============================================================================
+// CIERRE DE CONEXIÓN
+// ============================================================================
 $conexion->close();
 
+// ============================================================================
+// MENSAJE DE RESULTADO
+// ============================================================================
+if (count($errores) > 0) {
+    $mensaje = "✗ Proceso completado con errores. Consultas exitosas: $exitosas/8\n";
+    $mensaje .= "Errores encontrados:\n" . implode("\n", $errores);
+    error_log($mensaje);
+    echo $mensaje;
+    ?>
+    <script>
+        console.error("✗ Proceso completado con errores. Consultas exitosas: <?php echo $exitosas; ?>/8");
+        <?php foreach ($errores as $error): ?>
+        console.error("<?php echo addslashes($error); ?>");
+        <?php endforeach; ?>
+    </script>
+    <?php
+} else {
+    $mensaje = "✓ Proceso completado exitosamente: viewsowing actualizada ($exitosas consultas ejecutadas)";
+    error_log($mensaje);
+    echo $mensaje . "\n";
+    ?>
+    <script>
+        console.log("✓ Proceso completado exitosamente: viewsowing actualizada (<?php echo $exitosas; ?> consultas ejecutadas)");
+    </script>
+    <?php
+}
 ?>

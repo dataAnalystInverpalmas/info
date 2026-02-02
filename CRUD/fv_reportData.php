@@ -24,7 +24,7 @@ if ($_POST){
 }
 
 $query="
-SELECT 
+SELECT
     f.id,
     f.fecha_corte,
     f.fecha_florero,
@@ -100,7 +100,7 @@ FROM
     WHERE
         fc.id <> 1
     GROUP BY c.id , fc.id) AS t
-    GROUP BY t.id   desc) AS subquery_incf ON subquery_incf.id = f.id
+    GROUP BY t.id   ) AS subquery_incf ON subquery_incf.id = f.id
         LEFT JOIN
     (SELECT 
         f.id,

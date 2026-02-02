@@ -575,7 +575,13 @@ function construirHojaDeBautizo(headerData, bodyData, contenedor) {
       </tr>
       <tr>
         <td colspan="2"><div class="label">Finca</div><div class="fila2">${headerData.finca}</div></td>
-        <td colspan="2"><div class="label">Temporada</div><div class="fila2">${headerData.temporada}</div></td>
+        <td colspan="2">
+		<div class="label">Temporada</div>
+		<div class="contenedor-inline">
+			<span class="fila2">${headerData.fiesta}</span>
+			<span class="sub-item-fila">${headerData.temporada}</span>
+		</div>
+	</td>
         <td><div class="label"># Plantas</div><div class="fila2">${headerData.total_plantas}</div></td>
         <td><div class="label">Plantas M2</div><div class="fila2">${headerData.plantasm2}</div></td>
         <td><div class="label">Pico</div><div class="fila2">${headerData.pico}</div></td>
@@ -598,7 +604,7 @@ function construirHojaDeBautizo(headerData, bodyData, contenedor) {
         <td><div class="label">Semana Pico T</div><div class="fila3">${headerData.semana_pico_t}</div></td>
         <td><div class="label">Semana Pico R</div><div class="fila3">${headerData.semana_pico_r}</div></td>
         <td><div class="label">Origen</div><div class="fila3">${headerData.origen}</div></td>
-        <td><div class="label">Casa C</div><div class="fila3">${headerData.casa_comercial}</div></td>
+        <td><div class="label">Casa C</div><div class="item-casa-comercial">${headerData.casa_comercial}</div></td>
         <td><div class="label">Desde</div><div class="fila3">${headerData.desde}</div></td>
         <td><div class="label">Hasta</div><div class="fila3">${headerData.hasta}</div></td>
       </tr>
