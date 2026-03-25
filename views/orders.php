@@ -89,7 +89,7 @@ if (is_file("funciones/conexion.php")){
 
 <!--Modal para CRUD-->
 <div class="modal fade bs-example-modal-lg" id="modalDetails" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel"></h5>
@@ -118,6 +118,7 @@ if (is_file("funciones/conexion.php")){
                                         </div>  
                                     </div>
                                     <div id="puntajes">
+                                        <p class="text-muted small mb-1"><em>Calificaciones (opcional)</em></p>
                                         <div class="form-row">
                                             <div class="form-group col-sm">  
                                                 <input placeholder="color" id="color" class="form-control"  maxlength="1" size="1" type="number" min="1" max="3">
@@ -171,7 +172,7 @@ if (is_file("funciones/conexion.php")){
                                         </div>
                                         <div class="form-row">
                                             <div class="form-group col-sm-12">
-                                                <input placeholder="Comentario" type="text" name="" id="comentario" class="form-control">
+                                                <textarea placeholder="Comentario" id="comentario" class="form-control" rows="2"></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -203,6 +204,35 @@ if (is_file("funciones/conexion.php")){
                         </div>
                     </div>
                 </form>
+                <!-- Sección de Comentarios -->
+                <hr class="mt-3 mb-3">
+                <h6><i class="material-icons" style="vertical-align:middle;font-size:18px">comment</i> Comentarios</h6>
+                <div class="form-row mb-2">
+                    <div class="col-sm-9">
+                        <textarea id="texto_comentario" class="form-control" rows="2" placeholder="Escriba su comentario aquí..."></textarea>
+                    </div>
+                    <div class="col-sm-3 d-flex align-items-center">
+                        <button type="button" class="btn btn-info btn-block btnAgregarComentario">
+                            <i class="material-icons" style="vertical-align:middle">add_comment</i> Agregar
+                        </button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="table-responsive">
+                        <table id="tableComments" class="table table-bordered table-sm" style="width:100%">
+                            <thead class="text-center">
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Variedad</th>
+                                    <th>Comentario</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

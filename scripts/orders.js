@@ -93,6 +93,9 @@ $(document).ready(function() {
             //tableOrders.ajax.reload(null, false);
             //listar();
             $('#tableDetails').DataTable().ajax.reload(null, false);
+            if ($.fn.DataTable.isDataTable('#tableComments')) {
+                $('#tableComments').DataTable().ajax.reload(null, false);
+            }
             console.log(data)
            }
         });			        
@@ -112,7 +115,8 @@ $(document).ready(function() {
         $("#follaje").val("");	
         $("#pSpray").val("");	
         $("#sMini").val("");	
-        $("#comentario").val("");	
+        $("#comentario").val("");
+        $("#texto_comentario").val("");	
     });
     ///////////////////////fin de detalles/////////////// 
    //para limpiar los campos antes de dar de Alta una Persona
@@ -222,10 +226,107 @@ $(document).ready(function() {
             ]
         }); 
 
+        // Initialize comments DataTable
+        $('#tableComments').DataTable({
+            dom: 'rtip',
+            "order": [[ 0, "desc" ]],
+            "destroy": true,
+            'processing': true,
+            pageLength: 5,
+            "ajax":{
+                "url": "CRUD/crud_orders.php",
+                "method": 'POST',
+                "data":{opcion:8, tipo:1, order_id:id},
+                "dataSrc":"",
+            },
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            },
+            "columns":[
+                {"data": "id", "visible": false},
+                {"data": "variedad"},
+                {"data": "comment"},
+                {"defaultContent": "<div class='text-center'><div class='btn-group'><button class='btn btn-warning btn-sm btnEditarComentario' title='Editar'><i class='material-icons'>edit</i></button><button class='btn btn-danger btn-sm btnBorrarComentario' title='Eliminar'><i class='material-icons'>delete</i></button></div></div>"}
+            ]
+        });
+
         $(".modal-header").css("background-color", "#007bff");
         $(".modal-header").css("color", "white" );
         $(".modal-title").text("Agregar Puntajes y Comentario");		
         $('#modalDetails').modal('show');		   
+    });
+
+    ///////////////////// COMENTARIOS CRUD ///////////////////
+    // Agregar solo comentario
+    $(document).on("click", ".btnAgregarComentario", function(){
+        var order_id = $.trim($('#order_id').val());
+        var variedad = $.trim($('#variedad').val());
+        var texto = $.trim($('#texto_comentario').val());
+        if (texto === '') {
+            alert('Escriba un comentario');
+            return;
+        }
+        $.ajax({
+            url: "CRUD/crud_orders.php",
+            type: "POST",
+            datatype: "json",
+            data: {opcion:9, tipo:1, order_id:order_id, variedad:variedad, comentario:texto},
+            success: function() {
+                $('#tableComments').DataTable().ajax.reload(null, false);
+                $('#texto_comentario').val('');
+            }
+        });
+    });
+
+    // Editar comentario (inline)
+    $(document).on("click", ".btnEditarComentario", function(){
+        var table = $('#tableComments').DataTable();
+        var row = $(this).closest('tr');
+        var rowData = table.row(row).data();
+        var commentId = rowData.id;
+        var currentComment = rowData.comment;
+        var cells = row.find('td');
+        $(cells[1]).html('<textarea class="form-control editCommentInput" rows="2">' + $('<span>').text(currentComment).html() + '</textarea>');
+        $(cells[2]).html("<div class='text-center'><button class='btn btn-success btn-sm btnGuardarComentario' data-id='" + commentId + "' title='Guardar'><i class='material-icons'>save</i></button> <button class='btn btn-secondary btn-sm btnCancelarEdicion' title='Cancelar'><i class='material-icons'>close</i></button></div>");
+    });
+
+    // Guardar comentario editado
+    $(document).on("click", ".btnGuardarComentario", function(){
+        var commentId = $(this).data('id');
+        var newComment = $(this).closest('tr').find('.editCommentInput').val();
+        $.ajax({
+            url: "CRUD/crud_orders.php",
+            type: "POST",
+            datatype: "json",
+            data: {opcion:10, tipo:1, comment_id:commentId, comentario:newComment},
+            success: function() {
+                $('#tableComments').DataTable().ajax.reload(null, false);
+            }
+        });
+    });
+
+    // Cancelar edicion
+    $(document).on("click", ".btnCancelarEdicion", function(){
+        $('#tableComments').DataTable().ajax.reload(null, false);
+    });
+
+    // Borrar comentario
+    $(document).on("click", ".btnBorrarComentario", function(){
+        var table = $('#tableComments').DataTable();
+        var row = $(this).closest('tr');
+        var rowData = table.row(row).data();
+        var commentId = rowData.id;
+        if (confirm("\u00bfEst\u00e1 seguro de borrar este comentario?")) {
+            $.ajax({
+                url: "CRUD/crud_orders.php",
+                type: "POST",
+                datatype: "json",
+                data: {opcion:11, tipo:1, comment_id:commentId},
+                success: function() {
+                    $('#tableComments').DataTable().ajax.reload(null, false);
+                }
+            });
+        }
     });
 
     ///////////////////CARGA EVALUADORES////

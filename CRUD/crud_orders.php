@@ -37,6 +37,7 @@ $follaje = (isset($_POST['follaje'])) ? $_POST['follaje'] : '';
 $pSpray = (isset($_POST['pSpray'])) ? $_POST['pSpray'] : '';
 $sMini = (isset($_POST['sMini'])) ? $_POST['sMini'] : '';
 $comentario = (isset($_POST['comentario'])) ? $_POST['comentario'] : '';
+$comment_id = (isset($_POST['comment_id'])) ? intval($_POST['comment_id']) : 0;
 
 //user id
 $user_id=$_SESSION['id'];
@@ -248,6 +249,53 @@ switch($opcion){
         $resultado->execute();
         $data=$resultado->fetchAll(PDO::FETCH_ASSOC);    
         break;  
+    case 8:
+        // Listar comentarios de una orden
+        $oid = intval($order_id);
+        $stmt = $conexion->prepare("SELECT a.id, a.orders_id, IFNULL(b.nombre,'--') as variedad, a.comment 
+                                    FROM order_comments a 
+                                    LEFT JOIN varieties b ON b.id = a.variety_id 
+                                    WHERE a.orders_id = ?");
+        $stmt->bind_param("i", $oid);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $data = [];
+        while($row = $result->fetch_assoc()){
+            $data[] = $row;
+        }
+        $stmt->close();
+        break;
+    case 9:
+        // Insertar solo comentario
+        $oid = intval($order_id);
+        if (!empty($variedad_id)) {
+            $vid = intval($variedad_id);
+            $stmt = $conexion->prepare("INSERT INTO order_comments (orders_id, variety_id, comment) VALUES (?, ?, ?)");
+            $stmt->bind_param("iis", $oid, $vid, $comentario);
+        } else {
+            $stmt = $conexion->prepare("INSERT INTO order_comments (orders_id, comment) VALUES (?, ?)");
+            $stmt->bind_param("is", $oid, $comentario);
+        }
+        $stmt->execute();
+        $stmt->close();
+        $data = ['status' => 'ok'];
+        break;
+    case 10:
+        // Actualizar comentario
+        $stmt = $conexion->prepare("UPDATE order_comments SET comment = ? WHERE id = ?");
+        $stmt->bind_param("si", $comentario, $comment_id);
+        $stmt->execute();
+        $stmt->close();
+        $data = ['status' => 'ok'];
+        break;
+    case 11:
+        // Eliminar comentario
+        $stmt = $conexion->prepare("DELETE FROM order_comments WHERE id = ?");
+        $stmt->bind_param("i", $comment_id);
+        $stmt->execute();
+        $stmt->close();
+        $data = ['status' => 'ok'];
+        break;
 }
 //echo $data;
 print json_encode($data, JSON_UNESCAPED_UNICODE);//envio el array final el formato json a AJAX
