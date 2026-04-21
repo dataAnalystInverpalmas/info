@@ -22,4 +22,7 @@ $ip = $_SERVER['REMOTE_ADDR'] ?? '';
 // APP_SRC puede definirse en .env; si no, se mantiene el valor histórico
 $_GLOBALS['src'] = getenv('APP_SRC') ?: 'http://172.10.18.128:9258';
 
+// Cargador de las nuevas clases refactorizadas (Models, Controllers, etc.)
+require_once __DIR__ . '/../src/autoload.php';
+
 ?>

@@ -29,6 +29,39 @@ require "vendor/autoload.php";
   .modal .modal-body {
     overflow-y: auto;
 }
+  #step-2 {
+    overflow-y: visible !important;
+    height: auto !important;
+    max-height: none !important;
+}
+  /* Toolbar de SmartWizard siempre al pie del modal */
+  .modal-content {
+    display: flex;
+    flex-direction: column;
+  }
+  .modal-body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  #smartwizard {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+  }
+  #smartwizard .tab-content {
+    flex: 1 1 auto;
+    overflow-y: auto;
+  }
+  #smartwizard .sw-toolbar {
+    flex-shrink: 0;
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    z-index: 10;
+    border-top: 1px solid #dee2e6;
+    padding: 8px 0;
+}
 </style>
 
 <div class="container-fluid">
@@ -172,7 +205,7 @@ require "vendor/autoload.php";
                 <div class="row">
                   <div class="col-sm-12">
                     <div class="form-group">
-                      <textarea type="text-area" class="form-control" rows="3" id="comentario" placeholder="Comentarios finales"></textarea>
+                      <textarea class="form-control" rows="3" id="comentario" placeholder="Comentarios finales"></textarea>
                     </div>
                   </div>
                 </div>
@@ -182,10 +215,14 @@ require "vendor/autoload.php";
                 <div class="row h-100" id="formEvaluacion">
                   <div class="col-sm-6">
                     <div class="form-group">
-                      <select name="" id="item" placeholder="Item" class="form-control" onclick="getItems(this.value)"></select>
+                      <select name="" id="item" class="form-control" onchange="getItems(this.value)">
+                        <option value="" disabled selected>Item</option>
+                      </select>
                     </div>
                     <div class="form-group">
-                      <select name="" id="valor" class="form-control" placeholder="Valor"></select>
+                      <select name="" id="valor" class="form-control">
+                        <option value="" disabled selected>Valor</option>
+                      </select>
                     </div>
                       <input type="submit" class="btn btn-success" id="guardaEvaluacion" onclick="guardaEvaluacion()">
                     <div class="form-group">
@@ -195,7 +232,7 @@ require "vendor/autoload.php";
                   <div class="col-sm-6" id="resultEvaluacion">
                     <table class="table">
                       <thead>
-                        <tr><th>Item</th><th>Valor</th></tr>
+                        <tr><th>Item</th><th>Valor</th><th></th></tr>
                       </thead>
                       <tbody id="tabla"></tbody>
                     </table>
@@ -206,7 +243,9 @@ require "vendor/autoload.php";
                 <div class="row" id="formCausas">
                   <div class="col-sm-6">
                     <div class="form-group">
-                      <select name="" id="causa" class="form-control" placeholder="Causa"></select>
+                      <select name="" id="causa" class="form-control">
+                        <option value="" disabled selected>Causa</option>
+                      </select>
                     </div>
                     <div class="form-group">  
                       <input type="number" name="" id="dias" class="form-control" placeholder="#Dias">
@@ -214,7 +253,7 @@ require "vendor/autoload.php";
                     <div class="form-group">  
                       <input type="number" name="" id="cantidad" class="form-control" placeholder="#Tallos">
                     </div>
-                      <input type="submit" class="btn btn-success" id="guardaEvaluacion" onclick="guardaCausa()">
+                      <input type="submit" class="btn btn-success" id="guardaCausa" onclick="guardaCausa()">
                     <div class="form-group">
                       <br><label for=""><span class="badge badge-secondary" id="floreroo"></span></label>
                     </div>
@@ -222,7 +261,7 @@ require "vendor/autoload.php";
                   <div class="col-sm-6" id="resultCausas">
                     <table class="table">
                       <thead>
-                        <tr><th>Causa</th><th>Dias</th><th>Cantidad</th></tr>
+                        <tr><th>Causa</th><th>Dias</th><th>Cantidad</th><th></th></tr>
                       </thead>
                       <tbody id="tablaCausas"></tbody>
                     </table>

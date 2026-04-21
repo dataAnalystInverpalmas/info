@@ -50,51 +50,35 @@ $directorio = $_GLOBALS['src'];
 	<button type="button" class="btn btn-outline-success my-2 my-sm-0 dropdown-toggle" id="dropdownMenuOffset" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-offset="10,20">
       Tablas
   </button>
-	<div class="dropdown-menu scrollable-menu" aria-labelledby="dropdownMenuOffset">
-      <!-- <a class="dropdown-item" href="home.php?menu=tables&table=loadEmployees">Cargar Empleados</a>
-      <a class="dropdown-item" href="home.php?menu=tables&table=1">Cargar Plano de Siembra</a> -->
+	<div class="dropdown-menu" aria-labelledby="dropdownMenuOffset">
+      <!--<a class="dropdown-item" href="home.php?menu=tables&table=1">Cargar Plano de Siembra</a> -->
       <!--<a class="dropdown-item" href="home.php?menu=tables&table=2">Cargar Variedades</a>-->
-      <a class="dropdown-item" href="home.php?menu=tables&table=3">Cargar Presupuesto de Siembras</a>
-      <a class="dropdown-item" href="home.php?menu=tables&table=4">Cargar Temporadas</a>
-      <!-- <a class="dropdown-item" href="home.php?menu=tables&table=5">Cargar Datos Fusarium</a>-->
-      <!--<a class="dropdown-item" href="home.php?menu=tables&table=6">Cargar Arreglos</a> -->
-      <!-- <a class="dropdown-item" href="home.php?menu=tables&table=7">Cargar Empresas</a>
-      <a class="dropdown-item" href="home.php?menu=tables&table=8">Cargar Fincas</a>
-      <a class="dropdown-item" href="home.php?menu=tables&table=9">Cargar Productos</a> -->
-      <!-- <a class="dropdown-item" href="home.php?menu=tables&table=10">Cargar Variedades Adicionales</a> -->
-			<!-- <a class="dropdown-item" href="home.php?menu=tables&table=11">Cargar Areas de Producción</a> -->
-      <a class="dropdown-item" href="home.php?menu=tables&table=12">Cargar Presupuesto de Siembras con Asignaciones de Area</a>
-      <a class="dropdown-item" href="home.php?menu=tables&table=13">Cargar Plano Historico de Siembras</a>
-      <a class="dropdown-item" href="home.php?menu=tables&table=14">Generar Informes de Propagación y Siembras</a>
-      <!-- <a class="dropdown-item" href="home.php?menu=tables&table=16">Cargar Labores Presiembra</a> -->
-      <!-- <a class="dropdown-item" href="home.php?menu=tables&table=17">Cargar Presupuesto Adicionales con Asignación</a> -->
-      <!-- <a class="dropdown-item" href="home.php?menu=tables&table=18">Cargar Planos de Bloques</a> -->
-      <!-- <a class="dropdown-item" href="home.php?menu=tables&table=19">Cargar Presupuesto Adicionales</a> -->
-      <!-- <a class="dropdown-item" href="home.php?menu=tables&table=loadQualities">Cargar Tabla Calidades</a>
-      <a class="dropdown-item" href="home.php?menu=tables&table=loadEvaluations">Cargar Tabla Evaluaciones</a>
-      <a class="dropdown-item" href="home.php?menu=tables&table=loadNalcauses">Cargar Tabla Causas Nacional</a> -->
-      <!-- <a class="dropdown-item" href="home.php?menu=tables&table=loadComments">Cargar Tabla Comentarios</a> -->
-      <!-- <a class="dropdown-item" href="home.php?menu=tables&table=loadCurves">Cargar Tabla Curvas</a>-->
-      <!--<a class="dropdown-item" href="home.php?menu=tables&table=loadFeatures">Cargar Tabla Caracteristicas</a> -->
-      <!-- <a class="dropdown-item" href="home.php?menu=tables&table=loadSupervisors">Cargar Tabla Supervisores</a> -->
-      <!-- <a class="dropdown-item" href="home.php?menu=tables&table=loadAssistances">Cargar Tabla Asistencias</a> -->
-      <!-- <a class="dropdown-item" href="home.php?menu=tables&table=withoutdatacovid">Verificar personal sin datos COVID</a> -->
-      <a class="dropdown-item" href="home.php?menu=tables&table=generateViewBudget">Generar Datos Pto Siembras</a>
+      <!--<a class="dropdown-item" href="home.php?menu=tables&table=3">Cargar Presupuesto de Siembras</a>-->
+      <!--<a class="dropdown-item" href="home.php?menu=tables&table=4">Cargar Temporadas</a>-->
+      <!--<a class="dropdown-item" href="home.php?menu=tables&table=12">Cargar Presupuesto de Siembras con Asignaciones de Area</a>-->
+      <!--<a class="dropdown-item" href="home.php?menu=tables&table=generateViewBudget">Generar Datos Pto Siembras</a>-->
+      <a class="dropdown-item" href="home.php?menu=tables&report=arrangements_crud">CRUD Arrangements</a>
+      <a class="dropdown-item" href="home.php?menu=tables&report=arrangement_crud">CRUD Arrangement</a>
+      <a class="dropdown-item" href="home.php?menu=tables&report=crud_breeders">CRUD Breeders</a>
+      <a class="dropdown-item" href="home.php?menu=tables&report=crud_supplies">CRUD Supplies</a>
+      <a class="dropdown-item" href="home.php?menu=tables&report=crud_varieties">CRUD Varieties</a>
+      <a class="dropdown-item" href="home.php?menu=tables&report=crud_seasons">CRUD Seasons</a>
+          <div class="dropdown-divider"></div>
+      <a class="dropdown-item" href="home.php?menu=tables&report=crud_users">CRUD Users</a>
+      <a class="dropdown-item" href="home.php?menu=tables&report=crud_roles">CRUD Roles</a>
     </div>
   </div>
 
     <div class="btn-group collapse navbar-collapse" id="collapsibleNavbar">
 	<button type="button" class="btn btn-outline-success my-2 my-sm-0 dropdown-toggle" id="dropdownMenuOffset" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-offset="10,20">
-      Siembras
+      Cultivo
     </button>
 	<div class="dropdown-menu" aria-labelledby="dropdownMenuOffset">
       <a class="dropdown-item" href="home.php?menu=tables&report=1">Hoja de Bautizo Clavel</a>
       <a class="dropdown-item" href="home.php?menu=tables&report=2">Aplicaciones de insumos por Semana</a>
-      <a class="dropdown-item" href="home.php?menu=tables&report=3">Presupuesto de Siembras Adicional</a>
+      <!--<a class="dropdown-item" href="home.php?menu=tables&report=3">Presupuesto de Siembras Adicional</a>-->
       <a class="dropdown-item" href="home.php?menu=tables&report=4">Presupuesto de Siembras</a>
       <a class="dropdown-item" href="home.php?menu=tables&report=5">Presupuesto con Asignación de área</a>
-			<a class="dropdown-item" href="home.php?menu=tables&report=6">Programa de Siembras - Imprimir</a>
-			<a class="dropdown-item" href="home.php?menu=tables&report=7">Programa de Ensartes - Imprimir</a>
 			<a class="dropdown-item" href="home.php?menu=tables&report=8">Evaluación de Cosechas</a>
     </div>
   </div>
@@ -108,26 +92,32 @@ $directorio = $_GLOBALS['src'];
     <a class="dropdown-item" href="home.php?menu=tables&report=51">Reporte Ensartes y Cosechas</a> -->
     <a class="dropdown-item" href="home.php?menu=tables&report=102">Info de bloques</a>
     <a class="dropdown-item" href="home.php?menu=tables&report=13">Reporte Calidades</a>
-    <a class="dropdown-item" href="home.php?menu=tables&report=53">Reporte Evaluaciones</a>
-    <a class="dropdown-item" href="home.php?menu=tables&report=programs">Editar programa siembras</a>
+    
 	</div>
 </div>
 
 <div class="btn-group collapse navbar-collapse" id="collapsibleNavbar">
   <button type="button" class="btn btn-outline-success my-2 my-sm-0 dropdown-toggle" id="dropdownMenuOffset" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-offset="10,20">
-  Información
+  Siembras
   </button>
   <div class="dropdown-menu" aria-labelledby="dropdownMenuOffset">
     <a class="dropdown-item" href="home.php?menu=tables&report=1005">Cargar Archivos</a>
+    <div class="dropdown-divider"></div>
     <!-- <a class="dropdown-item" href="home.php?menu=tables&report=101">Registra Información</a>
     <a class="dropdown-item" href="home.php?menu=tables&report=9">Ubicaciones</a>
     <a class="dropdown-item" href="home.php?menu=tables&report=10">Indicadores</a> -->
-    <a class="dropdown-item" href="home.php?menu=tables&report=11">Registra Clasificación</a>
+    <!--<a class="dropdown-item" href="home.php?menu=tables&report=11">Registra Clasificación</a>-->
     <a class="dropdown-item" href="home.php?menu=tables&report=14">Registra Labores de Siembra</a>
-    <a class="dropdown-item" href="home.php?menu=tables&report=orders">Registra Evaluaciones</a>
-    <a class="dropdown-item" href="home.php?menu=tables&report=months">Registra Información Reportes</a>
+    <a class="dropdown-item" href="home.php?menu=tables&report=crud_emv">Entrada Material Vegetal</a>
+    <!--<a class="dropdown-item" href="home.php?menu=tables&report=months">Registra Información Reportes</a>-->
+    <div class="dropdown-divider"></div>
     <!-- Submenú adicional para administración del programa de siembras -->
     <a class="dropdown-item" href="home.php?menu=tables&report=programs">Editar programa siembras</a>
+    <a class="dropdown-item" href="home.php?menu=tables&report=programsf">Editar programa por finca</a>
+    <div class="dropdown-divider"></div>
+    <a class="dropdown-item" href="home.php?menu=tables&table=14">Generar Informes de Propagación y Siembras</a>
+    <a class="dropdown-item" href="home.php?menu=tables&report=6">Programa de Siembras - Imprimir</a>
+		<a class="dropdown-item" href="home.php?menu=tables&report=7">Programa de Ensartes - Imprimir</a>
   </div>
 </div>
 
@@ -136,7 +126,7 @@ $directorio = $_GLOBALS['src'];
   PowerBI
   </button>
   <div class="dropdown-menu" aria-labelledby="dropdownMenuOffset">
-    <a class="dropdown-item" href="home.php?menu=tables&report=103">Informe de Clavel</a>
+    <a class="dropdown-item" href="home.php?menu=tables&report=103">Informe de Clavel por picos</a>
     <a class="dropdown-item" href="home.php?menu=tables&report=104">Proyecciones real - quipus - inver</a>
     <a class="dropdown-item" href="home.php?menu=tables&report=106">Demandas</a>
     <a class="dropdown-item" href="home.php?menu=tables&report=107">Compara Producción</a>
@@ -150,20 +140,24 @@ $directorio = $_GLOBALS['src'];
   <div class="dropdown-menu" aria-labelledby="dropdownMenuOffset">
     <a class="dropdown-item" href="home.php?menu=tables&report=12">Registra Floreros</a>
     <a class="dropdown-item" href="home.php?menu=tables&report=52">Reporte Floreros</a>
+    <div class="dropdown-divider"></div>
+    <a class="dropdown-item" href="home.php?menu=tables&report=orders">Registra Evaluaciones</a>
+    <a class="dropdown-item" href="home.php?menu=tables&report=53">Reporte Evaluaciones</a>
   </div>
 </div>
 
-<!-- <div class="btn-group collapse navbar-collapse" id="collapsibleNavbar">
-<button type="button" class="btn btn-outline-success my-2 my-sm-0 dropdown-toggle" id="dropdownMenuOffset" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-offset="10,20">
-  COVID-19
-</button>
-<div class="dropdown-menu" aria-labelledby="dropdownMenuOffset">
-  <a class="dropdown-item" href="home.php?menu=tables&report=1001">Configuración</a>
-  <a class="dropdown-item" href="home.php?menu=tables&report=1000">Ingreso de Temperaturas</a>
-  <a class="dropdown-item" href="home.php?menu=tables&report=1002">Reporte</a>
-  <a class="dropdown-item" href="home.php?menu=tables&report=1004">¿Quienes No Registran?</a>
+<?php if ($role == 1): ?>
+<div class="btn-group collapse navbar-collapse" id="collapsibleNavbar">
+  <button type="button" class="btn btn-outline-dark my-2 my-sm-0 dropdown-toggle" id="dropdownMenuOffset" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-offset="10,20">
+    Gestión
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuOffset">
+    <a class="dropdown-item" href="home.php?menu=tables&report=200">Proyectos</a>
+    <a class="dropdown-item" href="home.php?menu=tables&report=201">Tareas</a>
+    <a class="dropdown-item" href="home.php?menu=tables&report=202">Bitácora</a>
+  </div>
 </div>
-</div> -->
+<?php endif; ?>
 
 <?php } ?>
 </nav>

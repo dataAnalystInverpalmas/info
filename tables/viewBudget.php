@@ -21,7 +21,7 @@ $sql="CREATE or REPLACE VIEW budget as
           ON pf.variedad=v.nombre
           LEFT JOIN seasons as s
           ON pf.temporada_obj=s.nombre
-          WHERE pf.fecha_siembra>=DATE_ADD(CURDATE(), INTERVAL - DAYOFWEEK(CURDATE())-1 DAY)
+          WHERE pf.fecha_siembra>=DATE_ADD(CURDATE(), INTERVAL - DAYOFWEEK(CURDATE())-1 DAY) AND pf.estado=1
           GROUP BY pf.finca,pf.bloque,pf.variedad,pf.temporada_obj,pf.fecha_siembra,pf.tipo
           ";
 
@@ -30,13 +30,13 @@ $query=$conexion->query($sql);
 
 $sql1 = "CREATE OR REPLACE VIEW print_budget AS 
     SELECT p.variedad,p.temporada_obj,p.producto,p.ciclo, p.fecha_siembra,p.fecha_pico,p.finca,p.bloque,f.abreviatura,
-     sum(p.plantas) as plantas,ROUND(sum(p.plantas)/960,0) as ncamas, tem.casa as casa, programa 
+     sum(p.plantas) as plantas,ROUND(sum(p.plantas)/960,0) as ncamas, tem.casa as casa, programa, p.estado as estado 
      FROM programf as p 
      LEFT JOIN farms AS f ON f.nombre=p.finca 
      LEFT JOIN seasons AS s ON s.nombre=p.temporada_obj
-     LEFT JOIN ( SELECT program.variedad,program.temporada_obj,GROUP_CONCAT(breeders.nombre) as casa FROM program left join breeders on breeders.id=program.casa_id group by 1,2 ) AS tem 
+    LEFT JOIN ( SELECT program.variedad,program.temporada_obj,GROUP_CONCAT(breeders.nombre) as casa FROM program left join breeders on breeders.id=program.casa_id WHERE program.estado=1 group by 1,2 ) AS tem 
      ON tem.variedad=p.variedad AND tem.temporada_obj=p.temporada_obj
-     WHERE p.plantas>0 GROUP BY p.variedad,p.temporada_obj,p.producto,p.fecha_siembra,p.ciclo,p.finca,p.bloque 
+     WHERE p.plantas>0 AND p.estado=1 GROUP BY p.variedad,p.temporada_obj,p.producto,p.fecha_siembra,p.ciclo,p.finca,p.bloque 
      ORDER BY p.fecha_temporada,p.fecha_siembra,p.producto,p.variedad ASC";
 
 $query1=$conexion->query($sql1);

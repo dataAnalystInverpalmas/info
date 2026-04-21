@@ -2,6 +2,12 @@
 // Traer conexión
 require("../funciones/conexion.php");
 
+$sql_procedimiento_limpieza = "CALL actualizar_gh_id()";
+$resultado_limpieza = $conexion->query($sql_procedimiento_limpieza);
+
+$sql_procedimiento = "CALL borrar_e_insertar_hplane_ultimas_15_semanas()";
+$resultado = $conexion->query($sql_procedimiento);
+
 // ============================================================================
 // LIMPIEZA INICIAL
 // ============================================================================

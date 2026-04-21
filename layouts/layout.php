@@ -30,7 +30,7 @@
 	<!-- DataTables FixedColumns JS -->
 	<script type="text/javascript" src="https://cdn.datatables.net/fixedcolumns/4.0.2/js/dataTables.fixedColumns.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>
-<script src="bootstrap/dist/js/JsBarcode.all.min.js"></script>
+<script src="scripts/JsBarcode.all.min.js"></script>
 
 <!-- Polyfill para ClipboardItem -->
 <script>

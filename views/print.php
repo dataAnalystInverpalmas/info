@@ -14,7 +14,7 @@ use Mpdf\Mpdf;
 Carbon::setLocale('es');
 
 // Inicializa variable vacía
-$where = " WHERE p.plantas > 0 and p.estado=1";
+$where = " WHERE p.plantas > 0 AND p.estado = 1";
 $producto = "";
 $temporada = "";
 $fecha_ensarte = "";
@@ -22,7 +22,7 @@ $finca = "";
 $encabezado = 0;
 
 // Obtener el último programa
-$prg = "SELECT max(programa) as y FROM programf";
+$prg = "SELECT max(programa) as y FROM programf where estado=1";
 $result = $conexion->query($prg);
 
 $row = $result->fetch_assoc();
@@ -46,30 +46,35 @@ if (isset($_POST['xfinca'])) {
 
 // Condiciones de búsqueda
 if (isset($_POST['buscar'])) {
-    if ($programa != "" && $producto == "" && $temporada == "" && $finca == "") {
-        $where = " WHERE p.plantas > 0 AND p.programa = '$programa'";
-    } elseif ($programa != "" && $producto != "" && $temporada == "" && $finca == "") {
-        $where = " WHERE p.plantas > 0 AND p.producto = '$producto' AND p.programa = '$programa'";
-        $encabezado = 2;
-    } elseif ($programa != "" && $producto != "" && $temporada == "" && $finca != "") {
-        $where = " WHERE p.plantas > 0 AND p.producto = '$producto' AND p.programa = '$programa' AND p.finca = '$finca'";
-        $encabezado = 1;
-    } elseif ($programa != "" && $producto == "" && $temporada == "" && $finca != "") {
-        $where = " WHERE p.plantas > 0 AND p.programa = '$programa' AND p.finca = '$finca'";
-    } elseif ($programa != "" && $producto != "" && $temporada != "" && $finca != "") {
-        $where = " WHERE p.plantas > 0 AND p.producto = '$producto' AND p.programa = '$programa' AND p.temporada_obj = '$temporada' AND p.finca = '$finca'";
-        $encabezado = 1;
-    } elseif ($programa == "" && $producto == "" && $temporada != "" && $finca == "") {
-        $where = " WHERE p.plantas > 0 AND p.temporada_obj = '$temporada'";
-    } elseif ($programa == "" && $producto != "" && $temporada != "" && $finca != "") {
-        $where = " WHERE p.plantas > 0 AND p.producto = '$producto' AND p.temporada_obj = '$temporada' AND p.finca = '$finca'";
-        $encabezado = 1;
-    } elseif ($programa != "" && $producto != "" && $temporada != "" && $finca == "") {
-        $where = " WHERE p.plantas > 0 AND p.producto = '$producto' AND p.temporada_obj = '$temporada' AND p.finca <> ''";
-        $encabezado = 1;
-    } else {
-        $where = " WHERE p.plantas > 0 ";
-    }
+  $programaEsc = $conexion->real_escape_string($programa);
+  $productoEsc = $conexion->real_escape_string($producto);
+  $temporadaEsc = $conexion->real_escape_string($temporada);
+  $fincaEsc = $conexion->real_escape_string($finca);
+
+  if ($programa != "" && $producto == "" && $temporada == "" && $finca == "") {
+    $where = " WHERE p.plantas > 0 AND p.estado = 1 AND p.programa = '$programaEsc'";
+  } elseif ($programa != "" && $producto != "" && $temporada == "" && $finca == "") {
+    $where = " WHERE p.plantas > 0 AND p.estado = 1 AND p.producto = '$productoEsc' AND p.programa = '$programaEsc'";
+    $encabezado = 2;
+  } elseif ($programa != "" && $producto != "" && $temporada == "" && $finca != "") {
+    $where = " WHERE p.plantas > 0 AND p.estado = 1 AND p.producto = '$productoEsc' AND p.programa = '$programaEsc' AND p.finca = '$fincaEsc'";
+    $encabezado = 1;
+  } elseif ($programa != "" && $producto == "" && $temporada == "" && $finca != "") {
+    $where = " WHERE p.plantas > 0 AND p.estado = 1 AND p.programa = '$programaEsc' AND p.finca = '$fincaEsc'";
+  } elseif ($programa != "" && $producto != "" && $temporada != "" && $finca != "") {
+    $where = " WHERE p.plantas > 0 AND p.estado = 1 AND p.producto = '$productoEsc' AND p.programa = '$programaEsc' AND p.temporada_obj = '$temporadaEsc' AND p.finca = '$fincaEsc'";
+    $encabezado = 1;
+  } elseif ($programa == "" && $producto == "" && $temporada != "" && $finca == "") {
+    $where = " WHERE p.plantas > 0 AND p.estado = 1 AND p.temporada_obj = '$temporadaEsc'";
+  } elseif ($programa == "" && $producto != "" && $temporada != "" && $finca != "") {
+    $where = " WHERE p.plantas > 0 AND p.estado = 1 AND p.producto = '$productoEsc' AND p.temporada_obj = '$temporadaEsc' AND p.finca = '$fincaEsc'";
+    $encabezado = 1;
+  } elseif ($programa != "" && $producto != "" && $temporada != "" && $finca == "") {
+    $where = " WHERE p.plantas > 0 AND p.estado = 1 AND p.producto = '$productoEsc' AND p.programa = '$programaEsc' AND p.temporada_obj = '$temporadaEsc' AND p.finca <> ''";
+    $encabezado = 1;
+  } else {
+    $where = " WHERE p.plantas > 0 AND p.estado = 1";
+  }
 }
 
 // Consulta principal
@@ -78,20 +83,22 @@ $sql = "SELECT p.variedad, p.temporada_obj, p.producto, p.ciclo, p.fecha_siembra
         FROM print_budget AS p $where
         GROUP BY p.variedad, p.temporada_obj, p.producto, p.fecha_siembra, p.fecha_pico, p.finca, p.bloque,p.ciclo
         ORDER BY p.fecha_siembra, p.producto, p.finca, p.bloque, p.variedad ASC";
+        //echo $sql;
 
 $result = $conexion->query($sql);
 
 // Consultas adicionales para combos
-$slqCOMBO = "SELECT programa FROM programf GROUP BY programa";
+$slqCOMBO = "SELECT programa FROM programf WHERE estado = 1 GROUP BY programa";
 $COM = $conexion->query($slqCOMBO);
 
-$slqCOMBO2 = "SELECT producto FROM programf GROUP BY 1";
+$slqCOMBO2 = "SELECT producto FROM programf WHERE estado = 1 GROUP BY 1";
 $COM2 = $conexion->query($slqCOMBO2);
 
-$slqCOMBO3 = "SELECT temporada_obj FROM programf WHERE Programa = $programa GROUP BY 1 ORDER BY fecha_pico";
+$programaCombo = $conexion->real_escape_string($programa);
+$slqCOMBO3 = "SELECT temporada_obj FROM programf WHERE estado = 1 AND Programa = '$programaCombo' GROUP BY 1 ORDER BY fecha_pico";
 $COM3 = $conexion->query($slqCOMBO3);
 
-$slqCOMBO4 = "SELECT finca FROM programf GROUP BY 1";
+$slqCOMBO4 = "SELECT finca FROM programf WHERE estado = 1 GROUP BY 1";
 $COM4 = $conexion->query($slqCOMBO4);
 
 // Consultas para encabezados

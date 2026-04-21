@@ -61,7 +61,7 @@ $sqlvar2 ="update varieties as a set producto='VITRINAS MINICLAVEL' where a.nomb
 $conexion->query($sqlvar1);
 $conexion->query($sqlvar2);
 
-for ($i=2022;$i<=2023;$i++){
+for ($i=2025;$i<=2026;$i++){
 	$sql_ciclo = "update varieties as v 
 	inner join 
 	(SELECT pr.variedad,pr.ciclo FROM program as pr

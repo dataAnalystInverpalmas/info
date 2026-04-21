@@ -71,6 +71,8 @@ $tablas = array(
 	'4'                  => 'tables/seasons.php',
 	'5'                  => 'tables/fusarium.php',
 	'6'                  => 'tables/arrangements.php',
+	'20'                 => 'tables/arrangements_crud.php',
+	'21'                 => 'tables/arrangement_crud.php',
 	'7'                  => 'tables/companys.php',
 	'8'                  => 'tables/farms.php',
 	'9'                  => 'tables/products.php',
@@ -122,13 +124,26 @@ $reportes = array(
 	'105'      => 'views/report_trazabilidad.php',
 	'106'      => 'views/report_pb_demandas.php',
 	'107'      => 'views/report_pb_compara_prod.php',
+	'200'      => 'views/proyectos.php',
+	'201'      => 'views/tareas.php',
+	'202'      => 'views/bitacora.php',
 	'1000'     => 'covid/covid.php',
 	'1001'     => 'covid/settings.php',
 	'1002'     => 'covid/report.php',
 	'1004'     => 'covid/reportout.php',
-	'programs' => 'views/programs.php',
-	'orders'   => 'views/orders.php',
-	'months'   => 'views/months.php',
+	'programs'         => 'views/programs.php',
+	'programsf'        => 'views/programsf.php',
+	'orders'           => 'views/orders.php',
+	'months'           => 'views/months.php',
+	'arrangements_crud' => 'views/arrangements_crud.php',
+	'arrangement_crud'  => 'views/arrangement_crud.php',
+	'crud_breeders'     => 'views/breeders_crud.php',
+	'crud_users'        => 'views/users_crud.php',
+	'crud_roles'        => 'views/roles_crud.php',
+	'crud_supplies'     => 'views/supplies_crud.php',
+	'crud_varieties'    => 'views/varieties_crud.php',
+	'crud_seasons'      => 'views/seasons_crud.php',
+	'crud_emv'          => 'views/entrada_material_vegetal.php',
 );
 
 // ============================================================
@@ -138,7 +153,12 @@ if (isset($_GET['table'])) {
 	$key = strval($_GET['table']);
 	if (isset($tablas[$key])) {
 		$dir = $tablas[$key];
-		if (tiene_permiso($conexion, $dir)) {
+		$permitido = tiene_permiso($conexion, $dir);
+		if (!$permitido && ($key === '20' || $key === '21')) {
+			$permitido = tiene_permiso($conexion, 'tables/arrangements.php');
+		}
+
+		if ($permitido) {
 			?>
 			<script>
 				var link = "<?php echo $enruta . $dir; ?>";
@@ -158,7 +178,24 @@ if (isset($_GET['report'])) {
 	$key = strval($_GET['report']);
 	if (isset($reportes[$key])) {
 		$dir = $reportes[$key];
-		if (tiene_permiso($conexion, $dir)) {
+		$permitido = tiene_permiso($conexion, $dir);
+		// Fallback: si la ruta nueva de arrangements no está en roles, usar el permiso del original
+		if (!$permitido && ($dir === 'views/arrangements_crud.php' || $dir === 'views/arrangement_crud.php')) {
+			$permitido = tiene_permiso($conexion, 'tables/arrangements.php');
+		}
+		// Fallback: CRUD nuevos de catálogos visibles para admin aunque no exista rol cargado
+		if (!$permitido && in_array($dir, [
+			'views/breeders_crud.php',
+			'views/users_crud.php',
+			'views/roles_crud.php',
+			'views/supplies_crud.php',
+			'views/varieties_crud.php',
+			'views/seasons_crud.php',
+			'views/entrada_material_vegetal.php',
+		], true) && intval($_SESSION['role']) === 1) {
+			$permitido = true;
+		}
+		if ($permitido) {
 			include "$dir";
 		} else {
 			echo "<h1>No tiene permisos</h1>";

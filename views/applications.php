@@ -18,6 +18,38 @@ use Carbon\Carbon;
 	//consulta para combos
 	$where=" WHERE p.producto in('CLAVEL','MINICLAVEL','CLAVEL STANDARD','CLAVEL MINIATURA') ";
 
+	$fechaSiembraJueves = "DATE_ADD(p.fecha_siembra, INTERVAL (3 - WEEKDAY(p.fecha_siembra)) DAY)";
+	$fechaBase = "IF(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'), DATE_ADD($fechaSiembraJueves, INTERVAL + COALESCE(pr.pico, v.ciclo) WEEK), s.fecha_pico)";
+	$fechaAplicacionExpr = "DATE_ADD(
+	IF(
+			aa.calc_conciclo=0,
+			DATE_ADD($fechaBase, INTERVAL - COALESCE(pr.pico, v.ciclo) WEEK),
+			IF(aa.calc_conciclo=2,
+				DATE_ADD($fechaBase, INTERVAL + COALESCE(pr.pico, v.ciclo) WEEK),
+				IF(aa.calc_conciclo=3,
+					DATE_ADD($fechaBase, INTERVAL - COALESCE(pr.pico, v.ciclo) WEEK),
+					IF(aa.calc_conciclo=4,
+						DATE_ADD($fechaBase, INTERVAL - COALESCE(pr.pico, v.ciclo) WEEK),
+						IF(aa.calc_conciclo=5,
+							DATE_ADD($fechaBase, INTERVAL - COALESCE(pr.pico, v.ciclo) WEEK),
+							IF(aa.calc_conciclo=6,
+								DATE_ADD($fechaBase, INTERVAL - 0 WEEK),
+								IF(aa.calc_conciclo=7,
+									DATE_ADD($fechaBase, INTERVAL - 0 WEEK),
+									IF(aa.calc_conciclo=8,
+										DATE_ADD($fechaBase, INTERVAL - 0 WEEK),
+										DATE_ADD($fechaBase, INTERVAL - COALESCE(pr.pico, v.ciclo) + COALESCE(pr.pico, v.ciclo) WEEK)
+									)
+								)
+							)
+						)
+					)
+				)
+			)
+		),
+	INTERVAL a.valor * IF(aa.calc_conciclo=6,-1,1) DAY
+	)";
+
 	if(empty($_POST['xtipo']) and empty($_POST['xfinca']))
 	{//las dos estan vacias
 		$tipo="";
@@ -58,64 +90,14 @@ use Carbon\Carbon;
 			$where.=" AND a.finca='".$finca."' ";
 		}
 		//resto de la condicion que siempre se cumple
-			  $where.=" AND  
-			  DATE_ADD(
-		if(
-		aa.calc_conciclo=0,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week),
-		if(aa.calc_conciclo=2,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval + COALESCE(pr.pico, v.ciclo) week),
-		if(aa.calc_conciclo=3,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week),
-		if(aa.calc_conciclo=4,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week )
-		,
-		if(aa.calc_conciclo=5,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week )
-		,
-		if(aa.calc_conciclo=6,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
-		,
-		if(aa.calc_conciclo=7,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
-		,
-		if(aa.calc_conciclo=8,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
-		,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo)  + COALESCE(pr.pico, v.ciclo) week )
-		))))))))
-		,interval a.valor * if(aa.calc_conciclo=6,-1,1) day)
+		  $where.=" AND  
+		$fechaAplicacionExpr
 		between '$dateIni' AND '$dateEnd' 		   		  
-			  ";
+		  ";
 	}else
 	{//en caso de no haber presionado  buscar, hace...
 		$where.=" AND a.finca='INVERPALMAS' AND a.tipo='GIBERELINA' AND
-		DATE_ADD(
-		if(
-		aa.calc_conciclo=0,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week),
-		if(aa.calc_conciclo=2,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval + COALESCE(pr.pico, v.ciclo) week),
-		if(aa.calc_conciclo=3,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week),
-		if(aa.calc_conciclo=4,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week )
-		,
-		if(aa.calc_conciclo=5,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week )
-		,
-		if(aa.calc_conciclo=6,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
-		,
-		if(aa.calc_conciclo=7,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
-		,
-		if(aa.calc_conciclo=8,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
-		,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo)  + COALESCE(pr.pico, v.ciclo) week )
-		))))))))
-		,interval a.valor * if(aa.calc_conciclo=6,-1,1) day)
+		$fechaAplicacionExpr
 		between '$dateIni' AND '$dateEnd' 		  
 		";
 	}
@@ -129,32 +111,7 @@ use Carbon\Carbon;
 			a.aplicar,
 			ld_v.codigo,
 		COUNT(p.bloque) as camas,round(sum(p.plantas)/960,1) as ncamas,
-		DATE_ADD(
-		if(
-			aa.calc_conciclo=0,
-			   date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week),
-		if(aa.calc_conciclo=2,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval + COALESCE(pr.pico, v.ciclo) week),
-		if(aa.calc_conciclo=3,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week),
-		if(aa.calc_conciclo=4,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week )
-		,
-		if(aa.calc_conciclo=5,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week )
-		,
-		if(aa.calc_conciclo=6,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
-		,
-		if(aa.calc_conciclo=7,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
-		,
-		if(aa.calc_conciclo=8,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
-		,
-		date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo)  + COALESCE(pr.pico, v.ciclo) week )
-		))))))))
-		,interval a.valor * if(aa.calc_conciclo=6,-1,1) day) as fecha_aplica
+		$fechaAplicacionExpr as fecha_aplica
 		FROM plane AS p
 		INNER JOIN arrangements as a
 		ON a.variedad=p.variedad and a.finca=p.finca
@@ -179,32 +136,7 @@ use Carbon\Carbon;
 		a.tipo,
 		a.aplicar,
 	COUNT(p.bloque) as camas,round(sum(p.plantas)/960,1) as ncamas,
-	DATE_ADD(
-	if(
-	aa.calc_conciclo=0,
-	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week),
-	if(aa.calc_conciclo=2,
-	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval + COALESCE(pr.pico, v.ciclo) week),
-	if(aa.calc_conciclo=3,
-	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week),
-	if(aa.calc_conciclo=4,
-	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week )
-	,
-	if(aa.calc_conciclo=5,
-	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo) week )
-	,
-	if(aa.calc_conciclo=6,
-	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
-	,
-	if(aa.calc_conciclo=7,
-	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
-	,
-	if(aa.calc_conciclo=8,
-	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - 0 week )
-	,
-	date_add(if(p.tipo_siembra IN ('REEMPLAZO', 'ADICIONAL'),date_add(p.fecha_siembra, interval + COALESCE(pr.pico, v.ciclo) week),s.fecha_pico), interval - COALESCE(pr.pico, v.ciclo)  + COALESCE(pr.pico, v.ciclo) week )
-	))))))))
-	,interval a.valor * if(aa.calc_conciclo=6,-1,1) day) as fecha_aplica
+	$fechaAplicacionExpr as fecha_aplica
 	FROM plane AS p
 	INNER JOIN arrangements as a
 	ON a.variedad=p.variedad and a.finca=p.finca
@@ -220,6 +152,7 @@ use Carbon\Carbon;
 	$where
 	GROUP BY p.finca,p.bloque,a.tipo,a.aplicar
 		";
+
 			//consulta para tabla
 	$sql3="SELECT IFNULL(a.aplicar,'Total') as aplicar,
 		COUNT(p.bloque) as camas,round(sum(p.plantas)/960,1) as ncamas	
@@ -251,6 +184,7 @@ use Carbon\Carbon;
 	//consulta fincas
 	$sqlFINCA="SELECT DISTINCT finca FROM plane";
 	$resF=$conexion->query($sqlFINCA);
+
 
 ?>
 	<!--formulario de fi-->

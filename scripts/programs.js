@@ -1,4 +1,59 @@
 $(document).ready(function(){
+    function normalizeDateString(raw){
+        if(!raw) return '';
+        var s = String(raw).trim();
+        if(!s) return '';
+
+        // Si viene con hora, tomar solo YYYY-MM-DD
+        if (s.length >= 10 && s.indexOf('-') > -1) {
+            return s.substring(0, 10);
+        }
+
+        // Convertir formatos con / a YYYY-MM-DD
+        if (s.indexOf('/') > -1) {
+            var parts = s.split('/');
+            if (parts.length === 3) {
+                // dd/mm/yyyy
+                if (parts[2].length === 4) {
+                    return parts[2] + '-' + String(parts[1]).padStart(2, '0') + '-' + String(parts[0]).padStart(2, '0');
+                }
+                // yyyy/mm/dd
+                if (parts[0].length === 4) {
+                    return parts[0] + '-' + String(parts[1]).padStart(2, '0') + '-' + String(parts[2]).padStart(2, '0');
+                }
+            }
+        }
+
+        return s;
+    }
+
+    function getIsoWeekLabel(dateString){
+        var normalized = normalizeDateString(dateString);
+        if(!normalized) return 'Semana ISO: -';
+
+        var d = new Date(normalized + 'T00:00:00');
+        if(isNaN(d.getTime())) return 'Semana ISO: -';
+        var tmp = new Date(d.getTime());
+        tmp.setDate(tmp.getDate() + 3 - ((tmp.getDay() + 6) % 7));
+        var week1 = new Date(tmp.getFullYear(), 0, 4);
+        var wk = 1 + Math.round(((tmp - week1) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+        return 'Semana ISO: ' + tmp.getFullYear() + '-W' + String(wk).padStart(2, '0');
+    }
+
+    function updateIsoWeekHint(value){
+        var val = (typeof value !== 'undefined') ? value : $('#p_fecha_siembra').val();
+        $('#p_fecha_siembra_iso').text(getIsoWeekLabel(val));
+    }
+
+    function setProgramDateField(rawValue){
+        var normalized = normalizeDateString(rawValue);
+        $('#p_fecha_siembra').val(normalized);
+        updateIsoWeekHint(normalized);
+    }
+
+    // Exponer helper global para invocación directa desde markup si aplica
+    window.updateProgramIsoWeek = updateIsoWeekHint;
+
     var table = $('#programsTable').DataTable({
         ajax: {
             url: '../ajax/program_list.php',
@@ -8,14 +63,34 @@ $(document).ready(function(){
                 d.estado = $('#f_estado').val() || '';
                 d.variedad = $('#f_variedad').val() || '';
                 d.temporada = $('#f_temporada').val() || '';
+                d.ciclo = $('#f_ciclo').val() || '';
+                d.adicional = $('#f_adicional').val() || '';
+                d.semana_siembra = $('#f_semana_siembra').val() || '';
             }
+        },
+        footerCallback: function(row, data, start, end, display){
+            var api = this.api();
+            var total = api.column(7, {search:'applied'}).data().reduce(function(a, b){
+                return a + (parseFloat(b) || 0);
+            }, 0);
+            $(api.column(7).footer()).html(total);
         },
         columns: [
             { data: 'id' },
             { data: 'programa' },
             { data: 'variedad' },
             { data: 'ciclo' },
-            { data: 'fecha_siembra' },
+            { data: 'fecha_siembra', render: function(data){
+                if(!data) return '';
+                var d = new Date(data + 'T00:00:00');
+                // ISO week number calculation
+                var tmp = new Date(d.getTime());
+                tmp.setDate(tmp.getDate() + 3 - ((tmp.getDay() + 6) % 7));
+                var week1 = new Date(tmp.getFullYear(), 0, 4);
+                var wk = 1 + Math.round(((tmp - week1) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+                var yy = String(tmp.getFullYear()).slice(-2);
+                return yy + String(wk).padStart(2, '0');
+            }},
             { data: 'temporada_obj' },
             {data: 'pico'},
             { data: 'ncamas' },
@@ -34,6 +109,13 @@ $(document).ready(function(){
         ]
     });
 
+    // Inicializar Select2 en variedad y temporada
+    $('#f_variedad, #f_temporada').select2({
+        placeholder: 'Buscar...',
+        allowClear: true,
+        width: '100%'
+    });
+
     function reloadCombos(){
         var programa = $('#f_programa').val() || '';
         var estado = $('#f_estado').val() || '';
@@ -48,6 +130,8 @@ $(document).ready(function(){
             }
             // try to reselect previous if still present
             $var.val(sel);
+            // re-init Select2
+            $var.select2({ placeholder: 'Buscar...', allowClear: true, width: '100%' });
 
             // rebuild temporada
             var $t = $('#f_temporada');
@@ -57,6 +141,8 @@ $(document).ready(function(){
                 res.temporadas.forEach(function(v){ $t.append($('<option>').attr('value',v).text(v)); });
             }
             $t.val(sels);
+            // re-init Select2
+            $t.select2({ placeholder: 'Buscar...', allowClear: true, width: '100%' });
         }, 'json');
     }
 
@@ -70,6 +156,7 @@ $(document).ready(function(){
         $('#programForm')[0].reset();
         $('#p_id').val('');
         $('#p_programa').val('');
+        updateIsoWeekHint();
         // ensure not in clone mode
         $('#programForm').data('clone', false);
         $('#programModal').modal('show');
@@ -83,8 +170,11 @@ $(document).ready(function(){
     $('#btnClearFilter').on('click', function(){
         $('#f_programa').val('');
         $('#f_estado').val('1');
-        $('#f_variedad').val('');
-        $('#f_temporada').val('');
+        $('#f_variedad').val('').trigger('change');
+        $('#f_temporada').val('').trigger('change');
+        $('#f_ciclo').val('');
+        $('#f_adicional').val('');
+        $('#f_semana_siembra').val('');
         reloadCombos();
         table.ajax.reload();
     });
@@ -98,10 +188,11 @@ $(document).ready(function(){
                 $('#p_programa').val(d.programa);
                 $('#p_variedad').val(d.variedad);
                 $('#p_ciclo').val(d.ciclo);
-                $('#p_fecha_siembra').val(d.fecha_siembra);
+                setProgramDateField(d.fecha_siembra);
                 $('#p_temporada_obj').val(d.temporada_obj);
                 $('#p_ncamas').val(d.ncamas);
                 $('#p_casa_id').val(d.casa_id);
+                $('#p_pico').val(d.pico);
                 $('#p_raiz').val(d.raiz);
                 $('#p_pm').val(d.pm);
                 $('#p_ferradica').val(d.ferradica);
@@ -128,10 +219,11 @@ $(document).ready(function(){
                 $('#p_programa').val(d.programa);
                 $('#p_variedad').val(d.variedad);
                 $('#p_ciclo').val(d.ciclo);
-                $('#p_fecha_siembra').val(d.fecha_siembra);
+                setProgramDateField(d.fecha_siembra);
                 $('#p_temporada_obj').val(d.temporada_obj);
                 $('#p_ncamas').val(d.ncamas);
                 $('#p_casa_id').val(d.casa_id);
+                $('#p_pico').val(d.pico);
                 $('#p_raiz').val(d.raiz);
                 $('#p_pm').val(d.pm);
                 $('#p_ferradica').val(d.ferradica);
@@ -199,4 +291,14 @@ $(document).ready(function(){
             else { alert(res.message || 'Error al eliminar'); }
         }, 'json');
     });
+
+    $('#p_fecha_siembra').on('change input blur', function(){
+        updateIsoWeekHint(this.value);
+    });
+
+    $('#programModal').on('shown.bs.modal', function(){
+        updateIsoWeekHint();
+    });
+
+    updateIsoWeekHint();
 });

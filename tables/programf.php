@@ -30,11 +30,12 @@ $nombrearchivo='../archivos/tabla_asignacion.xlsx';
 		$ciclo = $objPHPExcel->getActiveSheet()->getCell('I'.$i)->getCalculatedValue();
 		$fsiembra = $objPHPExcel->getActiveSheet()->getCell('J'.$i)->getCalculatedValue();
 		$ferradica = $objPHPExcel->getActiveSheet()->getCell('K'.$i)->getCalculatedValue();
+		$adicional = $objPHPExcel->getActiveSheet()->getCell('L'.$i)->getCalculatedValue();
 		$temporada_obj=strtoupper($temporada_obj);
 		$variedad=strtoupper($variedad);
 		//$fecha_siembra=date('Y-m-d',$fechai);
-		$sql="INSERT INTO programf (producto,variedad,temporada_obj,plantas,programa,finca,bloque,ncamas,ciclo,fecha_siembra,ferradica)";
-		$sql=$sql." VALUES ('$producto','$variedad','$temporada_obj',$matas,$programa,'$finca',$bloque,$ncamas,$ciclo,'$fsiembra','$ferradica')";
+		$sql="INSERT INTO programf (producto,variedad,temporada_obj,plantas,programa,finca,bloque,ncamas,ciclo,fecha_siembra,ferradica,adicional)";
+		$sql=$sql." VALUES ('$producto','$variedad','$temporada_obj',$matas,$programa,'$finca',$bloque,$ncamas,$ciclo,'$fsiembra','$ferradica','$adicional')";
 		$result=$conexion->query($sql);
 		
 		if (!$result){		

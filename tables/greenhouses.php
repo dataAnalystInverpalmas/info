@@ -8,14 +8,14 @@ use Carbon\Carbon;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 ///////////////////////////////////////////
-	$nombrearchivo='../archivos/tabla_bloques.xlsx';
+	$nombrearchivo='../archivos/tabla_bloques_001_14.xlsx';
 	$objPHPExcel=IOFactory::load($nombrearchivo);
 	$objPHPExcel->setActiveSheetIndex(0);
 	$numRows=$objPHPExcel->setActiveSheetIndex(0)->getHighestRow();
 
 	//Our SQL statement. This will empty / truncate the table "plane"
-$sqlp = "TRUNCATE TABLE greenhouses";
-$conexion->query($sqlp);
+#$sqlp = "TRUNCATE TABLE greenhouses";
+#$conexion->query($sqlp);
 
 	for ($i=2;$i<=$numRows;$i++){
 		$finca=$objPHPExcel->getActiveSheet()->getCell('A'.$i)->getCalculatedValue();
@@ -25,6 +25,7 @@ $conexion->query($sqlp);
 		$cama=$objPHPExcel->getActiveSheet()->getCell('E'.$i)->getCalculatedValue();
 		$longitud=$objPHPExcel->getActiveSheet()->getCell('F'.$i)->getCalculatedValue();
    	    $ancho=$objPHPExcel->getActiveSheet()->getCell('G'.$i)->getCalculatedValue();
+		$matas=$objPHPExcel->getActiveSheet()->getCell('H'.$i)->getCalculatedValue();
 
 		$sql="INSERT INTO greenhouses (finca_id,bloque,tabla,nave,cama,longitud,ancho)";
 		$sql=$sql." VALUES ($finca,$bloque,'$tabla',$nave,$cama,$longitud,$ancho)";

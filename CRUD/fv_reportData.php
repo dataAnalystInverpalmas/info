@@ -6,20 +6,29 @@ if (is_file("funciones/conexion.php")){
 	  include ("../funciones/conexion.php");
   }
 $where = "WHERE 1 ";
+$params = [];
+$types = "";
 
 if ($_POST){
-	$fini=$_POST['fini'];
-	$ffin=$_POST['ffin'];
-	$flor=$_POST['flor'];
+	$fini = $_POST['fini'] ?? '';
+	$ffin = $_POST['ffin'] ?? '';
+	$flor = $_POST['flor'] ?? '';
 
-	if ($fini != "" & $ffin != "" and $flor != ""){
-		$where .= "and v.producto='$flor' and fecha_florero BETWEEN '$fini' and '$ffin' ";
-	}elseif ($fini != "" & $ffin != ""){
-		$where .= "and fecha_florero BETWEEN '$fini' and '$ffin' ";
+	if ($fini != "" && $ffin != "" && $flor != ""){
+		$where .= "AND v.producto = ? AND f.fecha_florero BETWEEN ? AND ? ";
+		$types .= "sss";
+		$params[] = $flor;
+		$params[] = $fini;
+		$params[] = $ffin;
+	}elseif ($fini != "" && $ffin != ""){
+		$where .= "AND f.fecha_florero BETWEEN ? AND ? ";
+		$types .= "ss";
+		$params[] = $fini;
+		$params[] = $ffin;
 	}elseif ($flor != ""){
-		$where .= "and v.producto='$flor'";
-	}else{
-		$where .= "";
+		$where .= "AND v.producto = ? ";
+		$types .= "s";
+		$params[] = $flor;
 	}
 }
 
@@ -56,7 +65,7 @@ FROM
         LEFT JOIN
     informes.fv_causes_items AS ci ON ci.id = c.causes_item_id
         LEFT JOIN
-    informes.fv_evaluations AS e ON e.id = c.fv_id
+    informes.fv_evaluations AS e ON e.fv_id = f.id
         LEFT JOIN
     informes.fv_evaluation_items AS ei ON ei.id = e.evaluation_item_id
         LEFT JOIN
@@ -104,24 +113,17 @@ FROM
         LEFT JOIN
     (SELECT 
         f.id,
-            eval.CONSISTENCIA_COLOR,
-            eval.PETALOS,
-            eval.VELOCIDAD_APERTURA,
-            eval.FORMA_APERTURA,
-            eval.TALLO,
-            eval.FOLLAJE,
-            t.sum_incof,
-            (CASE
-                WHEN fc.id = 1 THEN CONCAT(ROUND(AVG(c.cantidad) / SUM(f.tallos) * 100, 0), '%')
-                ELSE 0
-            END) FINAL_OPTIMO,
-            (CASE
-                WHEN fc.id != 1 THEN CONCAT(sum_incof, '%')
-                ELSE CONCAT(if(sum_incof is null, 0 ,sum_incof ), '%') 
-            END) AS NO_CONFORME
+            MAX(eval.CONSISTENCIA_COLOR) AS CONSISTENCIA_COLOR,
+            MAX(eval.PETALOS) AS PETALOS,
+            MAX(eval.VELOCIDAD_APERTURA) AS VELOCIDAD_APERTURA,
+            MAX(eval.FORMA_APERTURA) AS FORMA_APERTURA,
+            MAX(eval.TALLO) AS TALLO,
+            MAX(eval.FOLLAJE) AS FOLLAJE,
+            CONCAT(COALESCE(ROUND(SUM(CASE WHEN fc.id = 1 THEN c.cantidad ELSE 0 END) / 
+                NULLIF(SUM(CASE WHEN fc.id = 1 THEN f.tallos ELSE 0 END), 0) * 100, 0), 0), '%') AS FINAL_OPTIMO,
+            CONCAT(COALESCE(MAX(t.sum_incof), 0), '%') AS NO_CONFORME
     FROM
         informes.flower_vases AS f
-    LEFT JOIN informes.varieties AS v ON v.id = f.variedad_id
     LEFT JOIN informes.fv_causes AS c ON c.fv_id = f.id
     LEFT JOIN (SELECT 
         f.id,
@@ -136,8 +138,6 @@ FROM
     LEFT JOIN informes.fv_causes_items AS fc ON fc.id = c.causes_item_id
     LEFT JOIN (SELECT 
         fv_id,
-            items.nombre,
-            puntaje,
             SUM(CASE
                 WHEN items.nombre LIKE '%CONSISTENCIA EN COLOR%' THEN puntaje
                 ELSE 0
@@ -165,15 +165,18 @@ FROM
     FROM
         informes.fv_evaluations AS eval
     LEFT JOIN informes.fv_evaluation_items AS items ON items.id = eval.evaluation_item_id
-    GROUP BY fv_id
-    ORDER BY fv_id DESC) AS eval ON eval.fv_id = f.id
-    GROUP BY c.id , fc.id
-     order by fc.id desc) AS subquery ON subquery.id = f.id
+    GROUP BY fv_id) AS eval ON eval.fv_id = f.id
+    GROUP BY f.id) AS subquery ON subquery.id = f.id
 $where
-GROUP BY f.fecha_corte , f.fecha_florero , f.pcorte , f.pempaque , f.pflorero , f.grupo_descripcion , k.nombre , v.nombre , o.nombre , f.simulacion , f.guarde_granel , f.observacion
+GROUP BY f.id , f.fecha_corte , f.fecha_florero , f.pcorte , f.pempaque , f.pflorero , f.grupo_descripcion , k.nombre , v.nombre , o.nombre , f.simulacion , f.guarde_granel , f.observacion
 ORDER BY f.id DESC
 ";
-$result=$conexion->query($query);
+$stmt = $conexion->prepare($query);
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
+$stmt->execute();
+$result = $stmt->get_result();
 
 $response = array();
 
