@@ -18,7 +18,7 @@ $(document).ready(function(){
      ///////////////////CARGA COMBO tipo////
      $.ajax({
         type: "POST",
-        url: "CRUD/proy_kind.php",
+        url: "ajax/proy_kind.php",
         data: {},
         success: function(response)
         {
@@ -83,7 +83,7 @@ var listarProy = function(){
         ],
         "destroy": true,
         "ajax": {
-            "url": "CRUD/pto_proy.php",
+            "url": "ajax/pto_proy.php",
             "dataSrc": "",
             "method": "post",
             "datetype": "json",

@@ -88,10 +88,8 @@ $directorio = $_GLOBALS['src'];
 		Informes
 	</button>
   <div class="dropdown-menu" aria-labelledby="dropdownMenuOffset">
-		<!-- <a class="dropdown-item" href="home.php?menu=tables&report=50">Reporte Fusarium</a>
-    <a class="dropdown-item" href="home.php?menu=tables&report=51">Reporte Ensartes y Cosechas</a> -->
+		<!-- <a class="dropdown-item" href="home.php?menu=tables&report=51">Reporte Ensartes y Cosechas</a> -->
     <a class="dropdown-item" href="home.php?menu=tables&report=102">Info de bloques</a>
-    <a class="dropdown-item" href="home.php?menu=tables&report=13">Reporte Calidades</a>
     
 	</div>
 </div>
@@ -106,7 +104,6 @@ $directorio = $_GLOBALS['src'];
     <!-- <a class="dropdown-item" href="home.php?menu=tables&report=101">Registra Información</a>
     <a class="dropdown-item" href="home.php?menu=tables&report=9">Ubicaciones</a>
     <a class="dropdown-item" href="home.php?menu=tables&report=10">Indicadores</a> -->
-    <!--<a class="dropdown-item" href="home.php?menu=tables&report=11">Registra Clasificación</a>-->
     <a class="dropdown-item" href="home.php?menu=tables&report=14">Registra Labores de Siembra</a>
     <a class="dropdown-item" href="home.php?menu=tables&report=crud_emv">Entrada Material Vegetal</a>
     <!--<a class="dropdown-item" href="home.php?menu=tables&report=months">Registra Información Reportes</a>-->
@@ -155,6 +152,8 @@ $directorio = $_GLOBALS['src'];
     <a class="dropdown-item" href="home.php?menu=tables&report=200">Proyectos</a>
     <a class="dropdown-item" href="home.php?menu=tables&report=201">Tareas</a>
     <a class="dropdown-item" href="home.php?menu=tables&report=202">Bitácora</a>
+    Kanban:
+    <a class="dropdown-item" href="home.php?menu=tables&report=203">Tablero</a>
   </div>
 </div>
 <?php endif; ?>

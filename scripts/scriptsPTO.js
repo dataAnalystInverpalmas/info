@@ -17,7 +17,7 @@ $(document).ready(function(){
             ///////////////////CARGA COMBO FLOR////
             $.ajax({
             type: "POST",
-            url: "CRUD/pto_y.php",
+            url: "ajax/pto_y.php",
             data: {},
             success: function(response)
             {
@@ -28,7 +28,7 @@ $(document).ready(function(){
             ///////////////////CARGA COMBO FLOR////
             $.ajax({
                 type: "POST",
-                url: "CRUD/pto_casa.php",
+                url: "ajax/pto_casa.php",
                 data: {},
                 success: function(response)
                 {
@@ -96,7 +96,7 @@ var listarPTO = function(){
         ],
         "destroy": true,
         "ajax": {
-            "url": "CRUD/pto.php",
+            "url": "ajax/pto.php",
             "dataSrc": "",
             "method": "post",
             "datetype": "json",

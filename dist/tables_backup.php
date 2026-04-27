@@ -377,42 +377,6 @@ else if ($_GET['table']==19)
 		echo "<h1>No tiene permisos</h1>";
 	}
 }
-else if ($_GET['table']=='loadQualities')
-{
-	$dir="tables/qualities.php";	
-	$query="SELECT dir FROM roles WHERE users_role=".$_SESSION['role']." 
-			AND dir='".$dir."' ";
-	$resQ=$conexion->query($query);
-	if ($resQ->num_rows>0)
-	{
-		?>
-			<script>
-				var link = "<?php echo $enruta.$dir; ?>";
-				listar_tabla(link);
-			</script>
-		<?php
-	}else{
-		echo "<h1>No tiene permisos</h1>";
-	}
-}
-else if ($_GET['table']=='loadNalcauses')
-{
-	$dir="tables/nalCauses.php";	
-	$query="SELECT dir FROM roles WHERE users_role=".$_SESSION['role']." 
-			AND dir='".$dir."' ";
-	$resQ=$conexion->query($query);
-	if ($resQ->num_rows>0)
-	{
-		?>
-			<script>
-				var link = "<?php echo $enruta.$dir; ?>";
-				listar_tabla(link);
-			</script>
-		<?php
-	}else{
-		echo "<h1>No tiene permisos</h1>";
-	}
-}
 else if ($_GET['table']=='loadEvaluations')
 {
 	$dir="tables/evaluations.php";	
@@ -713,35 +677,9 @@ if (isset($_GET['report']))
 			echo "<h1>No tiene permisos</h1>";
 		}
 	}
-	else if ($_GET['report']==11)
-	{
-		$dir="views/datatable.php";	
-		$query="SELECT dir FROM roles WHERE users_role=".$_SESSION['role']." 
-				AND dir='".$dir."' ";
-		$resQ=$conexion->query($query);
-		if ($resQ->num_rows>0)
-		{
-			include "$dir";
-		}else{
-			echo "<h1>No tiene permisos</h1>";
-		}
-	}
 	else if ($_GET['report']==12)
 	{
 		$dir="views/flowervase.php";	
-		$query="SELECT dir FROM roles WHERE users_role=".$_SESSION['role']." 
-				AND dir='".$dir."' ";
-		$resQ=$conexion->query($query);
-		if ($resQ->num_rows>0)
-		{
-			include "$dir";
-		}else{
-			echo "<h1>No tiene permisos</h1>";
-		}
-	}
-	else if ($_GET['report']==13)
-	{
-		$dir="views/report_qualities.php";	
 		$query="SELECT dir FROM roles WHERE users_role=".$_SESSION['role']." 
 				AND dir='".$dir."' ";
 		$resQ=$conexion->query($query);
@@ -780,7 +718,7 @@ if (isset($_GET['report']))
 	}
 	else if ($_GET['report']=='orders')
 	{
-		$dir="views/orders.php";	
+		$dir="views/evaluaciones_crud.php";	
 		$query="SELECT dir FROM roles WHERE users_role=".$_SESSION['role']." 
 				AND dir='".$dir."' ";
 		$resQ=$conexion->query($query);
@@ -794,19 +732,6 @@ if (isset($_GET['report']))
 	else if ($_GET['report']=='months')
 	{
 		$dir="views/months.php";	
-		$query="SELECT dir FROM roles WHERE users_role=".$_SESSION['role']." 
-				AND dir='".$dir."' ";
-		$resQ=$conexion->query($query);
-		if ($resQ->num_rows>0)
-		{
-			include "$dir";
-		}else{
-			echo "<h1>No tiene permisos</h1>";
-		}
-	}
-	else if ($_GET['report']==50)
-	{
-		$dir="views/management.php";	
 		$query="SELECT dir FROM roles WHERE users_role=".$_SESSION['role']." 
 				AND dir='".$dir."' ";
 		$resQ=$conexion->query($query);
@@ -846,19 +771,6 @@ if (isset($_GET['report']))
 	else if ($_GET['report']==53)
 	{
 		$dir="views/report_evaluations.php";	
-		$query="SELECT dir FROM roles WHERE users_role=".$_SESSION['role']." 
-				AND dir='".$dir."' ";
-		$resQ=$conexion->query($query);
-		if ($resQ->num_rows>0)
-		{
-			include "$dir";
-		}else{
-			echo "<h1>No tiene permisos</h1>";
-		}
-	}
-	else if ($_GET['report']==100)
-	{
-		$dir="views/management.php";	
 		$query="SELECT dir FROM roles WHERE users_role=".$_SESSION['role']." 
 				AND dir='".$dir."' ";
 		$resQ=$conexion->query($query);

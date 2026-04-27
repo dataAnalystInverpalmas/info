@@ -11,25 +11,60 @@ $(document).ready(function () {
     $('#emv_fecha_fin').val(ano + '-' + mes + '-' + dia);
 
     /* ---------------------------------------------------------------
-       Poblar select de proveedores (breeders)
+       Poblar selects de proveedores y destino (breeders)
     --------------------------------------------------------------- */
-    $.post('CRUD/crud_emv.php', { opcion: 'breeders' }, function (data) {
-        var $sel = $('#emv_proveedor');
-        $sel.empty().append('<option value="">— seleccione —</option>');
-        $.each(data, function (i, nombre) {
-            $sel.append($('<option>').val(nombre).text(nombre));
+    $.post('ajax/crud_emv.php', { opcion: 'breeders' }, function (data) {
+        var $selP = $('#emv_proveedor');
+        var $selD = $('#emv_destino');
+        $selP.empty().append('<option value="">— seleccione —</option>');
+        $selD.empty().append('<option value="">— seleccione —</option>');
+        $.each(data, function (i, item) {
+            $selP.append($('<option>').val(item.id).text(item.nombre));
+            $selD.append($('<option>').val(item.id).text(item.nombre));
         });
     }, 'json');
 
     /* ---------------------------------------------------------------
-       Poblar datalist de variedades
+       Poblar select de variedades con filtro por flor y texto
     --------------------------------------------------------------- */
-    $.post('CRUD/crud_emv.php', { opcion: 'variedades' }, function (data) {
-        var $list = $('#listVariedades').empty();
-        $.each(data, function (i, nombre) {
-            $list.append($('<option>').val(nombre));
+    var todasVariedades = [];
+
+    function aplicarFiltroVariedad() {
+        var flor  = $('#det_filtro_flor').val().toLowerCase();
+        var texto = $('#det_variedad_busca').val().toLowerCase();
+        var $sel  = $('#det_variedad');
+        var valorActual = $sel.val();
+        $sel.empty().append('<option value="">— seleccione —</option>');
+        $.each(todasVariedades, function (i, item) {
+            var coincideFlor  = !flor  || (item.codflor  || '').toLowerCase() === flor;
+            var coincideTexto = !texto || item.nombre.toLowerCase().indexOf(texto) !== -1
+                                       || (item.codigo || '').toLowerCase().indexOf(texto) !== -1;
+            if (coincideFlor && coincideTexto) {
+                $sel.append($('<option>').val(item.codigo).text(item.nombre));
+            }
         });
+        $sel.val(valorActual);
+    }
+
+    $.post('ajax/crud_emv.php', { opcion: 'variedades' }, function (data) {
+        todasVariedades = data;
+        // Poblar filtro de flores (valores únicos)
+        var flores = {};
+        $.each(data, function (i, item) {
+            var cf = item.codflor || '';
+            if (cf && !flores[cf]) {
+                flores[cf] = true;
+                $('#det_filtro_flor').append($('<option>').val(cf).text(cf));
+            }
+        });
+        aplicarFiltroVariedad();
     }, 'json');
+
+    $(document).on('change', '#det_filtro_flor', aplicarFiltroVariedad);
+    $(document).on('input',  '#det_variedad_busca', aplicarFiltroVariedad);
+    $(document).on('change', '#det_variedad', function () {
+        $(this).removeClass('is-invalid is-valid');
+    });
 
     /* ---------------------------------------------------------------
        Inicializar DataTable principal
@@ -37,7 +72,7 @@ $(document).ready(function () {
     var tableEmv = $('#tableEmv').DataTable({
         processing: true,
         ajax: {
-            url: 'CRUD/crud_emv.php',
+            url: 'ajax/crud_emv.php',
             type: 'POST',
             data: function () {
                 return {
@@ -107,7 +142,7 @@ $(document).ready(function () {
     $('#formEmv').on('submit', function (e) {
         e.preventDefault();
         $.ajax({
-            url: 'CRUD/crud_emv.php',
+            url: 'ajax/crud_emv.php',
             type: 'POST',
             dataType: 'json',
             data: {
@@ -154,9 +189,9 @@ $(document).ready(function () {
         $('#emv_id').val(row.id);
         $('#emv_fecha').val(row.fecha);
         $('#emv_maquila').val(row.maquila);
-        $('#emv_proveedor').val(row.proveedor);
+        $('#emv_proveedor').val(row.proveedor_id);
         $('#emv_remision').val(row.remision);
-        $('#emv_destino').val(row.destino);
+        $('#emv_destino').val(row.destino_id);
         $('#emv_material').val(row.material);
         abrirModalCRUD('Editar Entrada #' + row.id, 'bg-warning');
     });
@@ -165,7 +200,7 @@ $(document).ready(function () {
     $(document).on('click', '.btnEmvBorrar', function () {
         var id = $(this).data('id');
         if (!confirm('¿Eliminar la entrada #' + id + ' y todos sus detalles?')) return;
-        $.post('CRUD/crud_emv.php', { opcion: '3', id: id }, function () {
+        $.post('ajax/crud_emv.php', { opcion: '3', id: id }, function () {
             tableEmv.ajax.reload(null, false);
         }, 'json');
     });
@@ -192,7 +227,7 @@ $(document).ready(function () {
             tableDetalles = $('#tableEmvDetalles').DataTable({
                 processing: true,
                 ajax: {
-                    url: 'CRUD/crud_emv.php',
+                    url: 'ajax/crud_emv.php',
                     type: 'POST',
                     data: function () {
                         return { opcion: '5', entrada_id: $('#det_entrada_id').val() };
@@ -243,6 +278,9 @@ $(document).ready(function () {
         $('#det_facturado, #det_reposicion, #det_excedente, #det_obsequio, #det_adicional').val(0);
         $('#det_cantidad_recibida').val(0);
         $('#det_raiz').prop('checked', false);
+        $('#det_filtro_flor').val('');
+        $('#det_variedad_busca').val('');
+        aplicarFiltroVariedad();
     }
 
     $(document).on('input', '.emv-suma', calcularTotal);
@@ -267,19 +305,24 @@ $(document).ready(function () {
             return;
         }
 
-        if ($('#det_variedad').val().trim() === '') {
-            alert('Seleccione una variedad.');
+        var codigoVariedad = $('#det_variedad').val();
+        var variedadValida  = codigoVariedad !== '' &&
+            todasVariedades.some(function (v) { return v.codigo === codigoVariedad; });
+
+        if (!variedadValida) {
+            $('#det_variedad').addClass('is-invalid').focus();
             return;
         }
+        $('#det_variedad').removeClass('is-invalid').addClass('is-valid');
 
         $.ajax({
-            url: 'CRUD/crud_emv.php',
+            url: 'ajax/crud_emv.php',
             type: 'POST',
             dataType: 'json',
             data: {
                 opcion:     '7',
                 entrada_id: $('#det_entrada_id').val(),
-                variedad:   $('#det_variedad').val().trim(),
+                variedad:   codigoVariedad,
                 facturado:  facturado,
                 reposicion: reposicion,
                 excedente:  excedente,
@@ -292,6 +335,7 @@ $(document).ready(function () {
                 if (tableDetalles) tableDetalles.ajax.reload(null, false);
                 $('#formEmvDetalle')[0].reset();
                 resetSumaCampos();
+                $('#det_variedad').removeClass('is-valid is-invalid');
                 $('#det_variedad').focus();
             },
             error: function () {
@@ -306,7 +350,7 @@ $(document).ready(function () {
     $(document).on('click', '.btnEmvBorrarDet', function () {
         var id = $(this).data('id');
         if (!confirm('¿Eliminar el detalle #' + id + '?')) return;
-        $.post('CRUD/crud_emv.php', { opcion: '6', id: id }, function () {
+        $.post('ajax/crud_emv.php', { opcion: '6', id: id }, function () {
             if (tableDetalles) tableDetalles.ajax.reload(null, false);
         }, 'json');
     });

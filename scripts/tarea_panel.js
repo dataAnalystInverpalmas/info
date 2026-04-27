@@ -135,14 +135,6 @@ function cargarBitacoraTarea() {
             item.append(encabezado);
             item.append($('<div>').text(r.descripcion));
 
-            // Mostrar descripción anterior si existía
-            if (r.descripcion_antes) {
-                var prev = $('<details>').addClass('mt-1');
-                prev.append($('<summary>').addClass('small text-muted').text('Descripción anterior'));
-                prev.append($('<p>').addClass('small bg-light p-1 rounded').text(r.descripcion_antes));
-                item.append(prev);
-            }
-
             // Mostrar diff de campos
             if (r.cambios_json) {
                 var cambios;

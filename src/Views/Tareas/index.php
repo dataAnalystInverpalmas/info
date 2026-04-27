@@ -52,6 +52,7 @@
                     <td>Nombre</td>
                     <td>Proyecto</td>
                     <td>Responsable</td>
+                    <td>Quien Solicita</td>
                     <td>Estado</td>
                     <td>Prioridad</td>
                     <td>Inicio</td>
@@ -68,6 +69,7 @@
                             <td><?php echo htmlspecialchars($row->nombre); ?></td>
                             <td><?php echo htmlspecialchars($row->proyecto_nombre ?? 'Sin proyecto'); ?></td>
                             <td><?php echo htmlspecialchars($row->responsable ?? ''); ?></td>
+                            <td><?php echo htmlspecialchars($row->quien_solicita ?? ''); ?></td>
                             <td><?php echo htmlspecialchars($row->estado); ?></td>
                             <td><?php echo htmlspecialchars($row->prioridad); ?></td>
                             <td><?php echo htmlspecialchars($row->fecha_inicio ?? '-'); ?></td>
@@ -80,6 +82,7 @@
                                     "descripcion" => $row->descripcion ?? "",
                                     "proyecto_id" => $row->proyecto_id ?? "",
                                     "responsable" => $row->responsable ?? "",
+                                    "quien_solicita" => $row->quien_solicita ?? "",
                                     "estado" => $row->estado,
                                     "prioridad" => $row->prioridad,
                                     "fecha_inicio" => $row->fecha_inicio ?? "",
@@ -133,6 +136,8 @@
                 <textarea id="tDesc" class="form-control mb-2" rows="6" placeholder="Descripción (puede superar 100 caracteres)"></textarea>
                 <label class="small text-muted mb-0">Responsable</label>
                 <input type="text" id="tResponsable" class="form-control mb-2" placeholder="¿Quién ejecuta?">
+                <label class="small text-muted mb-0">Quien Solicita</label>
+                <input type="text" id="tSolicita" class="form-control mb-2" placeholder="¿Quién lo solicita? (opcional)">
                 <div class="row">
                     <div class="col-6">
                         <label class="small text-muted mb-0">Estado</label>
@@ -219,5 +224,8 @@
     <img id="lightboxImg" src="" style="max-width:90%;max-height:90%;border-radius:4px;box-shadow:0 0 30px #000">
 </div>
 
+<script>
+var usuarioActual = <?php echo json_encode($_SESSION['usuario'] ?? ''); ?>;
+</script>
 <script src="scripts/tareas.js"></script>
 <script src="scripts/tarea_panel.js"></script>

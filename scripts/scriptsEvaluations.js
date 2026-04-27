@@ -16,7 +16,7 @@ $(document).ready(function(){
     ///////////////////CARGA COMBO FLOR////
     $.ajax({
         type: "POST",
-        url: "CRUD/fv_fetchProducts.php",
+        url: "ajax/fv_fetchProducts.php",
         data: {},
         success: function(response)
         {
@@ -60,7 +60,7 @@ var listarEvaluaciones = function(){
         ],
         "destroy": true,
         "ajax": {
-            "url": "CRUD/evaluationsData.php",
+            "url": "ajax/evaluationsData.php",
             "dataSrc": "",
             "method": "post",
             "data": function(data) {

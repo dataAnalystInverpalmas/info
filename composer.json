@@ -1,9 +1,13 @@
 {
+    "name": "inverpalmas/informes-agricolas",
+    "description": "Aplicacion PHP para informes agricolas y modulos MVC graduales sobre src/.",
+    "type": "project",
+    "license": "proprietary",
     "require": {
         "nesbot/carbon": "^1.39",
         "phpoffice/phpspreadsheet": "^1.8",
         "mpdf/mpdf": "^8.0",
-        "twbs/bootstrap": "4.3.1",
+        "twbs/bootstrap": "^4.3.1",
         "datatables/datatables": "^1.10",
         "components/jqueryui": "^1.12"
     },
@@ -13,6 +17,11 @@
     "autoload": {
         "psr-4": {
             "App\\": "src/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "kylekatarnls/update-helper": false
         }
     }
 }

@@ -30,7 +30,7 @@ $(document).ready(function() {
        //id = parseInt(fila.find('td:eq(0)').text()); //capturo el ID	 
        var tipo = 0;//cero para trabajar con pedido general                             
            $.ajax({
-             url: "CRUD/crud_orders.php",
+             url: "ajax/crud_orders.php",
              type: "POST",
              datatype:"json",    
              data:  {fecha:fecha, evaluador: evaluador,opcion:opcion, tipo:tipo},    
@@ -66,7 +66,7 @@ $(document).ready(function() {
     comentario = $.trim($('#comentario').val());
     event.preventDefault();                         
         $.ajax({
-          url: "CRUD/crud_orders.php",
+          url: "ajax/crud_orders.php",
           type: "POST",
           datatype:"json",    
           data:  {
@@ -154,7 +154,7 @@ $(document).ready(function() {
        var respuesta = confirm("¿Está seguro de borrar el registro "+id+"?");                
        if (respuesta) {            
            $.ajax({
-             url: "CRUD/crud_orders.php",
+             url: "ajax/crud_orders.php",
              type: "POST",
              datatype:"json",    
              data:  {opcion:opcion, id:id},    
@@ -176,7 +176,7 @@ $(document).ready(function() {
     if (respuesta) {
         event.preventDefault();            
         $.ajax({
-          url: "CRUD/crud_orders.php",
+          url: "ajax/crud_orders.php",
           type: "POST",
           datatype:"json",    
           data:  {opcion:opcion, id:id, tipo:tipo},    
@@ -207,7 +207,7 @@ $(document).ready(function() {
             "destroy": true,
             pageLength: 5, 
             "ajax":{            
-                "url": "CRUD/crud_orders.php", 
+                "url": "ajax/crud_orders.php", 
                 "method": 'POST', //usamos el metodo POST
                 "data":{opcion:opcion,tipo: tipo,id:id}, //enviamos opcion 5 para EDITAR
                 "dataSrc":"",
@@ -234,7 +234,7 @@ $(document).ready(function() {
             'processing': true,
             pageLength: 5,
             "ajax":{
-                "url": "CRUD/crud_orders.php",
+                "url": "ajax/crud_orders.php",
                 "method": 'POST',
                 "data":{opcion:8, tipo:1, order_id:id},
                 "dataSrc":"",
@@ -267,7 +267,7 @@ $(document).ready(function() {
             return;
         }
         $.ajax({
-            url: "CRUD/crud_orders.php",
+            url: "ajax/crud_orders.php",
             type: "POST",
             datatype: "json",
             data: {opcion:9, tipo:1, order_id:order_id, variedad:variedad, comentario:texto},
@@ -295,7 +295,7 @@ $(document).ready(function() {
         var commentId = $(this).data('id');
         var newComment = $(this).closest('tr').find('.editCommentInput').val();
         $.ajax({
-            url: "CRUD/crud_orders.php",
+            url: "ajax/crud_orders.php",
             type: "POST",
             datatype: "json",
             data: {opcion:10, tipo:1, comment_id:commentId, comentario:newComment},
@@ -318,7 +318,7 @@ $(document).ready(function() {
         var commentId = rowData.id;
         if (confirm("\u00bfEst\u00e1 seguro de borrar este comentario?")) {
             $.ajax({
-                url: "CRUD/crud_orders.php",
+                url: "ajax/crud_orders.php",
                 type: "POST",
                 datatype: "json",
                 data: {opcion:11, tipo:1, comment_id:commentId},
@@ -332,7 +332,7 @@ $(document).ready(function() {
     ///////////////////CARGA EVALUADORES////
     $.ajax({
         type: "POST",
-        url: "CRUD/fv_fetchEvaluators.php",
+        url: "ajax/fv_fetchEvaluators.php",
         success: function(response)
         {
             $('#evaluador').html(response).fadeIn();
@@ -361,7 +361,7 @@ $(document).ready(function() {
            'processing': true,
            "destroy": true,  
            "ajax":{            
-               "url": "CRUD/crud_orders.php", 
+               "url": "ajax/crud_orders.php", 
                "method": 'POST', //usamos el metodo POST
                "data":{opcion:opcion,fecha_ini:fecha_ini,fecha_fin:fecha_fin,tipo: tipo}, //enviamos opcion 4 para que haga un SELECT
                "dataSrc":"",

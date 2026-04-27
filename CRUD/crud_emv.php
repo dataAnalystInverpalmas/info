@@ -20,16 +20,16 @@ switch ($opcion) {
     case '1':
         $fecha     = isset($_POST['fecha'])     ? $_POST['fecha']     : '';
         $maquila   = isset($_POST['maquila'])   ? $_POST['maquila']   : '';
-        $proveedor = isset($_POST['proveedor']) ? $_POST['proveedor'] : '';
+        $proveedor = isset($_POST['proveedor']) ? intval($_POST['proveedor']) : 0;
         $remision  = isset($_POST['remision'])  ? $_POST['remision']  : '';
-        $destino   = isset($_POST['destino'])   ? $_POST['destino']   : '';
+        $destino   = isset($_POST['destino'])   ? intval($_POST['destino'])   : 0;
         $material  = isset($_POST['material'])  ? $_POST['material']  : '';
 
         $stmt = $conexion->prepare(
             "INSERT INTO entrada_material_vegetal (fecha, maquila, proveedor, remision, destino, material)
              VALUES (?, ?, ?, ?, ?, ?)"
         );
-        $stmt->bind_param("ssssss", $fecha, $maquila, $proveedor, $remision, $destino, $material);
+        $stmt->bind_param("ssisis", $fecha, $maquila, $proveedor, $remision, $destino, $material);
         $stmt->execute();
         $new_id = $conexion->insert_id;
         $stmt->close();
@@ -42,9 +42,9 @@ switch ($opcion) {
     case '2':
         $fecha     = isset($_POST['fecha'])     ? $_POST['fecha']     : '';
         $maquila   = isset($_POST['maquila'])   ? $_POST['maquila']   : '';
-        $proveedor = isset($_POST['proveedor']) ? $_POST['proveedor'] : '';
+        $proveedor = isset($_POST['proveedor']) ? intval($_POST['proveedor']) : 0;
         $remision  = isset($_POST['remision'])  ? $_POST['remision']  : '';
-        $destino   = isset($_POST['destino'])   ? $_POST['destino']   : '';
+        $destino   = isset($_POST['destino'])   ? intval($_POST['destino'])   : 0;
         $material  = isset($_POST['material'])  ? $_POST['material']  : '';
 
         $stmt = $conexion->prepare(
@@ -52,7 +52,7 @@ switch ($opcion) {
              SET fecha=?, maquila=?, proveedor=?, remision=?, destino=?, material=?
              WHERE id=?"
         );
-        $stmt->bind_param("ssssssi", $fecha, $maquila, $proveedor, $remision, $destino, $material, $id);
+        $stmt->bind_param("ssisisi", $fecha, $maquila, $proveedor, $remision, $destino, $material, $id);
         $stmt->execute();
         $stmt->close();
         echo json_encode(['status' => 'ok']);
@@ -82,10 +82,18 @@ switch ($opcion) {
         $ff = isset($_POST['fecha_fin']) ? $_POST['fecha_fin'] : '';
 
         $stmt = $conexion->prepare(
-            "SELECT id, fecha, maquila, proveedor, remision, destino, material
-             FROM entrada_material_vegetal
-             WHERE fecha BETWEEN ? AND ?
-             ORDER BY fecha DESC, id DESC"
+            "SELECT e.id, e.fecha, e.maquila,
+                    e.proveedor AS proveedor_id,
+                    COALESCE(bp.nombre, e.proveedor) AS proveedor,
+                    e.remision,
+                    e.destino AS destino_id,
+                    COALESCE(bd.nombre, e.destino) AS destino,
+                    e.material
+             FROM entrada_material_vegetal e
+             LEFT JOIN breeders bp ON bp.id = e.proveedor
+             LEFT JOIN breeders bd ON bd.id = e.destino
+             WHERE e.fecha BETWEEN ? AND ?
+             ORDER BY e.fecha DESC, e.id DESC"
         );
         $stmt->bind_param("ss", $fi, $ff);
         $stmt->execute();
@@ -103,12 +111,16 @@ switch ($opcion) {
     // ---------------------------------------------------------------
     case '5':
         $stmt = $conexion->prepare(
-            "SELECT id, entrada_id, variedad, cantidad_recibida,
-                    facturado, reposicion, excedente, obsequio, adicional,
-                    raiz, observacion
-             FROM entrada_material_vegetal_detalle
-             WHERE entrada_id=?
-             ORDER BY id ASC"
+            "SELECT d.id, d.entrada_id,
+                    d.variedad AS variedad_codigo,
+                    COALESCE(v.nombre, d.variedad) AS variedad,
+                    d.cantidad_recibida,
+                    d.facturado, d.reposicion, d.excedente, d.obsequio, d.adicional,
+                    d.raiz, d.observacion
+             FROM entrada_material_vegetal_detalle d
+             LEFT JOIN ld_variedades v ON v.codigo = d.variedad
+             WHERE d.entrada_id=?
+             ORDER BY d.id ASC"
         );
         $stmt->bind_param("i", $entrada_id);
         $stmt->execute();
@@ -166,28 +178,28 @@ switch ($opcion) {
         break;
 
     // ---------------------------------------------------------------
-    // breeders – lista de proveedores para el <select>
+    // breeders – lista de proveedores/destinos para los <select>
     // ---------------------------------------------------------------
     case 'breeders':
-        $res  = $conexion->query("SELECT nombre FROM breeders ORDER BY nombre ASC");
+        $res  = $conexion->query("SELECT id, nombre FROM breeders ORDER BY nombre ASC");
         $data = [];
         if ($res) {
             while ($row = $res->fetch_assoc()) {
-                $data[] = $row['nombre'];
+                $data[] = ['id' => $row['id'], 'nombre' => $row['nombre']];
             }
         }
         echo json_encode($data);
         break;
 
     // ---------------------------------------------------------------
-    // variedades – lista de variedades para el <datalist>
+    // variedades – lista de variedades para el <select>
     // ---------------------------------------------------------------
     case 'variedades':
-        $res  = $conexion->query("SELECT nombre FROM ld_variedades ORDER BY nombre ASC");
+        $res  = $conexion->query("SELECT codigo, nombre, codflor FROM ld_variedades ORDER BY nombre ASC");
         $data = [];
         if ($res) {
             while ($row = $res->fetch_assoc()) {
-                $data[] = $row['nombre'];
+                $data[] = ['codigo' => $row['codigo'], 'nombre' => $row['nombre'], 'codflor' => $row['codflor']];
             }
         }
         echo json_encode($data);

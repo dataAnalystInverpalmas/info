@@ -11,6 +11,7 @@ switch ($accion) {
             exit;
         }
 
+        $usuario_id = $_SESSION['id'] ?? null;
         $nombre = $_POST['nombre'];
         $categoria = $_POST['categoria'] ?: null;
         $descripcion = $_POST['descripcion'] ?? null;
@@ -18,8 +19,8 @@ switch ($accion) {
         $fecha_inicio = $_POST['fecha_inicio'] ?: null;
         $fecha_fin = $_POST['fecha_fin'] ?: null;
 
-        $stmt = $conexion->prepare("INSERT INTO proyectos (nombre, categoria, descripcion, estado, fecha_inicio, fecha_fin) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssss", $nombre, $categoria, $descripcion, $estado, $fecha_inicio, $fecha_fin);
+        $stmt = $conexion->prepare("INSERT INTO proyectos (usuario_id, nombre, categoria, descripcion, estado, fecha_inicio, fecha_fin) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("issssss", $usuario_id, $nombre, $categoria, $descripcion, $estado, $fecha_inicio, $fecha_fin);
         $ok = $stmt->execute();
 
         echo json_encode(['success' => $ok, 'mensaje' => $ok ? 'Creado' : $conexion->error]);
@@ -32,6 +33,7 @@ switch ($accion) {
             exit;
         }
 
+        $usuario_id = $_SESSION['id'] ?? null;
         $nombre = $_POST['nombre'];
         $categoria = $_POST['categoria'] ?: null;
         $descripcion = $_POST['descripcion'] ?? null;
@@ -39,8 +41,8 @@ switch ($accion) {
         $fecha_inicio = $_POST['fecha_inicio'] ?: null;
         $fecha_fin = $_POST['fecha_fin'] ?: null;
 
-        $stmt = $conexion->prepare("UPDATE proyectos SET nombre=?, categoria=?, descripcion=?, estado=?, fecha_inicio=?, fecha_fin=? WHERE id=?");
-        $stmt->bind_param("ssssssi", $nombre, $categoria, $descripcion, $estado, $fecha_inicio, $fecha_fin, $id);
+        $stmt = $conexion->prepare("UPDATE proyectos SET nombre=?, categoria=?, descripcion=?, estado=?, fecha_inicio=?, fecha_fin=? WHERE id=? AND (usuario_id=? OR usuario_id IS NULL)");
+        $stmt->bind_param("ssssssii", $nombre, $categoria, $descripcion, $estado, $fecha_inicio, $fecha_fin, $id, $usuario_id);
         $ok = $stmt->execute();
 
         echo json_encode(['success' => $ok, 'mensaje' => $ok ? 'Actualizado' : $conexion->error]);
@@ -53,8 +55,9 @@ switch ($accion) {
             exit;
         }
 
-        $stmt = $conexion->prepare("DELETE FROM proyectos WHERE id=?");
-        $stmt->bind_param("i", $id);
+        $usuario_id = $_SESSION['id'] ?? null;
+        $stmt = $conexion->prepare("DELETE FROM proyectos WHERE id=? AND (usuario_id=? OR usuario_id IS NULL)");
+        $stmt->bind_param("ii", $id, $usuario_id);
         $ok = $stmt->execute();
 
         echo json_encode(['success' => $ok, 'mensaje' => $ok ? 'Eliminado' : $conexion->error]);

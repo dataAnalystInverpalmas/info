@@ -25,14 +25,6 @@
                                 <td><?php echo htmlspecialchars($row->tipo_registro); ?></td>
                                 <td>
                                     <?php echo htmlspecialchars($row->descripcion); ?>
-                                    <?php if (!empty($row->descripcion_antes)): ?>
-                                        <br><small class="text-muted">
-                                            <details>
-                                                <summary>Descripción anterior</summary>
-                                                <span class="text-danger"><?php echo htmlspecialchars($row->descripcion_antes); ?></span>
-                                            </details>
-                                        </small>
-                                    <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php if (!empty($row->cambios_json)): ?>

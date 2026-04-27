@@ -16,7 +16,8 @@ function abrirModalTarea() {
     $('#tNombre').val('');
     $('#tDesc').val('');
     $('#tProyecto').val('');
-    $('#tResponsable').val('');
+    $('#tResponsable').val(typeof usuarioActual !== 'undefined' ? usuarioActual : '');
+    $('#tSolicita').val('');
     $('#tEstado').val('pendiente');
     $('#tPrioridad').val('media');
     $('#tInicio').val('');
@@ -31,6 +32,7 @@ function editarTarea(d) {
     $('#tDesc').val(d.descripcion);
     $('#tProyecto').val(d.proyecto_id);
     $('#tResponsable').val(d.responsable);
+    $('#tSolicita').val(d.quien_solicita);
     $('#tEstado').val(d.estado);
     $('#tPrioridad').val(d.prioridad);
     $('#tInicio').val(d.fecha_inicio);
@@ -52,6 +54,7 @@ function guardarTarea() {
         descripcion: $('#tDesc').val(),
         proyecto_id: $('#tProyecto').val(),
         responsable: $('#tResponsable').val(),
+        quien_solicita: $('#tSolicita').val(),
         estado: $('#tEstado').val(),
         prioridad: $('#tPrioridad').val(),
         fecha_inicio: $('#tInicio').val(),

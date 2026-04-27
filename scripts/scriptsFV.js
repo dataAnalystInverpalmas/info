@@ -69,7 +69,7 @@ $(document).ready(function(){
     ///////////////////CARGA COMBO FLOR////
     $.ajax({
       type: "POST",
-      url: "CRUD/fv_fetchProducts.php",
+      url: "ajax/fv_fetchProducts.php",
       success: function(response)
       {
           $('#flor').html(response).fadeIn();
@@ -78,7 +78,7 @@ $(document).ready(function(){
     ///////////////////CARGA COMBO TIPOS DE FLORERO////
     $.ajax({
       type: "POST",
-      url: "CRUD/fv_fetchKinds.php",
+      url: "ajax/fv_fetchKinds.php",
       success: function(response)
       {
           $('#tipo').html(response).fadeIn();
@@ -87,7 +87,7 @@ $(document).ready(function(){
     ///////////////////CARGA COMBO ORIGENES////
     $.ajax({
       type: "POST",
-      url: "CRUD/fv_fetchOrigen.php",
+      url: "ajax/fv_fetchOrigen.php",
       success: function(response)
       {
           $('#origen').html(response).fadeIn();
@@ -96,7 +96,7 @@ $(document).ready(function(){
     ///////////////////CARGA COMBO ITEMS////
     $.ajax({
       type: "POST",
-      url: "CRUD/fv_fetchItems.php",
+      url: "ajax/fv_fetchItems.php",
       success: function(response)
       {
           $('#item').html(response).fadeIn();
@@ -106,7 +106,7 @@ $(document).ready(function(){
     ///////////////////CARGA COMBO CAUSAS////
     $.ajax({
       type: "POST",
-      url: "CRUD/fv_fetchCauses.php",
+      url: "ajax/fv_fetchCauses.php",
       success: function(response)
       {
           $('#causa').html(response).fadeIn();
@@ -121,7 +121,7 @@ $(document).ready(function(){
   function fetch_varieties(val){
       $.ajax({
           type: 'post',
-          url: 'CRUD/fv_fetchVarieties.php',
+          url: 'ajax/fetchVarieties.php',
           data: { get_option:val },
         success: function (response) {
           document.getElementById("variedad").innerHTML=response; 
@@ -132,7 +132,7 @@ $(document).ready(function(){
   function getItems(val){
     $.ajax({
         type: 'post',
-        url: 'CRUD/fv_fetchItems.php',
+        url: 'ajax/fv_fetchItems.php',
         data: { get_option: val },
       success: function (response) {
         document.getElementById("valor").innerHTML=response; 
@@ -143,7 +143,7 @@ $(document).ready(function(){
   function florero(){
     $.ajax({
       type: 'post',
-      url: 'CRUD/fv_fetchFlorero.php',  
+      url: 'ajax/fv_fetchFlorero.php',  
     success: function (response) {
       document.getElementById("florero").innerHTML=response; 
       document.getElementById("floreroo").innerHTML=response; 
@@ -193,7 +193,7 @@ function guardaEvaluacion(){
 
 $.ajax({
       type: "POST",
-      url: "CRUD/fv_addEvaluations.php",
+      url: "ajax/fv_addEvaluations.php",
       data: {item: nuevaEvaluacion.item, valor: nuevaEvaluacion.valor}, 
       cache: false,
       success: function(data){
@@ -259,7 +259,7 @@ var nuevaCausa = new Causa(causa,dias,cantidad);
 
 $.ajax({
         type: "POST",
-        url: "CRUD/fv_addCauses.php",
+        url: "ajax/fv_addCauses.php",
         data: {causa: nuevaCausa.causa, dias: nuevaCausa.dias, cantidad: nuevaCausa.cantidad}, 
         cache: false,
         success: function(data){
@@ -329,7 +329,7 @@ function guardaDatos(){
     return false;
   }else{
     $.ajax({
-      url: 'CRUD/fv_addRecord.php',
+      url: 'ajax/fv_addRecord.php',
       type: 'POST',
       data: {
         fecha_corte: fecha_corte,
@@ -394,7 +394,7 @@ florero();
 } 
 
 function readRecordsFV() {
-  $.get("CRUD/FVreadRecord.php", {}, function (data, status) {
+  $.get("ajax/FVreadRecord.php", {}, function (data, status) {
     $("#records_content_fv").html(data);
   });
 }
@@ -402,7 +402,7 @@ function readRecordsFV() {
 function DeleteFV(id){
   var conf = confirm("¿Está seguro, realmente desea eliminar el registro?");
   if (conf == true) {
-      $.post("CRUD/FVdeleteDetails.php", {
+      $.post("ajax/FVdeleteDetails.php", {
               id: id
           },
           function (data, status) {
