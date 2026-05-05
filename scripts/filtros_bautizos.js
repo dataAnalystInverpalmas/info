@@ -91,7 +91,7 @@ function guardarOriginales() {
       variedad: card.dataset.variedad,
       temporada: card.dataset.temporada,
       fecha_siembra: card.dataset.fecha_siembra,
-      fecha_siembra_r: card.dataset.fecha_siembra_r, 
+      fecha_siembra_r: card.dataset.fecha_siembra_r,
       camas: card.dataset.camas,
       plantas: card.dataset.plantas,
       tipo_siembra: card.dataset.tipo_siembra,
@@ -112,6 +112,34 @@ function obtenerValoresLimpios(selector) {
     return [];
   }
   return val;
+}
+
+//funcion auxiliar: busca dentro de un arreglo de headers la fila que corresponde
+//exactamente al bautizo seleccionado, comparando por fecha_siembra_r.
+function buscarHeaderCoincidente(headerData, sel) {
+  if (!Array.isArray(headerData) || headerData.length === 0) return null;
+
+  // 1. Coincidencia exacta por fecha_siembra_r completo (fecha/semana)
+  let coincidente = headerData.find(h => h.fecha_siembra_r === sel.fecha_siembra_r);
+  if (coincidente) return coincidente;
+
+  // 2. Coincidencia parcial: solo la fecha (parte antes del '/')
+  if (sel.fecha_siembra_r) {
+    const fechaSel = sel.fecha_siembra_r.split('/')[0];
+    coincidente = headerData.find(h => h.fecha_siembra_r?.split('/')[0] === fechaSel);
+    if (coincidente) return coincidente;
+  }
+
+  // 3. Coincidencia por fecha_siembra simple (cuando se guardo desde la tarjeta principal)
+  if (sel.fecha_siembra) {
+    const fechaSel = sel.fecha_siembra.split('/')[0];
+    coincidente = headerData.find(h => h.fecha_siembra_r?.split('/')[0] === fechaSel);
+    if (coincidente) return coincidente;
+  }
+
+  // 4. Fallback: usar el primero, pero avisar en consola
+  console.warn('No se encontro header coincidente, se usa el primero', sel);
+  return headerData[0];
 }
 
 //funcion para ordenar las tarjetas de  nuevo a lista original
@@ -141,7 +169,7 @@ function ordenarTarjetas() {
       const badgeNuevo = item.estado === 'NUEVO'
         ? '<span class="badge-nuevo bg-success ms-1"><i class="bi bi-star-fill"></i> NUEVO</span>'
         : '';
-    
+
       const tarjeta = `
         <div class="card-custom" 
           data-finca="${item.finca}" 
@@ -212,21 +240,7 @@ function expandirVista(item) {
               camas: item.dataset.total_camas,
               plantas: item.dataset.total_plantas,
               desde: item.dataset.desde,
-              hasta: item.dataset.hasta,
-              tabla: item.dataset.tabla || '',
-              origen: item.dataset.origen || '',
-              pico: item.dataset.pico || '',
-              ciclo: item.dataset.ciclo || '',
-              plantasm2: item.dataset.plantasm2 || '',
-              casa_comercial: item.dataset.casa_comercial || '',
-              semana_pico_t: item.dataset.semana_pico_t || '',
-              semana_pico_r: item.dataset.semana_pico_r || '',
-              cosecha_reem: item.dataset.cosecha_reem || '',
-              variedad_reem: item.dataset.variedad_reem || '',
-              tipo_suelo: item.dataset.tipo_suelo || '',
-              nmanguera: item.dataset.nmanguera || '',
-              ferradica: item.dataset.ferradica || '',
-              fecha_siembra_t: item.dataset.fecha_siembra_t || ''
+              hasta: item.dataset.hasta
             });
           });
 
@@ -236,8 +250,8 @@ function expandirVista(item) {
             alert("No has seleccionado ningún bautizo.");
             return;
           }
-          
-         //aqui guarda y valida los datos seleccionados cuando se seleccionan desde adentro de la ventana de expandir
+
+          //aqui guarda y valida los datos seleccionados cuando se seleccionan desde adentro de la ventana de expandir
           let seleccionadosActuales = JSON.parse(localStorage.getItem('bautizosSeleccionados')) || [];
 
           lista.forEach(nuevo => {
@@ -326,33 +340,18 @@ function seleccionarDesdeTarjeta(btn, item) {
               seleccionadosActuales.splice(index, 1); // valida si ya esta seleccionado
             } else {
               seleccionadosActuales.push({
-              finca: g.finca,
-              bloque: g.bloque,
-              variedad: g.variedad,
-              temporada: g.temporada,
-              tipo_siembra: g.tipo_siembra,
-              fecha_siembra: g.fecha_siembra,
-              fecha_siembra_r: g.fecha_siembra_r,
-              camas: g.total_camas,
-              plantas: g.total_plantas,
-              desde: g.desde,
-              hasta: g.hasta,
-              tabla: g.tabla || '',
-              origen: g.origen || '',
-              pico: g.pico || '',
-              ciclo: g.ciclo || '',
-              plantasm2: g.plantasm2 || '',
-              casa_comercial: g.casa_comercial || '',
-              semana_pico_t: g.semana_pico_t || '',
-              semana_pico_r: g.semana_pico_r || '',
-              cosecha_reem: g.cosecha_reem || '',
-              variedad_reem: g.variedad_reem || '',
-              tipo_suelo: g.tipo_suelo || '',
-              nmanguera: g.nmanguera || '',
-              ferradica: g.ferradica || '',
-              fecha_siembra_t: g.fecha_siembra_t || ''
-            });
-
+                finca: g.finca,
+                bloque: g.bloque,
+                variedad: g.variedad,
+                temporada: g.temporada,
+                tipo_siembra: g.tipo_siembra,
+                fecha_siembra: g.fecha_siembra,
+                fecha_siembra_r: g.fecha_siembra_r,
+                camas: g.total_camas,
+                plantas: g.total_plantas,
+                desde: g.desde,
+                hasta: g.hasta
+              });
             }
           });
 
@@ -415,91 +414,87 @@ function verAgrupamientosEnConsola(finca, bloque, variedad, temporada, tipo_siem
         dataType: 'json',
         data: { finca, bloque, variedad, temporada, tipo_siembra },
         success: function (resultadosHeader) {
-          const fecha_siembra = resultadosHeader[0]?.fecha_siembra_r?.split('/')[0] || '';
-          $.ajax({
-            url: '../ajax/dataBodyBautizos.php',
-            type: 'POST',
-            dataType: 'json',
-            data: {
-              finca,
-              bloque,
-              variedad,
-              temporada,
-              fecha_siembra
-            },
-            success: function (dataBody) {
-             // console.log("headerdata", resultadosHeader);
-             // console.log("databody", dataBody);
-              const agrupados = agruparPorUbicacion(resultadosHeader, ubicaciones);
-              if (agrupados.length === 0) return;
-              //encabezado de la seleccion actual
-              const textoEncabezado = `BAUTIZOS ENCONTRADOS PARA LA FINCA: ${finca} || BLOQUE: ${bloque} || VARIEDAD: ${variedad} || TEMPORADA: ${temporada} || TIPO SIEMBRA: ${tipo_siembra}`;
-              document.getElementById("infoResumen").textContent = textoEncabezado;
+          //agrupamos los headers por ubicacion para construir las tarjetas del panel izquierdo
+          const agrupados = agruparPorUbicacion(resultadosHeader, ubicaciones);
+          if (agrupados.length === 0) return;
 
-              const lista = document.getElementById("listaFormatos");
-              lista.innerHTML = '';
+          //encabezado de la seleccion actual
+          const textoEncabezado = `BAUTIZOS ENCONTRADOS PARA LA FINCA: ${finca} || BLOQUE: ${bloque} || VARIEDAD: ${variedad} || TEMPORADA: ${temporada} || TIPO SIEMBRA: ${tipo_siembra}`;
+          document.getElementById("infoResumen").textContent = textoEncabezado;
 
-              agrupados.forEach((g, i) => {
-                const tarjeta = document.createElement('div');
-                tarjeta.className = 'formato-item';
+          const lista = document.getElementById("listaFormatos");
+          lista.innerHTML = '';
 
-                tarjeta.dataset.finca = g.finca;
-                tarjeta.dataset.bloque = g.bloque;
-                tarjeta.dataset.variedad = g.variedad;
-                tarjeta.dataset.temporada = g.temporada;
-                tarjeta.dataset.tipo_siembra = g.tipo_siembra;
-                tarjeta.dataset.fecha_siembra = g.fecha_siembra;
-                tarjeta.dataset.fecha_siembra_r = g.fecha_siembra_r;
-                tarjeta.dataset.total_camas = g.total_camas;
-                tarjeta.dataset.total_plantas = g.total_plantas;
-                tarjeta.dataset.desde = g.desde;
-                tarjeta.dataset.hasta = g.hasta;
+          agrupados.forEach((g, i) => {
+            const tarjeta = document.createElement('div');
+            tarjeta.className = 'formato-item';
 
-                tarjeta.dataset.tabla = g.tabla || '';
-                tarjeta.dataset.origen = g.origen || '';
-                tarjeta.dataset.pico = g.pico || '';
-                tarjeta.dataset.ciclo = g.ciclo || '';
-                tarjeta.dataset.plantasm2 = g.plantasm2 || '';
-                tarjeta.dataset.casa_comercial = g.casa_comercial || '';
-                tarjeta.dataset.semana_pico_t = g.semana_pico_t || '';
-                tarjeta.dataset.semana_pico_r = g.semana_pico_r || '';
-                tarjeta.dataset.cosecha_reem = g.cosecha_reem || '';
-                tarjeta.dataset.variedad_reem = g.variedad_reem || '';
-                tarjeta.dataset.tipo_suelo = g.tipo_suelo || '';
-                tarjeta.dataset.nmanguera = g.nmanguera || '';
-                tarjeta.dataset.ferradica = g.ferradica || '';
-                tarjeta.dataset.fecha_siembra_t = g.fecha_siembra_t || '';
+            tarjeta.dataset.finca = g.finca;
+            tarjeta.dataset.bloque = g.bloque;
+            tarjeta.dataset.variedad = g.variedad;
+            tarjeta.dataset.temporada = g.temporada;
+            tarjeta.dataset.tipo_siembra = g.tipo_siembra;
+            tarjeta.dataset.fecha_siembra = g.fecha_siembra;
+            tarjeta.dataset.fecha_siembra_r = g.fecha_siembra_r;
+            tarjeta.dataset.total_camas = g.total_camas;
+            tarjeta.dataset.total_plantas = g.total_plantas;
+            tarjeta.dataset.desde = g.desde;
+            tarjeta.dataset.hasta = g.hasta;
 
-              
-                //aqui se cargan las tarjetas del panel izquierdo
-                tarjeta.innerHTML = `
-                  <div class="formato-contenido">
-                    <div><strong>Camas:</strong> ${g.total_camas}</div>
-                    <div><strong>Plantas:</strong> ${g.total_plantas}</div>
-                    <div class="formato-fila-horizontal">
-                      <div><strong>Desde</strong><br>${g.desde}</div>
-                      <div><strong>Hasta</strong><br>${g.hasta}</div>
-                    </div>
-                  </div>
-                  <div class="formato-accion">
-                    <i class="bi bi-printer" onclick="toggleSeleccion(this)"></i>
-                  </div>
-                `;
-                // cuando se hace click sobre la tarjeta del panel izquierdo carga  la vista de la hoja de bautizo
-                tarjeta.addEventListener('click', function () {
+            //aqui se cargan las tarjetas del panel izquierdo
+            tarjeta.innerHTML = `
+              <div class="formato-contenido">
+                <div><strong>Camas:</strong> ${g.total_camas}</div>
+                <div><strong>Plantas:</strong> ${g.total_plantas}</div>
+                <div class="formato-fila-horizontal">
+                  <div><strong>Desde</strong><br>${g.desde}</div>
+                  <div><strong>Hasta</strong><br>${g.hasta}</div>
+                </div>
+              </div>
+              <div class="formato-accion">
+                <i class="bi bi-printer" onclick="toggleSeleccion(this)"></i>
+              </div>
+            `;
+
+            // cuando se hace click sobre la tarjeta del panel izquierdo carga la vista de la hoja de bautizo
+           tarjeta.addEventListener('click', function () {
+              //buscamos el header que coincide con la fecha del grupo seleccionado
+              const headerCoincidente = buscarHeaderCoincidente(resultadosHeader, g);
+              const fecha_siembra = headerCoincidente?.fecha_siembra_r?.split('/')[0] || '';
+
+              $.ajax({
+                url: '../ajax/dataBodyBautizos.php',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                  finca,
+                  bloque,
+                  variedad,
+                  temporada,
+                  fecha_siembra
+                },
+                success: function (dataBody) {
                   const panel = document.getElementById("hojaBautizoCompleta");
-                  construirHojaDeBautizo(g, dataBody, panel);
-                });
-
-                lista.appendChild(tarjeta);
+                  //combinamos el header coincidente con los datos del grupo (desde, hasta, totales)
+                  const headerFinal = Object.assign({}, headerCoincidente, {
+                    desde: g.desde,
+                    hasta: g.hasta,
+                    total_camas: g.total_camas,
+                    total_plantas: g.total_plantas,
+                    fecha_siembra_r: g.fecha_siembra_r || headerCoincidente?.fecha_siembra_r
+                  });
+                  construirHojaDeBautizo(headerFinal, dataBody, panel);
+                },
+                error: function (xhr) {
+                  console.error("error al obtener cuerpo:", xhr.responseText);
+                }
               });
-              //cuantos bautizos se encontraron
-              document.getElementById("totalBautizos").textContent = agrupados.length;
-            },
-            error: function (xhr) {
-              console.error("error al obtener cuerpo:", xhr.responseText);
-            }
+            });
+
+            lista.appendChild(tarjeta);
           });
+          //cuantos bautizos se encontraron
+          document.getElementById("totalBautizos").textContent = agrupados.length;
         },
         error: function (xhr) {
           console.error("error al obtener encabezados:", xhr.responseText);
@@ -575,13 +570,7 @@ function construirHojaDeBautizo(headerData, bodyData, contenedor) {
       </tr>
       <tr>
         <td colspan="2"><div class="label">Finca</div><div class="fila2">${headerData.finca}</div></td>
-        <td colspan="2">
-		<div class="label">Temporada</div>
-		<div class="contenedor-inline">
-			<span class="fila2">${headerData.fiesta}</span>
-			<span class="sub-item-fila">${headerData.temporada}</span>
-		</div>
-	</td>
+        <td colspan="2"><div class="label">Temporada</div><div class="fila2">${headerData.temporada}</div></td>
         <td><div class="label"># Plantas</div><div class="fila2">${headerData.total_plantas}</div></td>
         <td><div class="label">Plantas M2</div><div class="fila2">${headerData.plantasm2}</div></td>
         <td><div class="label">Pico</div><div class="fila2">${headerData.pico}</div></td>
@@ -604,7 +593,7 @@ function construirHojaDeBautizo(headerData, bodyData, contenedor) {
         <td><div class="label">Semana Pico T</div><div class="fila3">${headerData.semana_pico_t}</div></td>
         <td><div class="label">Semana Pico R</div><div class="fila3">${headerData.semana_pico_r}</div></td>
         <td><div class="label">Origen</div><div class="fila3">${headerData.origen}</div></td>
-        <td><div class="label">Casa C</div><div class="item-casa-comercial">${headerData.casa_comercial}</div></td>
+        <td><div class="label">Casa C</div><div class="fila3">${headerData.casa_comercial}</div></td>
         <td><div class="label">Desde</div><div class="fila3">${headerData.desde}</div></td>
         <td><div class="label">Hasta</div><div class="fila3">${headerData.hasta}</div></td>
       </tr>
@@ -723,7 +712,11 @@ function imprimirSeleccionados() {
         tipo_siembra: sel.tipo_siembra
       },
       success: function (headerData) {
-        const fecha_siembra = headerData[0]?.fecha_siembra_r?.split('/')[0] || '';
+        //buscamos el header que corresponde EXACTAMENTE al bautizo seleccionado
+        //esto evita que al haber varias filas (por distintas fechas de siembra)
+        //se tome siempre la primera y la fecha_siembra_r cambie al imprimir
+        const headerCoincidente = buscarHeaderCoincidente(headerData, sel);
+        const fecha_siembra = headerCoincidente?.fecha_siembra_r?.split('/')[0] || '';
 
         $.ajax({
           url: '../ajax/dataBodyBautizos.php',
@@ -740,13 +733,16 @@ function imprimirSeleccionados() {
             const hoja = document.createElement('div');
             hoja.className = 'media-carta-hoja';
 
-            const headerFinal = Object.assign({}, headerData[0], {
+            //usamos headerCoincidente en lugar de headerData[0] para garantizar
+            //que la fecha_siembra_r sea la misma que el usuario selecciono
+            const headerFinal = Object.assign({}, headerCoincidente, {
               desde: sel.desde,
               hasta: sel.hasta,
               total_camas: sel.camas,
               total_plantas: sel.plantas,
-              origen: sel.origen,
-              tabla: headerData[0].tabla
+              tabla: headerCoincidente.tabla,
+              //preservamos la fecha_siembra_r del seleccionado como fuente de verdad
+              fecha_siembra_r: sel.fecha_siembra_r || headerCoincidente.fecha_siembra_r
             });
 
             construirHojaDeBautizo(headerFinal, bodyData, hoja);

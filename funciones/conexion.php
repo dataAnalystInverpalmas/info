@@ -1,11 +1,6 @@
 <?php
-ob_start();
-
-if(!isset($_SESSION)) 
-{      
-    error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE);
-    session_start(); 
-} 
+if (defined('CONEXION_LOADED')) return;
+define('CONEXION_LOADED', true);
 
 //variables — usar variables de entorno si están definidas, si no usar valores por defecto
 $host = getenv('DB_HOST') ?: 'db';
@@ -20,9 +15,13 @@ $conexion->set_charset("utf8");
 
 $ip = $_SERVER['REMOTE_ADDR'] ?? '';
 // APP_SRC puede definirse en .env; si no, se mantiene el valor histórico
-$_GLOBALS['src'] = getenv('APP_SRC') ?: 'http://172.10.18.128:9258';
+$GLOBALS['src'] = getenv('APP_SRC') ?: 'http://172.10.18.128:9258';
+
+// Composer autoloader (Carbon, PhpSpreadsheet, mPDF, etc.)
+if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+    require_once __DIR__ . '/../vendor/autoload.php';
+}
 
 // Cargador de las nuevas clases refactorizadas (Models, Controllers, etc.)
 require_once __DIR__ . '/../src/autoload.php';
 
-?>

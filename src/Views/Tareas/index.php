@@ -1,5 +1,11 @@
 <!-- Vista Tareas -->
 <style>
+    .gestion-title {
+        font-size: 1.15rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+
     .modal-dialog.modal-half {
         width: 70vw;
         max-width: 70vw;
@@ -20,6 +26,7 @@
 </style>
 
 <div class="container-fluid">
+    <h4 class="gestion-title">Gestión de Tareas</h4>
     <div class="row mb-2">
         <div class="col-auto">
             <select id="filtroTipo" class="form-control form-control-sm" onchange="filtrarTareas()">
@@ -51,6 +58,7 @@
                     <td>Tipo</td>
                     <td>Nombre</td>
                     <td>Proyecto</td>
+                    <td>% Avance</td>
                     <td>Responsable</td>
                     <td>Quien Solicita</td>
                     <td>Estado</td>
@@ -68,6 +76,7 @@
                             <td><?php echo htmlspecialchars($row->tipo ?? 'prevista'); ?></td>
                             <td><?php echo htmlspecialchars($row->nombre); ?></td>
                             <td><?php echo htmlspecialchars($row->proyecto_nombre ?? 'Sin proyecto'); ?></td>
+                            <td><?php echo (int)($row->porcentaje_avance ?? 0); ?>%</td>
                             <td><?php echo htmlspecialchars($row->responsable ?? ''); ?></td>
                             <td><?php echo htmlspecialchars($row->quien_solicita ?? ''); ?></td>
                             <td><?php echo htmlspecialchars($row->estado); ?></td>
@@ -84,6 +93,7 @@
                                     "responsable" => $row->responsable ?? "",
                                     "quien_solicita" => $row->quien_solicita ?? "",
                                     "estado" => $row->estado,
+                                    "porcentaje_avance" => (int)($row->porcentaje_avance ?? 0),
                                     "prioridad" => $row->prioridad,
                                     "fecha_inicio" => $row->fecha_inicio ?? "",
                                     "fecha_vencimiento" => $row->fecha_vencimiento ?? ""
@@ -148,6 +158,12 @@
                             <option value="cancelada">Cancelada</option>
                         </select>
                     </div>
+                    <div class="col-6">
+                        <label class="small text-muted mb-0">% Avance</label>
+                        <input type="number" id="tAvance" class="form-control mb-2" min="0" max="100" step="1" value="0">
+                    </div>
+                </div>
+                <div class="row">
                     <div class="col-6">
                         <label class="small text-muted mb-0">Prioridad</label>
                         <select id="tPrioridad" class="form-control mb-2">
@@ -227,5 +243,5 @@
 <script>
 var usuarioActual = <?php echo json_encode($_SESSION['usuario'] ?? ''); ?>;
 </script>
-<script src="scripts/tareas.js"></script>
+<script src="scripts/tareas.js?v=<?php echo @filemtime(__DIR__ . '/../../../scripts/tareas.js'); ?>"></script>
 <script src="scripts/tarea_panel.js"></script>

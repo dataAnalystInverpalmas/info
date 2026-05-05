@@ -9,12 +9,7 @@ function crud_json($payload)
 function crud_bind_and_execute($stmt, $types, $params)
 {
     if ($types !== '') {
-        $bind = array_merge([$types], $params);
-        $refs = [];
-        foreach ($bind as $k => $v) {
-            $refs[$k] = &$bind[$k];
-        }
-        call_user_func_array([$stmt, 'bind_param'], $refs);
+        $stmt->bind_param($types, ...$params);
     }
     return $stmt->execute();
 }

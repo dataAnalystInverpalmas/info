@@ -31,10 +31,10 @@ if (isset($_POST['xfinca'])) {
 }
 
 if (isset($_POST['buscar'])) {
-  $programaEsc = $conexion->real_escape_string($programa);
-  $productoEsc = $conexion->real_escape_string($producto);
-  $temporadaEsc = $conexion->real_escape_string($temporada);
-  $fincaEsc = $conexion->real_escape_string($finca);
+  $programaEsc = $conexion->real_escape_string((string)$programa);
+  $productoEsc = $conexion->real_escape_string((string)$producto);
+  $temporadaEsc = $conexion->real_escape_string((string)$temporada);
+  $fincaEsc = $conexion->real_escape_string((string)$finca);
 
   if ($programa != "" && $producto == "" && $temporada == "" && $finca == "") {
     $where = " WHERE p.plantas > 0 AND p.estado = 1 AND p.programa = '$programaEsc'";
@@ -76,7 +76,7 @@ $COM = $conexion->query($slqCOMBO);
 $slqCOMBO2 = "SELECT producto FROM programf WHERE estado = 1 GROUP BY 1";
 $COM2 = $conexion->query($slqCOMBO2);
 
-$programaCombo = $conexion->real_escape_string($programa);
+$programaCombo = $conexion->real_escape_string((string)$programa);
 $slqCOMBO3 = "SELECT temporada_obj FROM programf WHERE estado = 1 AND Programa = '$programaCombo' GROUP BY 1 ORDER BY fecha_pico";
 $COM3 = $conexion->query($slqCOMBO3);
 

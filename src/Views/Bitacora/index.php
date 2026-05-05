@@ -1,5 +1,13 @@
 <!-- Vista Bitacora -->
+<style>
+    .gestion-title {
+        font-size: 1.15rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+</style>
 <div class="container-fluid">
+    <h4 class="gestion-title">Gestión de Bitácora</h4>
     <div class="row">
         <div class="table-responsive">
             <table id="tablaBitacora" class="table display compact" style="width:100%">

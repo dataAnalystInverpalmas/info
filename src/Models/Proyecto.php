@@ -9,16 +9,57 @@ class Proyecto {
         $conexion = Database::getConnection();
         if ($usuario_id !== null) {
             $stmt = $conexion->prepare(
-                "SELECT id, nombre, categoria, descripcion, estado, fecha_inicio, fecha_fin, fecha_creacion
-                 FROM proyectos WHERE usuario_id = ? ORDER BY fecha_creacion DESC"
+                "SELECT p.id, p.nombre, p.categoria, p.descripcion, p.estado, p.fecha_inicio, p.fecha_fin, p.fecha_creacion,
+                        ROUND(
+                            COALESCE(SUM(
+                                CASE t.prioridad
+                                    WHEN 'urgente' THEN 4
+                                    WHEN 'alta' THEN 3
+                                    WHEN 'media' THEN 2
+                                    ELSE 1
+                                END * COALESCE(t.porcentaje_avance, 0)
+                            ) / NULLIF(SUM(
+                                CASE t.prioridad
+                                    WHEN 'urgente' THEN 4
+                                    WHEN 'alta' THEN 3
+                                    WHEN 'media' THEN 2
+                                    ELSE 1
+                                END
+                            ), 0), 0)
+                        ) AS avance_proyecto
+                 FROM proyectos p
+                 LEFT JOIN tareas t ON t.proyecto_id = p.id
+                       WHERE (p.usuario_id = ? OR p.usuario_id IS NULL)
+                 GROUP BY p.id, p.nombre, p.categoria, p.descripcion, p.estado, p.fecha_inicio, p.fecha_fin, p.fecha_creacion
+                 ORDER BY p.fecha_creacion DESC"
             );
             $stmt->bind_param("i", $usuario_id);
             $stmt->execute();
             $result = $stmt->get_result();
         } else {
             $result = $conexion->query(
-                "SELECT id, nombre, categoria, descripcion, estado, fecha_inicio, fecha_fin, fecha_creacion
-                 FROM proyectos ORDER BY fecha_creacion DESC"
+                "SELECT p.id, p.nombre, p.categoria, p.descripcion, p.estado, p.fecha_inicio, p.fecha_fin, p.fecha_creacion,
+                        ROUND(
+                            COALESCE(SUM(
+                                CASE t.prioridad
+                                    WHEN 'urgente' THEN 4
+                                    WHEN 'alta' THEN 3
+                                    WHEN 'media' THEN 2
+                                    ELSE 1
+                                END * COALESCE(t.porcentaje_avance, 0)
+                            ) / NULLIF(SUM(
+                                CASE t.prioridad
+                                    WHEN 'urgente' THEN 4
+                                    WHEN 'alta' THEN 3
+                                    WHEN 'media' THEN 2
+                                    ELSE 1
+                                END
+                            ), 0), 0)
+                        ) AS avance_proyecto
+                 FROM proyectos p
+                 LEFT JOIN tareas t ON t.proyecto_id = p.id
+                 GROUP BY p.id, p.nombre, p.categoria, p.descripcion, p.estado, p.fecha_inicio, p.fecha_fin, p.fecha_creacion
+                 ORDER BY p.fecha_creacion DESC"
             );
         }
         $data = [];
@@ -34,7 +75,12 @@ class Proyecto {
         $conexion = Database::getConnection();
         if ($usuario_id !== null) {
             $stmt = $conexion->prepare(
-                "SELECT DISTINCT categoria FROM proyectos WHERE categoria IS NOT NULL AND categoria != '' AND usuario_id = ? ORDER BY categoria"
+                                "SELECT DISTINCT categoria
+                                 FROM proyectos
+                                 WHERE categoria IS NOT NULL
+                                     AND categoria != ''
+                                     AND (usuario_id = ? OR usuario_id IS NULL)
+                                 ORDER BY categoria"
             );
             $stmt->bind_param("i", $usuario_id);
             $stmt->execute();

@@ -97,6 +97,7 @@ $sql = "
     a.temporada ,
     a.variedad ,
     a.producto ,
+    a.fecha_siembra,
     a.tabla ,
     a.nave ,
     a.cama ,

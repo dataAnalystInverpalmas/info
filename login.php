@@ -1,4 +1,5 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) session_start();
 //lamar conexion
 if (is_file("funciones/conexion.php")){
   include ("funciones/conexion.php");
@@ -24,14 +25,11 @@ if($rows>0){
   $_SESSION['usuario']=$row['name'];
   $_SESSION['role']=$row['role'];
   $_SESSION['id']=$row['id'];
-  header("location: home.php");
+  header("location: index.php");
+  exit;
 }else{
-?>
-  <script>
-    alert("Error en Login");
-  </script>
-<?php
-header("location: index.php");
+  header("location: index.php?error=1");
+  exit;
 }
 
 }

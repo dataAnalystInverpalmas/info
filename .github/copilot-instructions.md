@@ -1,53 +1,213 @@
-## Resumen rápido
+## Resumen del proyecto
 
-Este repositorio es una aplicación PHP procedimental orientada a informes agrícolas. La mayor parte de la lógica de back-end está en archivos PHP sueltos (carpeta `ajax/`, `views/`, `PDF/`, `scripts/`) que consultan la base de datos `informes` y devuelven HTML o JSON para consumo por front-end DataTables y páginas tradicionales.
+Aplicación PHP de informes agrícolas en proceso de migración a arquitectura MVC orientada a objetos. El código refactorizado vive en `src/` (namespace `App\`). Las vistas de entrada (`views/`) actúan como despachadores delgados que instancian el controlador correspondiente. Los endpoints AJAX legacy en `ajax/` coexisten con los nuevos que enrutan a métodos estáticos de los controllers. La BD es MySQL (`informes`); la conexión principal es mysqli vía `funciones/conexion.php`.
 
-## Estructura y componentes clave
-- `ajax/` — Endpoints AJAX que devuelven JSON (p.ej. `ajax/dataHeaderBautizos.php`).
-- `bd/` — Implementaciones PDO clásicas (ej. `bd/conexion.php`).
-- `funciones/` — Conexión y utilidades comunes (ej. `funciones/conexion.php` que crea `$conexion` con mysqli).
-- `archivos/` — Excel y dumps de datos usados por el equipo (referencia: `phpoffice/phpspreadsheet` en `composer.json`).
-- `vendor/` y `composer.json` — Dependencias: Carbon, PhpSpreadsheet, mPDF, Bootstrap, DataTables.
+---
 
-Observación importante: hay dos patrones de conexión a DB en el repo: `bd/conexion.php` (PDO, credenciales distintas) y `funciones/conexion.php` (mysqli, otras credenciales). Muchos scripts AJAX incluyen `funciones/conexion.php` y esperan un objeto mysqli `$conexion`.
+## Estructura de directorios
 
-## Convenciones de código que debes respetar
-- Estilo procedural: evita reescribir en OOP salvo que hagas una refactorización controlada.
-- Inclusiones relativas: los scripts usan `include("../funciones/conexion.php")` y rutas relativas. Mantén cuidado con la ruta de trabajo (cwd) al ejecutar scripts desde CLI.
-- Salida de endpoints AJAX: usualmente `echo json_encode($data);`. Los agentes deben preservar este comportamiento y mantener UTF-8.
-- Uso de consultas preparadas: ver `ajax/dataHeaderBautizos.php` — se usan `?` y `bind_param("sssss", ...)` con mysqli. Sigue ese patrón cuando modifiques endpoints.
+```
+raíz/
+├── src/                        ← código MVC principal (namespace App\)
+│   ├── autoload.php            ← PSR-4 manual (App\ → src/)
+│   ├── Helpers/Database.php    ← envuelve la $conexion global para los modelos
+│   ├── Controllers/            ← 25 controladores (App\Controllers\*)
+│   ├── Models/                 ← 8 modelos activos (App\Models\*)
+│   └── Views/                  ← 24+ carpetas de vistas (renderizadas por require_once)
+├── views/                      ← despachadores de página (include conexion + new Controller)
+├── ajax/                       ← endpoints AJAX (procedurales legacy y nuevos REST)
+├── tables/                     ← scripts PHP/SQL para operaciones manuales sobre BD (no hay ruta web)
+├── scripts/                    ← JS, CSS, migraciones SQL/PHP (se ejecutan manualmente si se necesitan)
+├── funciones/
+│   ├── conexion.php            ← bootstrap principal: mysqli $conexion, autoloaders, APP_SRC
+│   └── funciones.php           ← utilidades generales
+├── bd/conexion.php             ← clase Conexion (PDO) — usada solo por scripts legacy
+├── config/config.php           ← zona horaria, APP_DEBUG, logging (log_evento())
+├── layouts/                    ← plantillas HTML comunes (header, sidebar, footer)
+├── archivos/                   ← Excel y dumps de datos (PhpSpreadsheet)
+├── composer.json               ← define App\ → src/ (PSR-4); deps: Carbon, PhpSpreadsheet, mPDF
+└── vendor/                     ← dependencias Composer
+```
 
-## Flujo de datos típico (ejemplo concreto)
-1. Frontend DataTable hace POST a `ajax/dataHeaderBautizos.php` con `{finca,bloque,variedad,temporada,tipo_siembra}`.
-2. `ajax/dataHeaderBautizos.php` incluye `funciones/conexion.php` y prepara una consulta SQL compleja con `?` placeholders.
-3. El endpoint ejecuta `$stmt->execute(); $result = $stmt->get_result();` y responde `json_encode($data)`.
+---
 
-## Comandos y flujo de desarrollo local
-- Instalar dependencias: `composer install` (desde la raíz del repo). Esto creará `vendor/` para PhpSpreadsheet, mPDF, etc.
-- Servir la app rápida (solo para desarrollo): `php -S 0.0.0.0:9258 -t .` desde la raíz. Muchas referencias URL internas esperan el host/puerto `172.10.18.128:9258` (ver `funciones/conexion.php`), así que al probar localmente replica el host/puerto o adapte `$_GLOBALS['src']` según tu entorno.
-- Base de datos: la app espera una base MySQL llamada `informes`. Revisa credenciales en `funciones/conexion.php` y `bd/conexion.php` antes de ejecutar; confirma cuál usa el archivo que vas a modificar.
+## Arquitectura MVC activa
 
-## Seguridad y secretos
-- Credenciales aparecen en el repositorio (`bd/conexion.php`, `funciones/conexion.php`). No las expongas ni las subas a servicios públicos. Si automatizas tests o despliegues, externaliza credenciales en variables de entorno o archivos de configuración no versionados.
+### Patrón de flujo para páginas renderizadas
 
-## Errores comunes y cómo depurarlos
-- "Error en prepare()" en endpoints AJAX: normalmente significa que la conexión `$conexion` es null o no es mysqli; comprueba qué archivo de conexión se está incluyendo y si las credenciales/host son accesibles.
-- Diferencias PDO vs mysqli: no mezcles llamadas (p.ej. no uses `->prepare` de PDO sobre un mysqli sin adaptar). Verifica el tipo de `$conexion`.
+```
+views/modulo.php
+  └─ include funciones/conexion.php        // bootstrap + autoload
+  └─ (new App\Controllers\ModuloController)->index()
+       └─ App\Models\Modelo::getAll()      // llama Database::getConnection() → $conexion (mysqli)
+       └─ require src/Views/Modulo/index.php
+```
 
-## Qué buscar cuando edits/añades código
-- Si añades un nuevo endpoint en `ajax/`, sigue el patrón: validar `$_POST` (usa `$_POST['x'] ?? ''`), preparar consulta con `?`, `bind_param(...)`, `execute()`, `get_result()` y `json_encode`.
-- Mantén SQL legible: muchas consultas usan joins con prefijos `informes.*`. Preserva el esquema `informes.` en consultas a menos que modifiques la configuración de BD.
-- Si introduces composer/autoloaded classes, documenta la nueva dependencia en `composer.json` y ejecuta `composer install`.
+### Patrón de flujo para endpoints AJAX REST
 
-## Archivos para inspeccionar primero (rápida lectura)
-- `ajax/dataHeaderBautizos.php` — ejemplo completo de flujo AJAX/SQL.
-- `funciones/conexion.php` y `bd/conexion.php` — contrastar para entender qué conexión usa cada script.
-- `composer.json` — dependencias del proyecto.
-- `index.php`, `home.php`, `login.php` — puntos de entrada web.
+```
+ajax/modulo.php
+  └─ require funciones/conexion.php
+  └─ switch($_SERVER['REQUEST_METHOD'])
+       └─ App\Controllers\ModuloController::crear() / listar() / actualizar() / eliminar()
+```
 
-## Resultado esperado de los agentes
-- Hacer cambios mínimos y coherentes con el estilo procedural.
-- No eliminar o reescribir credenciales en masa; en su lugar, sugerir externalizarlos y documentarlo.
-- Si propones refactor, añade una nota con riesgos (p.ej. cambiar mysqli→PDO puede romper muchos endpoints).
+### Patrón de flujo para endpoints AJAX legacy (aún en uso)
 
-Si algo en estas notas está incompleto o quieres que añada ejemplos adicionales (p.ej. una plantilla para nuevos endpoints AJAX), dime cuál y lo añado.
+```
+ajax/modulo_crud.php
+  └─ include('../funciones/conexion.php')   // obtiene $conexion (mysqli)
+  └─ switch($accion) { case 'create': ... } // preparar + bind_param + execute
+```
+
+---
+
+## Capas del sistema
+
+### `src/Helpers/Database.php`
+Retorna la conexión global `$conexion` (mysqli). Todos los modelos deben usarlo:
+```php
+$conexion = Database::getConnection();
+```
+No mezclar con `bd/conexion.php` (PDO); son incompatibles.
+
+### `src/Models/` — modelos disponibles
+| Modelo | Tabla principal |
+|---|---|
+| Application | aplicaciones |
+| Bitacora | bitacora |
+| Flowervase | florvaso |
+| Greenhouse | invernaderos |
+| Program | programas |
+| Programf | programasf |
+| Proyecto | proyectos |
+| Tarea | tareas |
+
+Patrón estándar de modelo:
+- Métodos estáticos: `getAll($usuario_id)`, `getById($id)`
+- Consultas preparadas con `?` y `bind_param`
+- Acceso multiusuario: `WHERE usuario_id = ? OR usuario_id IS NULL` (proyectos y tareas globales)
+
+### `src/Controllers/` — controladores disponibles
+ApplicationController, BitacoraController, CatalogCrudController, EntradaMaterialVegetalController, EvaluacionesCrudController, FlowervaseController, FormBautizoController, GreenhouseController, GrowplantingController, GrowrootController, KanbanController, LaborsFormController, LoadFilesController, PlantillaBautizoController, PowerBIController, PrintController, ProgramController, ProgramfController, ProyectoController, ReportEvaluationsController, ReportFvController, ReportProgramController, ReportProgramViewController, TareaController, TrazabilidadController
+
+### `src/Views/` — vistas correspondientes
+Cada carpeta tiene un `index.php` que recibe variables via `extract()` desde el controlador.
+
+---
+
+## Conexiones a base de datos
+
+| Archivo | Tipo | Uso |
+|---|---|---|
+| `funciones/conexion.php` | mysqli global `$conexion` | **Principal.** Usado por todos los modelos OOP y endpoints nuevos |
+| `bd/conexion.php` | clase `Conexion` (PDO) | Legacy. Solo scripts antiguos que aún no han sido migrados |
+| `src/Helpers/Database.php` | Wrapper de `$conexion` | Punto de acceso desde modelos OOP |
+
+Credenciales configurables por variables de entorno: `DB_HOST`, `DB_USER`, `DB_PASS`, `DB_NAME`, `DB_PORT`. Si no están definidas se usan los valores por defecto en cada archivo.
+
+---
+
+## `tables/` — scripts de operaciones manuales
+Contienen scripts PHP y SQL para operaciones sobre la BD que se ejecutan manualmente cuando se necesitan (migraciones, inserciones masivas, consultas ad-hoc). No tienen ruta web. Referencia antes de crear una migración para no duplicar trabajo.
+
+## `scripts/` — assets y herramientas de desarrollo
+JS del frontend (`proyectos.js`, `tareas.js`, `programs.js`, etc.), CSS, SQL de creación de tablas y PHP de migración. Los PHP se ejecutan manualmente desde CLI o navegador según necesidad.
+
+---
+
+## Convenciones que debes seguir
+
+### Al agregar un nuevo módulo (patrón completo)
+1. Crear `src/Models/NuevoModelo.php` con namespace `App\Models` y métodos estáticos.
+2. Crear `src/Controllers/NuevoController.php` con namespace `App\Controllers`.
+3. Crear `src/Views/NuevoModulo/index.php` recibiendo variables via `extract()`.
+4. Crear `views/nuevo_modulo.php` como despachador delgado.
+5. Si necesita AJAX REST: crear `ajax/nuevo_modulo.php` que enrute al controller estático.
+
+### Consultas preparadas (mysqli)
+```php
+$conexion = Database::getConnection();
+$stmt = $conexion->prepare("SELECT ... WHERE campo = ?");
+$stmt->bind_param("s", $valor);
+$stmt->execute();
+$result = $stmt->get_result();
+```
+
+### Acceso multiusuario (proyectos/tareas globales)
+```sql
+WHERE (usuario_id = ? OR usuario_id IS NULL)
+```
+
+### Endpoints AJAX
+- Salida siempre: `header('Content-Type: application/json; charset=utf-8'); echo json_encode($data);`
+- Validar entrada: `$_POST['x'] ?? ''` o `$_GET['x'] ?? null`
+- Nunca mezclar PDO y mysqli en el mismo flujo
+
+---
+
+## Bootstrap de la aplicación
+
+`funciones/conexion.php` es el punto de arranque; hace:
+1. Crea `$conexion` (mysqli) con credenciales de env o defaults
+2. Carga `vendor/autoload.php` (Composer: Carbon, PhpSpreadsheet, mPDF…)
+3. Carga `src/autoload.php` (PSR-4 manual para `App\`)
+4. Define `$GLOBALS['src']` (URL base, configurable con `APP_SRC`)
+
+Todos los despachadores (`views/*.php`) y endpoints AJAX deben incluir este archivo primero.
+
+---
+
+## Dependencias (composer.json)
+
+| Paquete | Uso |
+|---|---|
+| `nesbot/carbon` | Fechas/horas |
+| `phpoffice/phpspreadsheet` | Exportar/importar Excel |
+| `mpdf/mpdf` | Generación de PDF |
+| `twbs/bootstrap` | CSS/JS frontend |
+| `datatables/datatables` | Tablas interactivas |
+
+---
+
+## Desarrollo local
+
+```bash
+composer install                     # instalar dependencias
+php -S 0.0.0.0:9258 -t .            # servidor de desarrollo
+```
+
+URL base histórica: `http://172.10.18.128:9258`. Configurar `APP_SRC` en entorno local si difiere.
+
+---
+
+## Seguridad
+
+- Credenciales en repositorio: externalizarlas en variables de entorno (`.env`). Archivo `.env.example` disponible como referencia.
+- Nunca concatenar input del usuario en SQL; usar siempre sentencias preparadas.
+- Validar `$_SESSION['id']` antes de usarlo como `usuario_id`.
+
+---
+
+## Errores frecuentes
+
+| Síntoma | Causa probable |
+|---|---|
+| `prepare()` devuelve false | `$conexion` es null o es PDO en lugar de mysqli |
+| Proyecto existe pero no aparece en tabla | Query filtra solo `usuario_id = ?`, ignorar registros con `usuario_id IS NULL` |
+| Error 500 en vista | `extract()` en controller no pasó la variable que la vista espera |
+| Clase no encontrada | No se incluyó `funciones/conexion.php` (que carga los autoloaders) |
+
+---
+
+## Archivos clave para inspección rápida
+
+- `funciones/conexion.php` — bootstrap completo del sistema
+- `src/autoload.php` — cómo se resuelven los namespaces
+- `src/Helpers/Database.php` — puente entre modelos OOP y conexión global
+- `src/Models/Proyecto.php` — modelo de referencia con patrón completo
+- `src/Controllers/ProyectoController.php` — controller de referencia
+- `views/proyectos.php` — despachador de referencia
+- `ajax/proyecto_crud.php` — endpoint AJAX legacy de referencia
+- `ajax/proyectos.php` — endpoint AJAX REST de referencia
+- `ajax/_crud_dynamic_common.php` — helpers reutilizables para CRUD genérico

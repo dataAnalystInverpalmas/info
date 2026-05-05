@@ -1,5 +1,11 @@
 <!-- Vista Proyectos -->
 <style>
+    .gestion-title {
+        font-size: 1.15rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+
     .modal-dialog.modal-half {
         width: 70vw;
         max-width: 70vw;
@@ -20,6 +26,7 @@
 </style>
 
 <div class="container-fluid">
+    <h4 class="gestion-title">Gestión de Proyectos</h4>
     <div class="row mb-2">
         <div class="col-auto">
             <select id="filtroCategoria" class="form-control form-control-sm" onchange="filtrarProyectos()">
@@ -42,6 +49,7 @@
                     <td>ID</td>
                     <td>Categoría</td>
                     <td>Nombre</td>
+                    <td>% Avance</td>
                     <td>Descripcion</td>
                     <td>Estado</td>
                     <td>Inicio</td>
@@ -56,6 +64,13 @@
                             <td><?php echo (int)$row->id; ?></td>
                             <td><?php echo htmlspecialchars($row->categoria ?? ''); ?></td>
                             <td><?php echo htmlspecialchars($row->nombre); ?></td>
+                            <td>
+                                <?php $avanceProyecto = (int)($row->avance_proyecto ?? 0); ?>
+                                <div class="progress" style="height: 8px; min-width: 110px;">
+                                    <div class="progress-bar bg-info" role="progressbar" style="width: <?php echo $avanceProyecto; ?>%;" aria-valuenow="<?php echo $avanceProyecto; ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <small class="text-muted"><?php echo $avanceProyecto; ?>%</small>
+                            </td>
                             <td><?php echo htmlspecialchars($row->descripcion ?? ''); ?></td>
                             <td><?php echo htmlspecialchars($row->estado); ?></td>
                             <td><?php echo htmlspecialchars($row->fecha_inicio ?? '-'); ?></td>

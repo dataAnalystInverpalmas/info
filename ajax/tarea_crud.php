@@ -19,12 +19,24 @@ switch ($accion) {
         $responsable = $_POST['responsable'] ?: null;
         $quien_solicita = $_POST['quien_solicita'] ?: null;
         $estado = $_POST['estado'] ?? 'pendiente';
+        $porcentaje_avance = isset($_POST['porcentaje_avance']) && $_POST['porcentaje_avance'] !== ''
+            ? max(0, min(100, (int)$_POST['porcentaje_avance']))
+            : null;
+        if ($porcentaje_avance === null) {
+            if ($estado === 'completada') {
+                $porcentaje_avance = 100;
+            } elseif ($estado === 'en_progreso') {
+                $porcentaje_avance = 25;
+            } else {
+                $porcentaje_avance = 0;
+            }
+        }
         $prioridad = $_POST['prioridad'] ?? 'media';
         $fecha_inicio = $_POST['fecha_inicio'] ?: null;
         $fecha_vencimiento = $_POST['fecha_vencimiento'] ?: null;
 
-        $stmt = $conexion->prepare("INSERT INTO tareas (usuario_id, nombre, tipo, descripcion, proyecto_id, responsable, quien_solicita, estado, prioridad, fecha_inicio, fecha_vencimiento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("isssissssss", $usuario_id, $nombre, $tipo, $descripcion, $proyecto_id, $responsable, $quien_solicita, $estado, $prioridad, $fecha_inicio, $fecha_vencimiento);
+        $stmt = $conexion->prepare("INSERT INTO tareas (usuario_id, nombre, tipo, descripcion, proyecto_id, responsable, quien_solicita, estado, porcentaje_avance, prioridad, fecha_inicio, fecha_vencimiento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("isssisssisss", $usuario_id, $nombre, $tipo, $descripcion, $proyecto_id, $responsable, $quien_solicita, $estado, $porcentaje_avance, $prioridad, $fecha_inicio, $fecha_vencimiento);
         $ok = $stmt->execute();
 
         if ($ok) {
@@ -50,7 +62,7 @@ switch ($accion) {
         $usuario_id = $_SESSION['id'] ?? null;
 
         // Leer estado ANTES del cambio para generar diff
-        $stmtAntes = $conexion->prepare("SELECT nombre, tipo, descripcion, proyecto_id, responsable, quien_solicita, estado, prioridad, fecha_inicio, fecha_vencimiento FROM tareas WHERE id=? AND (usuario_id=? OR usuario_id IS NULL) LIMIT 1");
+        $stmtAntes = $conexion->prepare("SELECT nombre, tipo, descripcion, proyecto_id, responsable, quien_solicita, estado, porcentaje_avance, prioridad, fecha_inicio, fecha_vencimiento FROM tareas WHERE id=? AND (usuario_id=? OR usuario_id IS NULL) LIMIT 1");
         $stmtAntes->bind_param("ii", $id, $usuario_id);
         $stmtAntes->execute();
         $antes = $stmtAntes->get_result()->fetch_assoc() ?? [];
@@ -62,12 +74,25 @@ switch ($accion) {
         $responsable = $_POST['responsable'] ?: null;
         $quien_solicita = $_POST['quien_solicita'] ?: null;
         $estado = $_POST['estado'] ?? 'pendiente';
+        $porcentaje_enviado = isset($_POST['porcentaje_avance']) && $_POST['porcentaje_avance'] !== '';
+        $porcentaje_avance = $porcentaje_enviado
+            ? max(0, min(100, (int)$_POST['porcentaje_avance']))
+            : (isset($antes['porcentaje_avance']) ? (int)$antes['porcentaje_avance'] : 0);
+        if (($antes['estado'] ?? '') !== $estado && !$porcentaje_enviado) {
+            if ($estado === 'pendiente') {
+                $porcentaje_avance = 0;
+            } elseif ($estado === 'en_progreso') {
+                $porcentaje_avance = 25;
+            } elseif ($estado === 'completada') {
+                $porcentaje_avance = 100;
+            }
+        }
         $prioridad = $_POST['prioridad'] ?? 'media';
         $fecha_inicio = $_POST['fecha_inicio'] ?: null;
         $fecha_vencimiento = $_POST['fecha_vencimiento'] ?: null;
 
-        $stmt = $conexion->prepare("UPDATE tareas SET nombre=?, tipo=?, descripcion=?, proyecto_id=?, responsable=?, quien_solicita=?, estado=?, prioridad=?, fecha_inicio=?, fecha_vencimiento=? WHERE id=? AND (usuario_id=? OR usuario_id IS NULL)");
-        $stmt->bind_param("sssissssssii", $nombre, $tipo, $descripcion, $proyecto_id, $responsable, $quien_solicita, $estado, $prioridad, $fecha_inicio, $fecha_vencimiento, $id, $usuario_id);
+        $stmt = $conexion->prepare("UPDATE tareas SET nombre=?, tipo=?, descripcion=?, proyecto_id=?, responsable=?, quien_solicita=?, estado=?, porcentaje_avance=?, prioridad=?, fecha_inicio=?, fecha_vencimiento=? WHERE id=? AND (usuario_id=? OR usuario_id IS NULL)");
+        $stmt->bind_param("sssisssisssii", $nombre, $tipo, $descripcion, $proyecto_id, $responsable, $quien_solicita, $estado, $porcentaje_avance, $prioridad, $fecha_inicio, $fecha_vencimiento, $id, $usuario_id);
         $ok = $stmt->execute();
 
         if ($ok) {
@@ -79,6 +104,7 @@ switch ($accion) {
                 'nombre' => $nombre, 'tipo' => $tipo, 'descripcion' => $descripcion,
                 'proyecto_id' => $proyecto_id, 'responsable' => $responsable,
                 'quien_solicita' => $quien_solicita,
+                'porcentaje_avance' => $porcentaje_avance,
                 'prioridad' => $prioridad, 'fecha_inicio' => $fecha_inicio,
                 'fecha_vencimiento' => $fecha_vencimiento
             ];
@@ -103,7 +129,12 @@ switch ($accion) {
             $b->execute();
         }
 
-        echo json_encode(['success' => $ok, 'mensaje' => $ok ? 'Actualizada' : $conexion->error]);
+        echo json_encode([
+            'success' => $ok,
+            'mensaje' => $ok ? 'Actualizada' : $conexion->error,
+            'porcentaje_avance' => $porcentaje_avance,
+            'filas_afectadas' => $conexion->affected_rows
+        ]);
         break;
 
     case 'delete':

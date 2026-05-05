@@ -10,7 +10,7 @@ class Tarea {
         if ($usuario_id !== null) {
             $stmt = $conexion->prepare(
                 "SELECT t.id, t.nombre, t.tipo, t.descripcion, t.estado, t.prioridad,
-                        t.fecha_vencimiento, t.fecha_inicio, t.responsable, t.quien_solicita,
+                        t.porcentaje_avance, t.fecha_vencimiento, t.fecha_inicio, t.responsable, t.quien_solicita,
                         t.proyecto_id, p.nombre AS proyecto_nombre, p.categoria AS proyecto_categoria
                  FROM tareas t
                  LEFT JOIN proyectos p ON t.proyecto_id = p.id
@@ -23,7 +23,7 @@ class Tarea {
         } else {
             $result = $conexion->query(
                 "SELECT t.id, t.nombre, t.tipo, t.descripcion, t.estado, t.prioridad,
-                        t.fecha_vencimiento, t.fecha_inicio, t.responsable, t.quien_solicita,
+                        t.porcentaje_avance, t.fecha_vencimiento, t.fecha_inicio, t.responsable, t.quien_solicita,
                         t.proyecto_id, p.nombre AS proyecto_nombre, p.categoria AS proyecto_categoria
                  FROM tareas t
                  LEFT JOIN proyectos p ON t.proyecto_id = p.id

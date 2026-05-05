@@ -1,8 +1,6 @@
 <?php
 //lamar conexion
 include ('funciones/conexion.php');
-//funciones personalizadas
-require "vendor/autoload.php";
 
 //verificar los roles	
 ?>
@@ -13,8 +11,12 @@ require "vendor/autoload.php";
 <?php
 // Mostrar enlace al report programs en el menú si el rol tiene permiso
 $dir_menu = "views/programs.php";
-$qmenu = "SELECT dir FROM roles WHERE users_role=".$_SESSION['role']." AND dir='".$dir_menu."' ";
-$rmenu = $conexion->query($qmenu);
+$stmt_menu = $conexion->prepare("SELECT dir FROM roles WHERE users_role = ? AND dir = ? LIMIT 1");
+$role_menu = intval($_SESSION['role']);
+$stmt_menu->bind_param("is", $role_menu, $dir_menu);
+$stmt_menu->execute();
+$rmenu = $stmt_menu->get_result();
+$stmt_menu->close();
 ?>
 <script>
 	function listar_tabla(link){
@@ -115,6 +117,7 @@ $reportes = array(
 	'103'      => 'views/report_pb_clavel.php',
 	'104'      => 'views/report_pb_curvas.php',
 	'105'      => 'views/report_trazabilidad.php',
+	'108'      => 'views/report_pb_pto_vs_real.php',
 	'106'      => 'views/report_pb_demandas.php',
 	'107'      => 'views/report_pb_compara_prod.php',
 	'200'      => 'views/proyectos.php',
@@ -137,6 +140,7 @@ $reportes = array(
 	'crud_varieties'    => 'views/varieties_crud.php',
 	'crud_seasons'      => 'views/seasons_crud.php',
 	'crud_emv'          => 'views/entrada_material_vegetal.php',
+	'1005'              => 'views/loadfiles.php',
 );
 
 // ============================================================
@@ -185,16 +189,39 @@ if (isset($_GET['report'])) {
 			'views/varieties_crud.php',
 			'views/seasons_crud.php',
 			'views/entrada_material_vegetal.php',
+			'views/evaluaciones_crud.php',
 		], true) && intval($_SESSION['role']) === 1) {
 			$permitido = true;
 		}
+		// Fallback: evaluaciones_crud puede estar registrada como views/orders.php (ruta histórica)
+		if (!$permitido && $dir === 'views/evaluaciones_crud.php') {
+			$permitido = tiene_permiso($conexion, 'views/orders.php');
+		}
+		// Fallback: carga de archivos accesible a todos los usuarios autenticados
+		if (!$permitido && $dir === 'views/loadfiles.php' && intval($_SESSION['role']) > 0) {
+			$permitido = true;
+		}
+		// Fallback: reporte Power BI del dashboard accesible a usuarios autenticados
+		if (!$permitido && $dir === 'views/report_pb_pto_vs_real.php' && intval($_SESSION['role']) > 0) {
+			$permitido = true;
+		}
 		if ($permitido) {
-			include "$dir";
+			if ($dir === 'views/formBautizo.php') {
+				?>
+				<div class="embed-responsive">
+				<iframe src="views/formBautizo.php"
+					style="position: fixed; top: 60px; left: 0; width: 100vw; height: calc(100vh - 70px); border: none;"
+					frameborder="0"
+					scrolling="auto">
+				</iframe>
+				</div>
+				<?php
+			} else {
+				include "$dir";
+			}
 		} else {
 			echo "<h1>No tiene permisos</h1>";
 		}
-	} elseif ($key == '1005') {
-		include "views/loadfiles.php";
 	}
 }
 ?>

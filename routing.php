@@ -6,13 +6,16 @@ if (is_file("funciones/conexion.php")){
 	include ("../funciones/conexion.php");
 }
 
-	if (empty($_GET['menu']) & empty($_SESSION['usuario'])){
+	if (empty($_SESSION['usuario'])){
 		?>
 		<br>
 			<div class="row justify-content-sm-center">
 				<div class="col-sm-6 col-md-5 flex-column">
 					<h1 class="text-center">Admin Panel</h1>
 					<h2 class="text-center">Iniciar Sesión</h2>
+					<?php if (!empty($_GET['error'])): ?>
+					<div class="alert alert-danger text-center">Usuario o contraseña incorrectos.</div>
+					<?php endif; ?>
 					<div>
 						<form action="login.php" method="POST" name="login">
 						<input type="text" class="form-control" placeholder="Username" name="email" required autofocus><br>
@@ -33,45 +36,11 @@ if (is_file("funciones/conexion.php")){
 		<?php
 	} else {
 		
-		if (empty($_GET['menu'])) {
-			?>
-			<!-- <div class="jumbotron jumbotron-fluid"> -->
-				<div class="container">
-					<div class="row">
-						<div class="col-sm-4"></div>
-						<div class="col-sm-4"></div>
-						<div class="col-sm-4 text-right">
-							<?php echo "<h7>".$_SESSION['usuario']." </h7"; ?></h7>
-							<!-- tutiempo.net - Ancho:300px - Alto:411px -->
-							<!-- <iframe src="https://www.tutiempo.net/s-widget/app/?LocId=70463&sc=1" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:300px; height:411px;" allowtransparency="true"></iframe> -->
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-sm-12">
-							<div class="embed-responsive">
-								<iframe title="Pto Vs Real" class="powerbi-frame" src="https://app.powerbi.com/view?r=eyJrIjoiOGI4YWM0OWEtNzliYS00YmEyLWI5YzAtNjhmMmJlZTU4MTdmIiwidCI6ImIzMTI4MDM5LTFkN2ItNGE0Ny1hYjA2LTE1MmU3MWMzYTg1NyIsImMiOjR9" frameborder="0" allowFullScreen="true"></iframe>
-							</div>
-						</div>
-					</div>	
-				</div>
-			<!-- </div> -->
-			<?php
+		if (!isset($_GET['report']) && !isset($_GET['table'])) {
+			include 'views/dashboard_proyecciones.php';
 		}
 		else {
-			if(isset($_GET['report']) && $_GET['report'] == '1'){
-				?>
-				<div class="embed-responsive">
-				<iframe src="views/formBautizo.php"
-					style="position: fixed; top: 60px; left: 0; width: 100vw; height: calc(100vh - 70px); border: none;"
-					frameborder="0"
-					scrolling="auto">
-				</iframe>
-				</div>
-				<?php
-			}else{
-				require_once('dist/tables.php');
-			}
-			
+			require_once('dist/tables.php');
 		}
 		
 }

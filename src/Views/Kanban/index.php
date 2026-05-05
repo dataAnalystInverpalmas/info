@@ -63,6 +63,8 @@
         font-size: 0.82rem;
         -webkit-user-select: none;
         user-select: none;
+        position: relative;
+        padding-bottom: 1.65rem;
     }
     .kanban-card:active { cursor: grabbing; }
     .kanban-card.dragging { opacity: .45; }
@@ -94,9 +96,32 @@
         color: #2c3e50 !important;
         border: 1px solid #d8dee8;
     }
+
+    .kanban-card .card-avance {
+        position: absolute;
+        right: 0.6rem;
+        bottom: 0.4rem;
+        font-size: 0.72rem;
+        color: #4b5563;
+        background: #f2f4f7;
+        border-radius: 10px;
+        padding: 2px 8px;
+        font-weight: 600;
+    }
+
+    #kGeneralWrap {
+        min-width: 280px;
+    }
+
+    .gestion-title {
+        font-size: 1.15rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
 </style>
 
 <div class="container-fluid">
+    <h4 class="gestion-title">Gestión de Kanban</h4>
     <!-- Barra de filtros -->
     <div class="row align-items-center mb-3 g-2">
         <div class="col-auto">
@@ -110,9 +135,17 @@
         <div class="col-auto mt-3">
             <button class="btn btn-sm btn-primary" onclick="cargarKanban()">Aplicar</button>
             <button class="btn btn-sm btn-outline-secondary ms-1" onclick="semanaActual(); cargarKanban();">Esta semana</button>
+            <button class="btn btn-sm btn-success ms-1" onclick="exportarKanbanExcel()">Exportar Excel</button>
+            <button class="btn btn-sm btn-danger ms-1" onclick="exportarKanbanPDF()">Exportar PDF</button>
         </div>
         <div class="col-auto mt-3 ms-auto">
-            <span id="kResumen" class="small text-muted"></span>
+            <div id="kGeneralWrap" class="text-end">
+                <div id="kResumen" class="small text-muted"></div>
+                <div class="small text-muted mt-1">Avance general: <span id="kGeneralPct">0%</span></div>
+                <div class="progress mt-1" style="height: 8px;">
+                    <div id="kGeneralBar" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -166,6 +199,25 @@
             + String(d.getDate()).padStart(2, '0');
     }
 
+    function actualizarIndicadorGeneral() {
+        var cards = document.querySelectorAll('.kanban-card .card-avance');
+        if (cards.length === 0) {
+            document.getElementById('kGeneralPct').textContent = '0%';
+            document.getElementById('kGeneralBar').style.width = '0%';
+            document.getElementById('kGeneralBar').setAttribute('aria-valuenow', '0');
+            return;
+        }
+        var sum = 0;
+        cards.forEach(function(card) {
+            var pct = parseInt(card.textContent.replace('%', '')) || 0;
+            sum += pct;
+        });
+        var avanceGeneral = Math.round(sum / cards.length);
+        document.getElementById('kGeneralPct').textContent = avanceGeneral + '%';
+        document.getElementById('kGeneralBar').style.width = avanceGeneral + '%';
+        document.getElementById('kGeneralBar').setAttribute('aria-valuenow', String(avanceGeneral));
+    }
+
     // ── Carga inicial ────────────────────────────────────────
     semanaActual();
 
@@ -180,6 +232,9 @@
             document.getElementById('cards-' + e).innerHTML = '';
             document.getElementById('count-' + e).textContent = '0';
         });
+        document.getElementById('kGeneralPct').textContent = '0%';
+        document.getElementById('kGeneralBar').style.width = '0%';
+        document.getElementById('kGeneralBar').setAttribute('aria-valuenow', '0');
         document.getElementById('kResumen').textContent = 'Cargando…';
 
         $.post('ajax/kanban_tareas.php', { accion: 'list', desde: desde, hasta: hasta }, function (res) {
@@ -189,21 +244,54 @@
             }
             var total = res.tareas.length;
             var counts = { pendiente: 0, en_progreso: 0, completada: 0, cancelada: 0 };
+            var completadas = 0;
 
             res.tareas.forEach(function (t) {
                 var card = buildCard(t);
                 var col  = document.getElementById('cards-' + t.estado);
                 if (col) col.appendChild(card);
                 if (counts[t.estado] !== undefined) counts[t.estado]++;
+                if (t.estado === 'completada') completadas++;
             });
 
             Object.keys(counts).forEach(function (e) {
                 document.getElementById('count-' + e).textContent = counts[e];
             });
             document.getElementById('kResumen').textContent = total + ' tarea(s) encontrada(s)';
+            actualizarIndicadorGeneral();
         }, 'json').fail(function () {
             document.getElementById('kResumen').textContent = 'Error de conexión';
         });
+    };
+
+    window.exportarKanbanExcel = function () {
+        var desde = document.getElementById('kDesde').value;
+        var hasta = document.getElementById('kHasta').value;
+
+        if (!desde || !hasta) {
+            alert('Debes seleccionar el rango de fechas');
+            return;
+        }
+
+        var url = 'ajax/kanban_tareas.php?accion=export_excel'
+            + '&desde=' + encodeURIComponent(desde)
+            + '&hasta=' + encodeURIComponent(hasta);
+        window.location.href = url;
+    };
+
+    window.exportarKanbanPDF = function () {
+        var desde = document.getElementById('kDesde').value;
+        var hasta = document.getElementById('kHasta').value;
+
+        if (!desde || !hasta) {
+            alert('Debes seleccionar el rango de fechas');
+            return;
+        }
+
+        var url = 'ajax/kanban_tareas.php?accion=export_pdf'
+            + '&desde=' + encodeURIComponent(desde)
+            + '&hasta=' + encodeURIComponent(hasta);
+        window.location.href = url;
     };
 
     // ── Construir tarjeta ────────────────────────────────────
@@ -221,6 +309,7 @@
         var venc = t.fecha_vencimiento ? ' · vence: ' + t.fecha_vencimiento : '';
         var proj = t.proyecto_nombre   ? '<br><span class="card-meta">📁 ' + escK(t.proyecto_nombre) + '</span>' : '';
         var resp = t.responsable       ? '<br><span class="card-meta">👤 ' + escK(t.responsable) + '</span>' : '';
+        var avance = Math.max(0, Math.min(100, parseInt(t.porcentaje_avance || 0, 10)));
 
         div.innerHTML =
             '<div class="d-flex justify-content-between align-items-start">' +
@@ -228,7 +317,8 @@
                 '<span class="badge-prio ' + badgeClass + ' ms-1">' + prioLabel + '</span>' +
             '</div>' +
             '<div class="card-meta">' + escK(t.tipo || 'prevista') + venc + '</div>' +
-            proj + resp;
+            proj + resp +
+            '<span class="card-avance">' + avance + '%</span>';
 
         // Drag events
         div.addEventListener('dragstart', function (e) {
@@ -280,9 +370,16 @@
                 card.dataset.estado = nuevoEstado;
                 document.getElementById('cards-' + nuevoEstado).appendChild(card);
 
+                var spanAvance = card.querySelector('.card-avance');
+                if (spanAvance && typeof res.porcentaje_avance !== 'undefined') {
+                    spanAvance.textContent = String(res.porcentaje_avance) + '%';
+                }
+
                 // Sumar al contador destino
                 var cDest = document.getElementById('count-' + nuevoEstado);
                 if (cDest) cDest.textContent = parseInt(cDest.textContent) + 1;
+
+                actualizarIndicadorGeneral();
             } else {
                 alert('No se pudo actualizar: ' + res.mensaje);
             }

@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS tareas (
     tipo ENUM('prevista', 'imprevista') DEFAULT 'prevista',
     descripcion TEXT,
     estado ENUM('pendiente', 'en_progreso', 'completada', 'cancelada') DEFAULT 'pendiente',
+    porcentaje_avance TINYINT UNSIGNED DEFAULT 0,
     prioridad ENUM('baja', 'media', 'alta', 'urgente') DEFAULT 'media',
     responsable VARCHAR(150) DEFAULT NULL,
     fecha_inicio DATE DEFAULT NULL,

@@ -39,17 +39,14 @@ function roundC($valor){
     return $rta;
 }
 
-function exist_data($order,$variety,$item){
+function exist_data($order, $variety, $item) {
+    global $conexion;
     $sql = "SELECT id FROM informes.orders_details WHERE order_id=$order AND variety_id=$variety AND eval_goals_id=$item";
-    $result = $conexion->query($sql); 
-    $row = $result->fetch_assoc(); 
-    $evaluador_id = $row['id'];
+    $result = $conexion->query($sql);
+    $row = $result->fetch_assoc();
+    $evaluador_id = $row['id'] ?? null;
 
-    if (empty($evaluador_id)){
-        return int(0);
-    }else{
-        return int($evaluador_id);
-    }
+    return empty($evaluador_id) ? 0 : (int)$evaluador_id;
 }
 
 ?>

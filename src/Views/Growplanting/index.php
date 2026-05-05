@@ -102,7 +102,7 @@ $COM4 = $conexion->query($slqCOMBO4);
 
 <?php
 if ($result->num_rows > 0 && $header) {
-    $temporadaEsc = $conexion->real_escape_string($_POST['xtemporada']);
+    $temporadaEsc = $conexion->real_escape_string((string)($_POST['xtemporada'] ?? ''));
     $sqlFP = "SELECT fecha_pico FROM seasons WHERE nombre='$temporadaEsc'";
     $resultFP = $conexion->query($sqlFP);
     $row = $resultFP->fetch_assoc();
