@@ -6,8 +6,61 @@
         margin-bottom: 0.75rem;
     }
 </style>
+<?php
+$gestionActive = 'bitacora';
+$gestionTitle = 'Gestión de Bitácora';
+$gestionSubtitle = 'Sigue cambios recientes y consulta el historial operativo del módulo completo.';
+$gestionProyectoFiltro = trim((string)($_GET['proyecto'] ?? ''));
+$gestionProyectosBitacora = [];
+foreach (($registros ?? []) as $registroBitacora) {
+    $nombreProyecto = trim((string)($registroBitacora->proyecto_nombre ?? ''));
+    if ($nombreProyecto !== '') {
+        $gestionProyectosBitacora[$nombreProyecto] = true;
+    }
+}
+$gestionProyectosBitacora = array_keys($gestionProyectosBitacora);
+sort($gestionProyectosBitacora, SORT_NATURAL | SORT_FLAG_CASE);
+$gestionQuickActions = [
+    [
+        'label' => 'Panel',
+        'href' => 'index.php?report=205',
+        'class' => 'btn-outline-secondary',
+        'icon' => 'space_dashboard'
+    ],
+    [
+        'label' => 'Ver Tareas',
+        'href' => 'index.php?report=201',
+        'class' => 'btn-outline-secondary',
+        'icon' => 'assignment'
+    ],
+    [
+        'label' => 'Abrir Kanban',
+        'href' => 'index.php?report=203',
+        'class' => 'btn-outline-success',
+        'icon' => 'view_kanban'
+    ],
+];
+require __DIR__ . '/../Shared/gestion_header.php';
+?>
 <div class="container-fluid">
-    <h4 class="gestion-title">Gestión de Bitácora</h4>
+    <div class="row mb-3 align-items-center">
+        <div class="col-auto">
+            <select id="filtroProyectoBitacora" class="form-control form-control-sm">
+                <option value="">-- Todos los proyectos --</option>
+                <?php foreach ($gestionProyectosBitacora as $gestionProyectoNombre): ?>
+                    <option value="<?php echo htmlspecialchars($gestionProyectoNombre); ?>" <?php echo $gestionProyectoFiltro === $gestionProyectoNombre ? 'selected' : ''; ?>><?php echo htmlspecialchars($gestionProyectoNombre); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <?php if ($gestionProyectoFiltro !== ''): ?>
+            <div class="col-auto">
+                <span class="small text-muted">Contexto activo: <strong><?php echo htmlspecialchars($gestionProyectoFiltro); ?></strong></span>
+            </div>
+            <div class="col-auto">
+                <a class="btn btn-sm btn-outline-secondary" href="index.php?report=202">Limpiar filtro</a>
+            </div>
+        <?php endif; ?>
+    </div>
     <div class="row">
         <div class="table-responsive">
             <table id="tablaBitacora" class="table display compact" style="width:100%">
@@ -71,6 +124,15 @@
 
 <script>
 $(document).ready(function(){
-    $('#tablaBitacora').DataTable({ responsive: true, order: [[0, 'desc']] });
+    var tablaBitacora = $('#tablaBitacora').DataTable({ responsive: true, order: [[0, 'desc']] });
+    var filtroInicial = <?php echo json_encode($gestionProyectoFiltro, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+
+    if (filtroInicial) {
+        tablaBitacora.column(1).search(filtroInicial).draw();
+    }
+
+    $('#filtroProyectoBitacora').on('change', function () {
+        tablaBitacora.column(1).search($(this).val()).draw();
+    });
 });
 </script>

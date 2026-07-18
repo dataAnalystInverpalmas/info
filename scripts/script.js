@@ -11,7 +11,7 @@ function addRecord() {
     var valor = $("#valor").val();
 
     // agregar registros
-    $.post("CRUD/addRecord.php", {
+    $.post("ajax/addRecord.php", {
         fecha: fecha,
         finca: finca,
         producto: producto,
@@ -41,7 +41,7 @@ function addRecord() {
 function DeleteUser(id) {
     var conf = confirm("¿Está seguro, realmente desea eliminar el registro?");
     if (conf == true) {
-        $.post("CRUD/deleteDetails.php", {
+        $.post("ajax/deleteDetails.php", {
                 id: id
             },
             function (data, status) {
@@ -55,7 +55,7 @@ function DeleteUser(id) {
 function GetUserDetails(id) {
     // Add User ID to the hidden field for furture usage
     $("#hidden_user_id").val(id);
-    $.post("CRUD/readDetails.php", {
+    $.post("ajax/readDetails.php", {
             id: id
         },
         function (data, status) {
@@ -92,7 +92,7 @@ function UpdateUserDetails() {
     var id = $("#hidden_user_id").val();
 
     // Update the details by requesting to the server using ajax
-    $.post("CRUD/updateRecord.php", {
+    $.post("ajax/updateRecord.php", {
             id: id,
             update_fecha: update_fecha,
             update_finca: update_finca,
@@ -114,7 +114,7 @@ function UpdateUserDetails() {
 
 // Leer record
 function readRecords() {
-    $.get("CRUD/readRecord.php", {}, function (data, status) {
+    $.get("ajax/readRecord.php", {}, function (data, status) {
         $("#records_content").html(data);
     });
 }

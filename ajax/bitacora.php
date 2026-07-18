@@ -17,10 +17,13 @@ try {
     $accion = $_GET['accion'] ?? null;
     $id = $_GET['id'] ?? null;
     $tarea_id = $_GET['tarea_id'] ?? null;
+    $proyecto_id = $_GET['proyecto_id'] ?? null;
     
     switch ($metodo) {
         case 'GET':
-            if ($accion === 'historial' && $tarea_id) {
+            if ($accion === 'notas_proyecto' && $proyecto_id) {
+                echo json_encode(BitacoraController::obtenerNotasProyecto($proyecto_id));
+            } elseif ($accion === 'historial' && $tarea_id) {
                 echo json_encode(BitacoraController::obtenerHistorialTarea($tarea_id));
             } elseif ($accion === 'reporte') {
                 echo json_encode(BitacoraController::obtenerReporte());

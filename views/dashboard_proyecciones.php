@@ -1,9 +1,5 @@
 <?php
-if (is_file('funciones/conexion.php')) {
-	include_once('funciones/conexion.php');
-} else {
-	include_once('../funciones/conexion.php');
-}
+require_once dirname(__DIR__) . '/src/autoload.php';
 
 $controller = new \App\Controllers\DashboardProyeccionesController();
 $controller->index();

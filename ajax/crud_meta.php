@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/_crud_dynamic_common.php';
-include('../funciones/conexion.php');
+require_once dirname(__DIR__) . '/funciones/conexion.php';
 header('Content-Type: application/json; charset=utf-8');
 
 $table = trim($_GET['table'] ?? '');

@@ -1,5 +1,229 @@
 let ordenInvertido = false;
 let tarjetasOriginales = [];
+let modoBarcodeActivo = false;
+let barcodeRows = [];
+let barcodeSeleccionados = new Set();
+
+function normalizarTextoCode39(valor) {
+  return String(valor ?? '')
+    .toUpperCase()
+    .replace(/\s+/g, '')
+    .replace(/[^A-Z0-9\-\.\$\/\+%]/g, '');
+}
+
+function construirClaveBarcode(row) {
+  const fincaCode = String(row.finca || '').toUpperCase() === 'INVERPALMAS' ? '10' : '20';
+  const bloque2 = String(row.bloque ?? '').trim().padStart(2, '0');
+  const codigoVariedad4 = String(row.codigo_variedad ?? '').trim().padStart(4, '0');
+  const temporada = normalizarTextoCode39(row.temporada || '');
+  const yyww = String(row.siembra_yyww || '').trim().slice(-4);
+
+  return `${fincaCode}${bloque2}${codigoVariedad4}${temporada}${yyww}`;
+}
+
+function actualizarContadorBarcodeSeleccionados() {
+  const el = document.getElementById('barcodeSeleccionadosCount');
+  if (el) el.textContent = barcodeSeleccionados.size;
+}
+
+function actualizarEstadoChecksMasivosBarcode() {
+  const checkHeader = document.getElementById('checkAllBarcodeHeader');
+  const checkVisible = document.getElementById('checkAllBarcodeVisible');
+  const visibles = barcodeRows.map(r => r._rowId);
+  const totalVisibles = visibles.length;
+  const totalSeleccionadosVisibles = visibles.filter(id => barcodeSeleccionados.has(id)).length;
+  const checked = totalVisibles > 0 && totalVisibles === totalSeleccionadosVisibles;
+
+  if (checkHeader) checkHeader.checked = checked;
+  if (checkVisible) checkVisible.checked = checked;
+}
+
+function toggleSeleccionMasivaBarcode(marcar) {
+  barcodeRows.forEach(r => {
+    if (marcar) {
+      barcodeSeleccionados.add(r._rowId);
+    } else {
+      barcodeSeleccionados.delete(r._rowId);
+    }
+  });
+
+  document.querySelectorAll('.barcode-row-check').forEach(chk => {
+    chk.checked = marcar;
+  });
+
+  actualizarContadorBarcodeSeleccionados();
+  actualizarEstadoChecksMasivosBarcode();
+}
+
+function renderTablaBarcode() {
+  const tbody = document.getElementById('tbodyBarcodeBautizos');
+  if (!tbody) return;
+
+  if (!Array.isArray(barcodeRows) || barcodeRows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-3">No hay datos para modo barcode.</td></tr>';
+    actualizarContadorBarcodeSeleccionados();
+    actualizarEstadoChecksMasivosBarcode();
+    return;
+  }
+
+  tbody.innerHTML = barcodeRows.map((r) => {
+    const checked = barcodeSeleccionados.has(r._rowId) ? 'checked' : '';
+    const clave = construirClaveBarcode(r);
+    const invalida = !r.codigo_variedad ? 'barcode-clave-invalida' : '';
+
+    return `
+      <tr>
+        <td><input type="checkbox" class="form-check-input barcode-row-check" data-rowid="${r._rowId}" ${checked}></td>
+        <td>${r.finca}</td>
+        <td>${String(r.bloque ?? '').padStart(2, '0')}</td>
+        <td>${r.variedad}</td>
+        <td>${r.temporada}</td>
+        <td>${r.siembra_yyww}</td>
+        <td>${Number(r.matas || 0).toLocaleString('es-CO')}</td>
+        <td>${r.codigo_variedad || '<span class="text-danger">N/D</span>'}</td>
+        <td class="${invalida}">${clave || '-'}</td>
+      </tr>
+    `;
+  }).join('');
+
+  document.querySelectorAll('.barcode-row-check').forEach(chk => {
+    chk.addEventListener('change', function () {
+      const rowId = this.dataset.rowid;
+      if (this.checked) {
+        barcodeSeleccionados.add(rowId);
+      } else {
+        barcodeSeleccionados.delete(rowId);
+      }
+      actualizarContadorBarcodeSeleccionados();
+      actualizarEstadoChecksMasivosBarcode();
+    });
+  });
+
+  actualizarContadorBarcodeSeleccionados();
+  actualizarEstadoChecksMasivosBarcode();
+}
+
+function cargarTablaBarcode(datosFiltros) {
+  $.ajax({
+    url: '../ajax/consulta_bautizos.php',
+    method: 'POST',
+    data: Object.assign({}, datosFiltros, { modo: 'barcode' }),
+    dataType: 'json',
+    success: function (respuesta) {
+      if (!Array.isArray(respuesta)) {
+        barcodeRows = [];
+        barcodeSeleccionados = new Set();
+        renderTablaBarcode();
+        return;
+      }
+
+      barcodeRows = respuesta.map((r, idx) => {
+        const rowId = `${r.finca}|${r.bloque}|${r.variedad}|${r.temporada}|${r.siembra_yyww}|${idx}`;
+        return Object.assign({}, r, { _rowId: rowId });
+      });
+
+      const idsValidos = new Set(barcodeRows.map(r => r._rowId));
+      barcodeSeleccionados.forEach(id => {
+        if (!idsValidos.has(id)) barcodeSeleccionados.delete(id);
+      });
+
+      document.getElementById('datosEncontrados').textContent = ` ${barcodeRows.length}`;
+      renderTablaBarcode();
+    },
+    error: function (xhr) {
+      console.error('Error cargando tabla barcode:', xhr.responseText);
+      barcodeRows = [];
+      barcodeSeleccionados = new Set();
+      renderTablaBarcode();
+    }
+  });
+}
+
+function activarModoBarcode(activar) {
+  modoBarcodeActivo = !!activar;
+
+  const contTarjetas = document.getElementById('contenedorTarjetas');
+  const contTabla = document.getElementById('contenedorBarcodeTabla');
+  const btnOrdenar = document.getElementById('btnOrdenar');
+  const btnImprimirBarcode = document.getElementById('btnImprimirBarcode');
+
+  if (contTarjetas) contTarjetas.classList.toggle('d-none', modoBarcodeActivo);
+  if (contTabla) contTabla.classList.toggle('d-none', !modoBarcodeActivo);
+  if (btnOrdenar) btnOrdenar.classList.toggle('d-none', modoBarcodeActivo);
+  if (btnImprimirBarcode) btnImprimirBarcode.classList.toggle('d-none', !modoBarcodeActivo);
+
+  if (modoBarcodeActivo) {
+    const datosFiltros = {
+      finca: $('#finca').val(),
+      bloque: $('#bloque').val(),
+      variedad: $('#variedad').val(),
+      siembra: $('#siembra').val()
+    };
+    cargarTablaBarcode(datosFiltros);
+  }
+}
+
+function imprimirCodigosBarras() {
+  if (typeof JsBarcode === 'undefined') {
+    alert('No se pudo cargar JsBarcode. Revisa la inclusión de ../scripts/JsBarcode.all.min.js');
+    return;
+  }
+
+  const seleccion = barcodeRows.filter(r => barcodeSeleccionados.has(r._rowId));
+  if (seleccion.length === 0) {
+    alert('No hay registros seleccionados para imprimir codigos.');
+    return;
+  }
+
+  const invalidas = seleccion.filter(r => !r.codigo_variedad);
+  if (invalidas.length > 0) {
+    alert('Hay filas sin codigo de variedad (ld_variedades). Ajusta la seleccion para continuar.');
+    return;
+  }
+
+  const contenedor = document.getElementById('contenedorImpresion');
+  contenedor.innerHTML = `<div class="barcode-print-grid">${seleccion.map((row, index) => {
+    const clave = construirClaveBarcode(row);
+    return `
+      <div class="barcode-label-card">
+        <div class="barcode-label-title">${row.finca} REGISTRO DE CORTES</div>
+        <div class="barcode-label-meta">
+          <div><span>FLOR</span> <strong>CLAVEL</strong></div>
+          <div><span>BLOQUE</span> <strong>${String(row.bloque ?? '').padStart(2, '0')}</strong></div>
+          <div><span>VARIEDAD</span> <strong>${row.variedad}</strong></div>
+          <div><span>MATAS</span> <strong>${Number(row.matas || 0).toLocaleString('es-CO')}</strong></div>
+          <div><span>COSECHA</span> <strong>${row.temporada}</strong></div>
+          <div><span>SIEMBRA</span> <strong>${row.siembra_yyww}</strong></div>
+        </div>
+        <svg id="barcode-svg-${index}" class="barcode-svg" data-code39="${clave}" data-text="*${clave}*"></svg>
+      </div>
+    `;
+  }).join('')}</div>`;
+
+  contenedor.classList.remove('d-none');
+  contenedor.style.display = 'block';
+
+  document.querySelectorAll('#contenedorImpresion .barcode-svg').forEach(svg => {
+    const code = svg.getAttribute('data-code39');
+    const text = svg.getAttribute('data-text') || `*${code}*`;
+    JsBarcode(svg, code, {
+      format: 'CODE39',
+      text,
+      displayValue: true,
+      fontSize: 16,
+      height: 70,
+      margin: 0,
+      width: 1.7
+    });
+  });
+
+  setTimeout(() => {
+    window.print();
+    contenedor.innerHTML = '';
+    contenedor.classList.add('d-none');
+    contenedor.style.display = 'none';
+  }, 300);
+}
 
 //actualiza filtros dependiendo los valores a buscar
 function actualizarFiltros() {
@@ -92,6 +316,7 @@ function guardarOriginales() {
       temporada: card.dataset.temporada,
       fecha_siembra: card.dataset.fecha_siembra,
       fecha_siembra_r: card.dataset.fecha_siembra_r,
+        origen: card.dataset.origen || '',
       camas: card.dataset.camas,
       plantas: card.dataset.plantas,
       tipo_siembra: card.dataset.tipo_siembra,
@@ -119,6 +344,56 @@ function obtenerValoresLimpios(selector) {
 function buscarHeaderCoincidente(headerData, sel) {
   if (!Array.isArray(headerData) || headerData.length === 0) return null;
 
+  const normalizar = (valor) => String(valor ?? '').trim();
+  const isoDesdeFecha = (fechaTexto) => {
+    const valor = normalizar(fechaTexto);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(valor)) return '';
+    const fecha = new Date(`${valor}T00:00:00Z`);
+    if (Number.isNaN(fecha.getTime())) return '';
+
+    const dia = fecha.getUTCDay() || 7;
+    fecha.setUTCDate(fecha.getUTCDate() + 4 - dia);
+    const anioIso = fecha.getUTCFullYear();
+    const inicio = new Date(Date.UTC(anioIso, 0, 1));
+    const semana = Math.ceil((((fecha - inicio) / 86400000) + 1) / 7);
+    return `${anioIso}${String(semana).padStart(2, '0')}`;
+  };
+  const obtenerYYWW = (registro) => {
+    const directo = normalizar(registro?.fecha_siembra_yyww);
+    if (directo) return directo;
+
+    const fechaR = normalizar(registro?.fecha_siembra_r);
+    if (fechaR.includes('/')) {
+      const [fecha, semana] = fechaR.split('/');
+      const anioSemana = isoDesdeFecha(fecha);
+      if (anioSemana) return anioSemana;
+      if (semana && fecha) return `${fecha.slice(0, 4)}${String(semana).padStart(2, '0')}`;
+    }
+
+    return isoDesdeFecha(registro?.fecha_siembra);
+  };
+
+  const origenSel = normalizar(sel.origen);
+  const yywwSel = obtenerYYWW(sel);
+
+  if (origenSel && yywwSel) {
+    const coincidenteOrigenSemana = headerData.find(h =>
+      normalizar(h.origen) === origenSel &&
+      obtenerYYWW(h) === yywwSel
+    );
+    if (coincidenteOrigenSemana) return coincidenteOrigenSemana;
+  }
+
+  if (origenSel) {
+    const coincidentePorOrigen = headerData.find(h => normalizar(h.origen) === origenSel);
+    if (coincidentePorOrigen) return coincidentePorOrigen;
+  }
+
+  if (yywwSel) {
+    const coincidentePorSemana = headerData.find(h => obtenerYYWW(h) === yywwSel);
+    if (coincidentePorSemana) return coincidentePorSemana;
+  }
+
   // 1. Coincidencia exacta por fecha_siembra_r completo (fecha/semana)
   let coincidente = headerData.find(h => h.fecha_siembra_r === sel.fecha_siembra_r);
   if (coincidente) return coincidente;
@@ -137,9 +412,55 @@ function buscarHeaderCoincidente(headerData, sel) {
     if (coincidente) return coincidente;
   }
 
-  // 4. Fallback: usar el primero, pero avisar en consola
   console.warn('No se encontro header coincidente, se usa el primero', sel);
   return headerData[0];
+}
+
+function inferirOrigenDesdeRango(headerData, sel) {
+  if (!Array.isArray(headerData) || headerData.length === 0) return '';
+  const desde = String(sel?.desde || '').trim();
+  if (!desde) return '';
+
+  const partes = desde.split('-');
+  if (partes.length < 3) return '';
+
+  const tabla = String(partes[0] || '').trim().toUpperCase();
+  const nave = Number(partes[1]);
+  const cama = Number(partes[2]);
+  if (!tabla || Number.isNaN(nave) || Number.isNaN(cama)) return '';
+
+  const fila = headerData.find(h =>
+    String(h.tabla || '').trim().toUpperCase() === tabla &&
+    Number(h.nave) === nave &&
+    Number(h.cama) === cama
+  );
+
+  return String(fila?.origen || '').trim();
+}
+
+function resolverOrigenSeleccion(sel) {
+  const normalizar = (valor) => String(valor ?? '').trim();
+  const yywwSel = normalizar(sel.fecha_siembra_yyww || '').trim();
+
+  const tarjetas = [
+    ...document.querySelectorAll('#listaFormatos .formato-item'),
+    ...document.querySelectorAll('#contenedorTarjetas .card-custom')
+  ];
+
+  const coincidencia = tarjetas.find(card => {
+    const yywwCard = normalizar(card.dataset.fecha_siembra_yyww || card.dataset.fecha_siembra_r || card.dataset.fecha_siembra || '').split('/').pop();
+    if (!yywwSel || yywwCard !== yywwSel) return false;
+
+    return (
+      (!sel.finca || normalizar(sel.finca) === normalizar(card.dataset.finca)) &&
+      (!sel.bloque || normalizar(sel.bloque) === normalizar(card.dataset.bloque)) &&
+      (!sel.variedad || normalizar(sel.variedad) === normalizar(card.dataset.variedad)) &&
+      (!sel.temporada || normalizar(sel.temporada) === normalizar(card.dataset.temporada)) &&
+      (!sel.tipo_siembra || normalizar(sel.tipo_siembra) === normalizar(card.dataset.tipo_siembra))
+    );
+  });
+
+  return coincidencia?.dataset?.origen || '';
 }
 
 //funcion para ordenar las tarjetas de  nuevo a lista original
@@ -177,7 +498,8 @@ function ordenarTarjetas() {
           data-variedad="${item.variedad}" 
           data-temporada="${item.temporada}" 
           data-fecha_siembra="${item.fecha_siembra}"
-          data-fecha_siembra_r="${item.fecha_siembra_r}">
+          data-fecha_siembra_r="${item.fecha_siembra_r}"
+          data-origen="${item.origen || ''}">
           <div class="d-flex justify-content-between">
             <div class="info">
               <strong>${item.finca}</strong>${badgeNuevo}<br>
@@ -235,8 +557,10 @@ function expandirVista(item) {
               variedad: item.dataset.variedad,
               temporada: item.dataset.temporada,
               tipo_siembra: item.dataset.tipo_siembra,
+              origen: item.dataset.origen,
               fecha_siembra: item.dataset.fecha_siembra,
               fecha_siembra_r: item.dataset.fecha_siembra_r,
+              fecha_siembra_yyww: item.dataset.fecha_siembra_yyww,
               camas: item.dataset.total_camas,
               plantas: item.dataset.total_plantas,
               desde: item.dataset.desde,
@@ -261,6 +585,7 @@ function expandirVista(item) {
               sel.variedad === nuevo.variedad &&
               sel.temporada === nuevo.temporada &&
               sel.tipo_siembra === nuevo.tipo_siembra &&
+              sel.origen === nuevo.origen &&
               sel.desde === nuevo.desde &&
               sel.hasta === nuevo.hasta
             );
@@ -331,6 +656,7 @@ function seleccionarDesdeTarjeta(btn, item) {
               sel.variedad === g.variedad &&
               sel.temporada === g.temporada &&
               sel.tipo_siembra === g.tipo_siembra &&
+              sel.origen === g.origen &&
               sel.desde === g.desde &&
               sel.hasta === g.hasta &&
               sel.fecha_siembra === g.fecha_siembra
@@ -345,8 +671,10 @@ function seleccionarDesdeTarjeta(btn, item) {
                 variedad: g.variedad,
                 temporada: g.temporada,
                 tipo_siembra: g.tipo_siembra,
+                origen: g.origen,
                 fecha_siembra: g.fecha_siembra,
                 fecha_siembra_r: g.fecha_siembra_r,
+                fecha_siembra_yyww: g.fecha_siembra_yyww,
                 camas: g.total_camas,
                 plantas: g.total_plantas,
                 desde: g.desde,
@@ -434,8 +762,10 @@ function verAgrupamientosEnConsola(finca, bloque, variedad, temporada, tipo_siem
             tarjeta.dataset.variedad = g.variedad;
             tarjeta.dataset.temporada = g.temporada;
             tarjeta.dataset.tipo_siembra = g.tipo_siembra;
+            tarjeta.dataset.origen = g.origen;
             tarjeta.dataset.fecha_siembra = g.fecha_siembra;
             tarjeta.dataset.fecha_siembra_r = g.fecha_siembra_r;
+            tarjeta.dataset.fecha_siembra_yyww = g.fecha_siembra_yyww || '';
             tarjeta.dataset.total_camas = g.total_camas;
             tarjeta.dataset.total_plantas = g.total_plantas;
             tarjeta.dataset.desde = g.desde;
@@ -645,6 +975,7 @@ function marcarTarjetaSeleccionada() {
     const variedad = card.dataset.variedad;
     const temporada = card.dataset.temporada;
     const fecha_siembra = card.dataset.fecha_siembra;
+    const origen = card.dataset.origen;
 
     const botonSeleccion = card.querySelector('.btn-select');
     const botonExpandir = card.querySelector('.btn-expand');
@@ -654,6 +985,7 @@ function marcarTarjetaSeleccionada() {
       sel.bloque === bloque &&
       sel.variedad === variedad &&
       sel.temporada === temporada &&
+      sel.origen === origen &&
       sel.fecha_siembra === fecha_siembra
     );
 
@@ -700,22 +1032,28 @@ function imprimirSeleccionados() {
   let pendientes = seleccionados.length;
 
   seleccionados.forEach((sel, index) => {
+    const selConOrigen = { ...sel };
+
     $.ajax({
       url: '../ajax/dataHeaderBautizos.php',
       type: 'POST',
       dataType: 'json',
       data: {
-        finca: sel.finca,
-        bloque: sel.bloque,
-        variedad: sel.variedad,
-        temporada: sel.temporada,
-        tipo_siembra: sel.tipo_siembra
+        finca: selConOrigen.finca,
+        bloque: selConOrigen.bloque,
+        variedad: selConOrigen.variedad,
+        temporada: selConOrigen.temporada,
+        tipo_siembra: selConOrigen.tipo_siembra
       },
       success: function (headerData) {
+        if (!selConOrigen.origen) {
+          selConOrigen.origen = inferirOrigenDesdeRango(headerData, selConOrigen) || resolverOrigenSeleccion(selConOrigen);
+        }
+
         //buscamos el header que corresponde EXACTAMENTE al bautizo seleccionado
         //esto evita que al haber varias filas (por distintas fechas de siembra)
         //se tome siempre la primera y la fecha_siembra_r cambie al imprimir
-        const headerCoincidente = buscarHeaderCoincidente(headerData, sel);
+        const headerCoincidente = buscarHeaderCoincidente(headerData, selConOrigen);
         const fecha_siembra = headerCoincidente?.fecha_siembra_r?.split('/')[0] || '';
 
         $.ajax({
@@ -723,10 +1061,10 @@ function imprimirSeleccionados() {
           type: 'POST',
           dataType: 'json',
           data: {
-            finca: sel.finca,
-            bloque: sel.bloque,
-            variedad: sel.variedad,
-            temporada: sel.temporada,
+            finca: selConOrigen.finca,
+            bloque: selConOrigen.bloque,
+            variedad: selConOrigen.variedad,
+            temporada: selConOrigen.temporada,
             fecha_siembra
           },
           success: function (bodyData) {
@@ -736,13 +1074,13 @@ function imprimirSeleccionados() {
             //usamos headerCoincidente en lugar de headerData[0] para garantizar
             //que la fecha_siembra_r sea la misma que el usuario selecciono
             const headerFinal = Object.assign({}, headerCoincidente, {
-              desde: sel.desde,
-              hasta: sel.hasta,
-              total_camas: sel.camas,
-              total_plantas: sel.plantas,
+              desde: selConOrigen.desde,
+              hasta: selConOrigen.hasta,
+              total_camas: selConOrigen.camas,
+              total_plantas: selConOrigen.plantas,
               tabla: headerCoincidente.tabla,
               //preservamos la fecha_siembra_r del seleccionado como fuente de verdad
-              fecha_siembra_r: sel.fecha_siembra_r || headerCoincidente.fecha_siembra_r
+              fecha_siembra_r: selConOrigen.fecha_siembra_r || headerCoincidente.fecha_siembra_r
             });
 
             construirHojaDeBautizo(headerFinal, bodyData, hoja);
@@ -793,7 +1131,36 @@ $(document).ready(function () {
     actualizarFiltros();
     verificaBusquedaActiva();
     actualizaResumenFiltros();
+    if (modoBarcodeActivo) {
+      cargarTablaBarcode({
+        finca: $('#finca').val(),
+        bloque: $('#bloque').val(),
+        variedad: $('#variedad').val(),
+        siembra: $('#siembra').val()
+      });
+    }
   });
+
+  const chkModo = document.getElementById('chkModoBarcode');
+  if (chkModo) {
+    chkModo.addEventListener('change', function () {
+      activarModoBarcode(this.checked);
+    });
+  }
+
+  const chkAllHeader = document.getElementById('checkAllBarcodeHeader');
+  if (chkAllHeader) {
+    chkAllHeader.addEventListener('change', function () {
+      toggleSeleccionMasivaBarcode(this.checked);
+    });
+  }
+
+  const chkAllVisible = document.getElementById('checkAllBarcodeVisible');
+  if (chkAllVisible) {
+    chkAllVisible.addEventListener('change', function () {
+      toggleSeleccionMasivaBarcode(this.checked);
+    });
+  }
 
   $('#formFiltros').on('submit', function (e) {
     e.preventDefault();
@@ -812,6 +1179,11 @@ $(document).ready(function () {
       data: datosFiltros,
       dataType: 'json',
       success: function (respuesta) {
+        if (modoBarcodeActivo) {
+          cargarTablaBarcode(datosFiltros);
+          return;
+        }
+
         const contenedor = $('#contenedorTarjetas');
         contenedor.empty();
         if (respuesta.length === 0) {
@@ -834,7 +1206,8 @@ $(document).ready(function () {
               data-bloque="${item.bloque}" 
               data-variedad="${item.variedad}" 
               data-temporada="${item.temporada}" 
-              data-fecha_siembra="${item.fecha_siembra}">
+              data-fecha_siembra="${item.fecha_siembra}"
+              data-origen="${item.origen || ''}">
               <div class="d-flex justify-content-between">
                 <div class="info">
                   <strong>${item.finca}</strong>${badgeNuevo}<br>

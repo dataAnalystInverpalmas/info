@@ -56,7 +56,7 @@ class Application {
                 INNER JOIN varieties as v ON v.nombre=p.variedad
                 LEFT JOIN ld_variedades as ld_v ON ld_v.nombre=p.variedad
                 INNER JOIN seasons as s ON s.nombre=p.temporada
-                LEFT JOIN (SELECT variedad,temporada_obj,pico FROM program group by 1,2,3) as pr
+                LEFT JOIN (SELECT variedad,temporada_obj,pico FROM program WHERE estado=1 group by 1,2,3) as pr
                     ON pr.variedad=p.variedad and pr.temporada_obj=s.nombre
                 left join arrangement as aa on a.tipo=aa.tipo and a.aplicar=aa.aplicar
                 $where
@@ -82,7 +82,7 @@ class Application {
                 INNER JOIN arrangements as a ON a.variedad=p.variedad and a.finca=p.finca
                 INNER JOIN varieties as v ON v.nombre=p.variedad
                 INNER JOIN seasons as s ON s.nombre=p.temporada
-                LEFT JOIN (SELECT variedad,temporada_obj,pico FROM program group by 1,2,3) as pr
+                LEFT JOIN (SELECT variedad,temporada_obj,pico FROM program WHERE estado=1 group by 1,2,3) as pr
                     ON pr.variedad=p.variedad and pr.temporada_obj=s.nombre
                 left join arrangement as aa on a.tipo=aa.tipo and a.aplicar=aa.aplicar
                 $where

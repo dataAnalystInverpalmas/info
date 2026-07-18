@@ -89,11 +89,90 @@ class DashboardProyecciones
             }
         }
 
+        // RE se calcula desde quipus_vs_proy para evitar huecos de carga en ld_proyecciones.
+        $whereQvp = self::buildQvpWhere($filters);
+        $florCardRealRows = self::fetchAll(
+            $conexion,
+            'SELECT flor, COALESCE(SUM(`inverpalmas-real`), 0) AS total '
+            . 'FROM quipus_vs_proy '
+            . $whereQvp['sql'] . ' '
+            . 'GROUP BY flor',
+            $whereQvp['types'],
+            $whereQvp['params']
+        );
+
+        foreach ($florCardRealRows as $row) {
+            $flor = $row['flor'] ?? '';
+            if (isset($florCards[$flor])) {
+                $florCards[$flor]['RE'] = (float)$row['total'];
+            }
+        }
+
+        // ==========================================
+        // 1. PLANTAS SEMBRADAS POR FLOR (de tabla plane)
+        // ==========================================
+        // Mapea el producto o variedad_reem etc, pero típicamente 'producto' o sub-campo indica el tipo de flor.
+        // O si no, podemos usar 'producto' directo.
+        $plantasPorFlor = self::fetchAll(
+            $conexion,
+            "SELECT producto AS label, COALESCE(SUM(plantas), 0) AS total 
+             FROM plane 
+             GROUP BY producto 
+             ORDER BY total DESC",
+             "",
+             []
+        );
+
+        // ==========================================
+        // 2. EDADES Y CANTIDAD DE PLANTAS
+        // Edad aproximada en semanas/meses o rangos de edad basados en la fecha_siembra.
+        // Agrupamos por rangos de semanas de sembrado (Semanas transcurridas de fecha_siembra a hoy).
+        // ==========================================
+        $edadesYPlantas = self::fetchAll(
+            $conexion,
+            "SELECT 
+                CASE 
+                    WHEN DATEDIFF(CURRENT_DATE, fecha_siembra)/7 < 17 THEN '0-17 Semanas (Vegetativo)'
+                    WHEN DATEDIFF(CURRENT_DATE, fecha_siembra)/7 < 35 THEN '18-35 Semanas (1Pico)'
+                    WHEN DATEDIFF(CURRENT_DATE, fecha_siembra)/7 < 43 THEN '36-43 Semanas (Valle)'
+                    WHEN DATEDIFF(CURRENT_DATE, fecha_siembra)/7 < 68 THEN '44-68 Semanas (2Pico)'
+                    ELSE 'Más de 68 Semanas'
+                END AS label,
+                COALESCE(SUM(plantas), 0) AS total
+             FROM plane
+             WHERE fecha_siembra IS NOT NULL AND plantas > 0
+             GROUP BY label
+             ORDER BY MIN(DATEDIFF(CURRENT_DATE, fecha_siembra))",
+             "",
+             []
+        );
+
+        // ==========================================
+        // 3. DISTRIBUCIÓN DE SIEMBRAS POR COLOR
+        // ==========================================
+        $distribucionColor = self::fetchAll(
+            $conexion,
+            "SELECT COALESCE(NULLIF(TRIM(v.color), ''), 'SIN COLOR') AS label, COALESCE(SUM(p.plantas), 0) AS total 
+             FROM plane p
+             LEFT JOIN varieties v ON v.nombre = p.variedad
+             WHERE p.plantas > 0
+             GROUP BY label 
+             ORDER BY total DESC 
+             LIMIT 8",
+             "",
+             []
+        );
+
         return [
             'ok' => true,
             'message' => 'Datos cargados correctamente.',
             'filters' => $filters,
             'florCards' => $florCards,
+            'plantasPorFlor' => self::toChartPayload($plantasPorFlor),
+            'edadesYPlantas' => self::toChartPayload($edadesYPlantas),
+            'distribucionColor' => self::toChartPayload($distribucionColor),
+            // Compatibilidad temporal con el frontend previo
+            'distribucionVariedad' => self::toChartPayload($distribucionColor),
         ];
     }
 
@@ -180,6 +259,38 @@ class DashboardProyecciones
 
         return [
             'sql' => $sql,
+            'types' => $types,
+            'params' => $params,
+        ];
+    }
+
+    private static function buildQvpWhere($filters)
+    {
+        $conditions = ["`inverpalmas-real` IS NOT NULL", "`inverpalmas-real` > 0", "flor IN ('CLA','CM0','ROC','ROS')"];
+        $types = '';
+        $params = [];
+
+        if (!empty($filters['fecha_desde']) && !empty($filters['fecha_hasta'])) {
+            $conditions[] = "STR_TO_DATE(CONCAT('20', FLOOR(sem_prod/100), ' ', sem_prod % 100, ' Monday'), '%Y %u %W') BETWEEN ? AND ?";
+            $types .= 'ss';
+            $params[] = $filters['fecha_desde'];
+            $params[] = $filters['fecha_hasta'];
+        }
+
+        if ($filters['finca'] !== '') {
+            $conditions[] = 'finca = ?';
+            $types .= 's';
+            $params[] = $filters['finca'];
+        }
+
+        if ($filters['flor'] !== '') {
+            $conditions[] = 'flor = ?';
+            $types .= 's';
+            $params[] = strtoupper($filters['flor']);
+        }
+
+        return [
+            'sql' => 'WHERE ' . implode(' AND ', $conditions),
             'types' => $types,
             'params' => $params,
         ];

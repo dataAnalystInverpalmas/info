@@ -7,8 +7,9 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script src="../scripts/filtros_bautizos.js"></script>
-<script src="../scripts/ubicacionesBautizos.js"></script>
+<script src="../scripts/JsBarcode.all.min.js?v=<?php echo time(); ?>"></script>
+<script src="../scripts/filtros_bautizos.js?v=<?php echo time(); ?>"></script>
+<script src="../scripts/ubicacionesBautizos.js?v=<?php echo time(); ?>"></script>
 
 <div class="layout" style="height: 100vh; overflow: hidden;">
   <!-- panel lateral izquierdo -->
@@ -23,6 +24,9 @@
     <div class="p-3 border-top">
       <button class="btn btn-outline-success btn-sm w-100 btn-select" onclick="imprimirSeleccionados()">
         <i class="bi bi-printer-fill"></i> Imprimir
+      </button>
+      <button id="btnImprimirBarcode" class="btn btn-outline-primary btn-sm w-100 mt-2 d-none" onclick="imprimirCodigosBarras()">
+        <i class="bi bi-upc-scan"></i> Imprimir Códigos
       </button>
     </div>
   </div>
@@ -39,6 +43,10 @@
       </div>
 
       <div class="d-flex aling-items-start flex-wrap gap-2">
+        <div class="form-check form-switch mt-1 me-2">
+          <input class="form-check-input" type="checkbox" id="chkModoBarcode">
+          <label class="form-check-label" for="chkModoBarcode">Modo Barcode</label>
+        </div>
         <button id="btnOrdenar" class="btn btn-outline-dark btn-sm" onclick="ordenarTarjetas()">
           <i class="bi bi-sort-up-alt"></i> Ordenar Nuevos
         </button>
@@ -54,6 +62,36 @@
     <div class="cards-scrollable">
       <div class="cards-container d-grid gap-3" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));" id="contenedorTarjetas">
         <!-- aqui se inyectan las tarjetas de los bautizos disponibles -->
+      </div>
+
+      <div id="contenedorBarcodeTabla" class="d-none mt-3">
+        <div class="barcode-toolbar mb-2">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="checkAllBarcodeVisible">
+            <label class="form-check-label" for="checkAllBarcodeVisible">Seleccionar todos los visibles</label>
+          </div>
+          <small class="text-muted">Seleccionados: <span id="barcodeSeleccionadosCount">0</span></small>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-sm table-striped align-middle" id="tablaBarcodeBautizos">
+            <thead>
+              <tr>
+                <th style="width: 40px;"><input type="checkbox" id="checkAllBarcodeHeader" aria-label="Seleccionar todos"></th>
+                <th>Finca</th>
+                <th>Bloque</th>
+                <th>Variedad</th>
+                <th>Temporada</th>
+                <th>Siembra YYWW</th>
+                <th>Matas</th>
+                <th>Código Var</th>
+                <th>Clave</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyBarcodeBautizos">
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

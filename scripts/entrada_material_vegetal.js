@@ -100,6 +100,8 @@ $(document).ready(function () {
                          + '<i class="material-icons" style="font-size:16px;vertical-align:middle">list_alt</i></button>'
                          + '<button class="btn btn-sm btn-warning btnEmvEditar mr-1" data-id="' + row.id + '" title="Editar">'
                          + '<i class="material-icons" style="font-size:16px;vertical-align:middle">edit</i></button>'
+                         + '<button class="btn btn-sm btn-secondary btnEmvImprimir mr-1" data-id="' + row.id + '" title="Imprimir">'
+                         + '<i class="material-icons" style="font-size:16px;vertical-align:middle">print</i></button>'
                          + '<button class="btn btn-sm btn-danger btnEmvBorrar" data-id="' + row.id + '" title="Borrar">'
                          + '<i class="material-icons" style="font-size:16px;vertical-align:middle">delete</i></button>';
                 }
@@ -208,6 +210,177 @@ $(document).ready(function () {
     /* Abrir modal de detalles */
     $(document).on('click', '.btnEmvDetalles', function () {
         abrirDetalles($(this).data('id'));
+    });
+
+    /* ---------------------------------------------------------------
+       Imprimir entrada (media carta)
+    --------------------------------------------------------------- */
+    function emvEscaparHtml(valor) {
+        return String(valor === null || valor === undefined ? '' : valor)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function emvFormatearFecha(fechaIso) {
+        if (!fechaIso) return '';
+        var partes = String(fechaIso).split('-');
+        if (partes.length !== 3) return fechaIso;
+        return partes[2] + '/' + partes[1] + '/' + partes[0];
+    }
+
+    function emvConsecutivo(id) {
+        return String(id || '').padStart(6, '0');
+    }
+
+    function emvNumero(valor) {
+        var n = parseInt(valor, 10);
+        return isNaN(n) ? 0 : n;
+    }
+
+    function emvConstruirFilasDetalle(detalles) {
+        if (!detalles || detalles.length === 0) {
+            return '<tr><td colspan="7" style="text-align:center;color:#6b7280;">Sin detalles registrados</td></tr>';
+        }
+
+        var html = '';
+        $.each(detalles, function (_, d) {
+            html += '<tr>'
+                 + '<td>' + emvEscaparHtml(d.variedad || '') + '</td>'
+                 + '<td class="num">' + emvNumero(d.cantidad_recibida) + '</td>'
+                 + '<td class="num">' + emvNumero(d.facturado) + '</td>'
+                  + '<td class="num">' + emvNumero(d.excedente) + '</td>'
+                 + '<td class="num">' + emvNumero(d.obsequio) + '</td>'
+                 + '<td class="num">' + emvNumero(d.adicional) + '</td>'
+                 + '<td>' + (String(d.raiz) === '1' ? 'Si' : 'No') + '</td>'
+                 + '</tr>';
+        });
+        return html;
+    }
+
+    function emvTotales(detalles) {
+        var t = {
+            cantidad_recibida: 0,
+            facturado: 0,
+            reposicion: 0,
+            excedente: 0,
+            obsequio: 0,
+            adicional: 0
+        };
+
+        $.each(detalles || [], function (_, d) {
+            t.cantidad_recibida += emvNumero(d.cantidad_recibida);
+            t.facturado += emvNumero(d.facturado);
+            t.reposicion += emvNumero(d.reposicion);
+            t.excedente += emvNumero(d.excedente);
+            t.obsequio += emvNumero(d.obsequio);
+            t.adicional += emvNumero(d.adicional);
+        });
+
+        return t;
+    }
+
+    function emvHtmlImpresion(cabecera, detalles) {
+        var tot = emvTotales(detalles);
+        return '<!doctype html>'
+            + '<html><head><meta charset="utf-8"><title>Entrada Material Vegetal #' + emvEscaparHtml(cabecera.id) + '</title>'
+            + '<style>'
+            + '@page{size:5.5in 8.5in portrait;margin:0.35in;}'
+            + 'html,body{margin:0;padding:0;font-family:Arial,sans-serif;color:#111827;}'
+            + '.sheet{width:100%;height:100%;}'
+            + '.head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #0f766e;padding-bottom:8px;margin-bottom:10px;}'
+            + '.title{font-size:18px;font-weight:700;letter-spacing:.3px;color:#0f766e;}'
+            + '.subtitle{font-size:11px;color:#475569;margin-top:2px;}'
+            + '.consecutivo{border:2px solid #0f766e;border-radius:8px;padding:6px 10px;text-align:center;min-width:140px;}'
+            + '.consecutivo .lbl{font-size:10px;color:#334155;text-transform:uppercase;letter-spacing:.6px;}'
+            + '.consecutivo .val{font-size:22px;font-weight:800;color:#0f172a;line-height:1.1;}'
+            + '.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:10px;}'
+            + '.field{border:1px solid #cbd5e1;border-radius:6px;padding:6px;background:#f8fafc;}'
+            + '.field .k{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:#64748b;}'
+            + '.field .v{font-size:12px;font-weight:600;color:#0f172a;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}'
+            + 'table{width:100%;border-collapse:collapse;font-size:10px;}'
+            + 'th,td{border:1px solid #cbd5e1;padding:4px 5px;}'
+            + 'th{background:#ecfeff;color:#155e75;font-weight:700;text-transform:uppercase;font-size:9px;}'
+            + 'td.num{text-align:right;font-variant-numeric:tabular-nums;}'
+            + 'tfoot td{font-weight:700;background:#f1f5f9;}'
+            + '.footer{margin-top:20px;display:flex;justify-content:flex-end;align-items:flex-end;min-height:72px;}'
+            + '.signature{min-width:260px;text-align:center;color:#334155;font-size:10px;}'
+            + '.signature-line{border-top:1px solid #64748b;height:1px;margin:0 8px 8px;}'
+            + '.signature-label{font-size:9px;letter-spacing:.3px;text-transform:uppercase;}'
+            + '</style></head><body>'
+            + '<div class="sheet">'
+            + '<div class="head">'
+            + '<div><div class="title">Entrada de Material Vegetal</div><div class="subtitle">Formato de recepcion para control interno</div></div>'
+            + '<div class="consecutivo"><div class="lbl">Numero de Entrada</div><div class="val">' + emvEscaparHtml(emvConsecutivo(cabecera.id)) + '</div></div>'
+            + '</div>'
+            + '<div class="grid">'
+            + '<div class="field"><div class="k">Fecha</div><div class="v">' + emvEscaparHtml(emvFormatearFecha(cabecera.fecha)) + '</div></div>'
+            + '<div class="field"><div class="k">Maquila</div><div class="v">' + emvEscaparHtml(cabecera.maquila || '') + '</div></div>'
+            + '<div class="field"><div class="k">Proveedor</div><div class="v">' + emvEscaparHtml(cabecera.proveedor || '') + '</div></div>'
+            + '<div class="field"><div class="k">Destino</div><div class="v">' + emvEscaparHtml(cabecera.destino || '') + '</div></div>'
+            + '<div class="field"><div class="k">Remision</div><div class="v">' + emvEscaparHtml(cabecera.remision || '') + '</div></div>'
+            + '<div class="field"><div class="k">Material</div><div class="v">' + emvEscaparHtml(cabecera.material || '') + '</div></div>'
+            + '<div class="field"><div class="k">Total Variedades</div><div class="v">' + (detalles ? detalles.length : 0) + '</div></div>'
+            + '<div class="field"><div class="k">Total Recibido</div><div class="v">' + tot.cantidad_recibida + '</div></div>'
+            + '</div>'
+            + '<table>'
+            + '<thead><tr><th>Variedad</th><th>Cant. Recibida</th><th>Facturado</th><th>Excedente</th><th>Obsequio</th><th>Adicional</th><th>Raiz</th></tr></thead>'
+            + '<tbody>' + emvConstruirFilasDetalle(detalles) + '</tbody>'
+            + '<tfoot><tr>'
+            + '<td style="text-align:right;">Totales</td>'
+            + '<td class="num">' + tot.cantidad_recibida + '</td>'
+            + '<td class="num">' + tot.facturado + '</td>'
+            + '<td class="num">' + tot.excedente + '</td>'
+            + '<td class="num">' + tot.obsequio + '</td>'
+            + '<td class="num">' + tot.adicional + '</td>'
+            + '<td></td>'
+            + '</tr></tfoot>'
+            + '</table>'
+            + '<div class="footer"><div class="signature"><div class="signature-line"></div><div class="signature-label">Firma y nombre de quien recibe</div></div></div>'
+            + '</div></body></html>';
+    }
+
+    function emvImprimir(cabecera, detalles) {
+        var html = emvHtmlImpresion(cabecera, detalles);
+        var win = window.open('', '_blank', 'width=1100,height=700');
+        if (!win) {
+            alert('No fue posible abrir la ventana de impresion. Verifique el bloqueador de ventanas emergentes.');
+            return;
+        }
+        win.document.open();
+        win.document.write(html);
+        win.document.close();
+        win.focus();
+        setTimeout(function () {
+            win.print();
+            win.close();
+        }, 350);
+    }
+
+    $(document).on('click', '.btnEmvImprimir', function () {
+        var row = tableEmv.row($(this).closest('tr')).data();
+        if (!row) {
+            row = tableEmv.row($(this).parents('tr')).data();
+        }
+        if (!row || !row.id) {
+            alert('No fue posible obtener la entrada a imprimir.');
+            return;
+        }
+
+        $.ajax({
+            url: 'ajax/crud_emv.php',
+            type: 'POST',
+            dataType: 'json',
+            data: { opcion: '5', entrada_id: row.id },
+            success: function (detalles) {
+                emvImprimir(row, detalles || []);
+            },
+            error: function () {
+                alert('Error al consultar el detalle para impresion.');
+            }
+        });
     });
 
     /* ---------------------------------------------------------------

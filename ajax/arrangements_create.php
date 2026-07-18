@@ -1,5 +1,5 @@
 <?php
-include("../funciones/conexion.php");
+require_once dirname(__DIR__) . '/funciones/conexion.php';
 
 $variedad = trim($_POST['variedad'] ?? '');
 $finca = trim($_POST['finca'] ?? '');

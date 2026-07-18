@@ -1,5 +1,5 @@
 <?php
-include('../funciones/conexion.php');
+require_once dirname(__DIR__) . '/funciones/conexion.php';
 
 //consutla para filtrar los datos dinamicamente
 
@@ -81,6 +81,6 @@ foreach($respuesta as $key => $values){
     $respuesta[$key] = array_values(array_unique($values));
 }
 
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 
 echo json_encode($respuesta);

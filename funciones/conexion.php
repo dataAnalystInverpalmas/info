@@ -2,6 +2,10 @@
 if (defined('CONEXION_LOADED')) return;
 define('CONEXION_LOADED', true);
 
+if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+    session_start();
+}
+
 //variables — usar variables de entorno si están definidas, si no usar valores por defecto
 $host = getenv('DB_HOST') ?: 'db';
 $username = getenv('DB_USER') ?: 'inverpalmas';

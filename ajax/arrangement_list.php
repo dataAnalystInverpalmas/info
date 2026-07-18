@@ -1,5 +1,5 @@
 <?php
-include("../funciones/conexion.php");
+require_once dirname(__DIR__) . '/funciones/conexion.php';
 
 $tipo = isset($_GET['tipo']) ? trim($_GET['tipo']) : '';
 $aplicar = isset($_GET['aplicar']) ? trim($_GET['aplicar']) : '';

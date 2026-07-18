@@ -1,5 +1,5 @@
 <?php
-include('../funciones/conexion.php');
+require_once dirname(__DIR__) . '/funciones/conexion.php';
 header('Content-Type: application/json; charset=utf-8');
 
 $accion = $_REQUEST['accion'] ?? '';

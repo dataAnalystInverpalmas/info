@@ -1,22 +1,23 @@
 <!-- Vista Kanban de Tareas -->
 <style>
     #kanbanBoard {
-        display: flex;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 1rem;
-        overflow-x: auto;
         align-items: stretch;
         height: calc(100dvh - 220px);
         min-height: 420px;
         padding-bottom: 0.25rem;
+        width: 100%;
     }
     .kanban-col {
-        flex: 0 0 260px;
         background: #f4f6fb;
         border-radius: 8px;
         padding: 0.75rem 0.6rem;
         min-height: 200px;
         display: flex;
         flex-direction: column;
+        min-width: 0;
     }
     .kanban-col-header {
         font-weight: 600;
@@ -44,8 +45,15 @@
         padding-right: 0.2rem;
     }
 
+    @media (max-width: 1199px) {
+        #kanbanBoard {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
     @media (max-width: 767px) {
         #kanbanBoard {
+            grid-template-columns: minmax(0, 1fr);
             height: calc(100dvh - 250px);
             min-height: 360px;
         }
@@ -120,8 +128,40 @@
     }
 </style>
 
+<?php
+$gestionActive = 'kanban';
+$gestionTitle = 'Gestión de Kanban';
+$gestionSubtitle = 'Visualiza el flujo de trabajo por estado y actúa rápido sobre proyectos y tareas vinculadas.';
+$gestionQuickActions = [
+    [
+        'label' => 'Panel',
+        'href' => 'index.php?report=205',
+        'class' => 'btn-outline-secondary',
+        'icon' => 'space_dashboard'
+    ],
+    [
+        'label' => 'Nueva Tarea',
+        'onclick' => 'abrirModalTarea ? abrirModalTarea() : window.location.href="index.php?report=201"',
+        'class' => 'btn-primary',
+        'icon' => 'add_task'
+    ],
+    [
+        'label' => 'Ver Tareas',
+        'href' => 'index.php?report=201',
+        'class' => 'btn-outline-secondary',
+        'icon' => 'assignment'
+    ],
+    [
+        'label' => 'Ver Proyectos',
+        'href' => 'index.php?report=200',
+        'class' => 'btn-outline-success',
+        'icon' => 'folder_open'
+    ],
+];
+require __DIR__ . '/../Shared/gestion_header.php';
+?>
+
 <div class="container-fluid">
-    <h4 class="gestion-title">Gestión de Kanban</h4>
     <!-- Barra de filtros -->
     <div class="row align-items-center mb-3 g-2">
         <div class="col-auto">

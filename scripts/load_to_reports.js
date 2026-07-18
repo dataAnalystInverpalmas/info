@@ -2,7 +2,7 @@ $(document).ready(function(){
  ///////////////////CARGA COMBO FLOR////
  $.ajax({
     type: "POST",
-    url: "CRUD/fv_fetchProducts.php",
+    url: "ajax/fv_fetchProducts.php",
     success: function(response)
     {
         $('#flor').html(response).fadeIn();
@@ -12,7 +12,7 @@ $(document).ready(function(){
 
   $.ajax({
     type: "POST",
-    url: "CRUD/fetchFarms.php",
+    url: "ajax/fetchFarms.php",
     success: function(response)
     {
         $('#finca').html(response).fadeIn();
@@ -22,7 +22,7 @@ $(document).ready(function(){
 
   $.ajax({
     type: "POST",
-    url: "CRUD/fetchAreas.php",
+    url: "ajax/fetchAreas.php",
     success: function(response)
     {
         $('#area').html(response).fadeIn();
@@ -34,7 +34,7 @@ $(document).ready(function(){
 
   $.ajax({
     type: "POST",
-    url: "CRUD/fetchDataTypes.php",
+    url: "ajax/fetchDataTypes.php",
     success: function(response)
     {
         $('#tipod').html(response).fadeIn();

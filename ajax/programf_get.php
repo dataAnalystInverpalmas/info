@@ -1,5 +1,5 @@
 <?php
-include("../funciones/conexion.php");
+require_once dirname(__DIR__) . '/funciones/conexion.php';
 
 $id = $_GET['id'] ?? null;
 if(!$id){ echo json_encode(['success'=>false,'message'=>'Falta id']); exit; }

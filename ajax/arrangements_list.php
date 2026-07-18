@@ -1,5 +1,5 @@
 <?php
-include("../funciones/conexion.php");
+require_once dirname(__DIR__) . '/funciones/conexion.php';
 
 $variedad = isset($_GET['variedad']) ? trim($_GET['variedad']) : '';
 $finca = isset($_GET['finca']) ? trim($_GET['finca']) : '';

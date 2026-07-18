@@ -244,4 +244,4 @@
     </div>
 </div>
 
-<script src="scripts/entrada_material_vegetal.js"></script>
+<script src="scripts/entrada_material_vegetal.js?v=<?= time() ?>"></script>

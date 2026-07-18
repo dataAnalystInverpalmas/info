@@ -24,6 +24,11 @@ class BitacoraController {
         return Bitacora::getByTarea((int)$tarea_id, $usuario_id);
     }
 
+    public static function obtenerNotasProyecto($proyecto_id) {
+        $usuario_id = $_SESSION['id'] ?? null;
+        return Bitacora::getNotasByProyecto((int)$proyecto_id, $usuario_id);
+    }
+
     public static function listar() {
         $usuario_id = $_SESSION['id'] ?? null;
         return Bitacora::getAll($usuario_id);
@@ -53,7 +58,28 @@ class BitacoraController {
     }
 
     public static function crear() {
-        return ['error' => 'Usar ajax/bitacora_crud.php para crear registros'];
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+        $tarea_id = isset($input['tarea_id']) && $input['tarea_id'] !== '' ? (int)$input['tarea_id'] : null;
+        $proyecto_id = isset($input['proyecto_id']) && $input['proyecto_id'] !== '' ? (int)$input['proyecto_id'] : null;
+        $tipo_registro = $input['tipo_registro'] ?? 'nota';
+        $descripcion = $input['descripcion'] ?? '';
+        $autor = $input['autor'] ?? ($_SESSION['usuario'] ?? 'Sistema');
+
+        if (empty($descripcion)) {
+            return ['success' => false, 'mensaje' => 'Descripción requerida'];
+        }
+
+        if ($tarea_id === null && $proyecto_id === null) {
+            return ['success' => false, 'mensaje' => 'Debes indicar una tarea o un proyecto'];
+        }
+
+        $usuario_id = $_SESSION['id'] ?? null;
+        $conexion = \App\Helpers\Database::getConnection();
+        $stmt = $conexion->prepare("INSERT INTO bitacora (tarea_id, proyecto_id, tipo_registro, descripcion, autor, usuario_id) VALUES (?, ?, ?, ?, ?, ?)");
+        if (!$stmt) return ['success' => false, 'mensaje' => 'Error de consulta'];
+        $stmt->bind_param("iisssi", $tarea_id, $proyecto_id, $tipo_registro, $descripcion, $autor, $usuario_id);
+        $ok = $stmt->execute();
+        return ['success' => $ok, 'mensaje' => $ok ? 'Creado' : $conexion->error, 'id' => $conexion->insert_id];
     }
 
     public static function actualizar($id) {

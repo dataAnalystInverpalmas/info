@@ -25,8 +25,50 @@
     }
 </style>
 
+<?php
+$gestionActive = 'tareas';
+$gestionTitle = 'Gestión de Tareas';
+$gestionSubtitle = 'Consulta pendientes, prioriza ejecución y salta al tablero Kanban sin perder el hilo operativo.';
+$gestionProyectoFiltro = trim((string)($_GET['proyecto'] ?? ''));
+$gestionProyectoIdInicial = (int)($_GET['proyecto_id'] ?? 0);
+$gestionQuickActions = [
+    [
+        'label' => 'Panel',
+        'href' => 'index.php?report=205',
+        'class' => 'btn-outline-secondary',
+        'icon' => 'space_dashboard'
+    ],
+    [
+        'label' => 'Nueva Tarea',
+        'onclick' => 'abrirModalTarea()',
+        'class' => 'btn-primary',
+        'icon' => 'add_task'
+    ],
+    [
+        'label' => 'Ir a Kanban',
+        'href' => 'index.php?report=203',
+        'class' => 'btn-outline-success',
+        'icon' => 'view_kanban'
+    ],
+    [
+        'label' => 'Ver Proyectos',
+        'href' => 'index.php?report=200',
+        'class' => 'btn-outline-secondary',
+        'icon' => 'folder_open'
+    ],
+];
+require __DIR__ . '/../Shared/gestion_header.php';
+?>
+
 <div class="container-fluid">
-    <h4 class="gestion-title">Gestión de Tareas</h4>
+    <?php if ($gestionProyectoFiltro !== ''): ?>
+        <div class="alert alert-light border d-flex align-items-center justify-content-between mb-3">
+            <div>
+                <strong>Contexto activo:</strong> mostrando tareas del proyecto <strong><?php echo htmlspecialchars($gestionProyectoFiltro); ?></strong>.
+            </div>
+            <a class="btn btn-sm btn-outline-secondary" href="index.php?report=201">Limpiar filtro</a>
+        </div>
+    <?php endif; ?>
     <div class="row mb-2">
         <div class="col-auto">
             <select id="filtroTipo" class="form-control form-control-sm" onchange="filtrarTareas()">
@@ -41,19 +83,17 @@
                 <option value="Sin proyecto">Sin proyecto</option>
                 <?php if (!empty($proyectos)): ?>
                     <?php foreach ($proyectos as $p): ?>
-                        <option value="<?php echo htmlspecialchars($p->nombre); ?>"><?php echo htmlspecialchars(($p->categoria ? $p->categoria . ' / ' : '') . $p->nombre); ?></option>
+                        <option value="<?php echo htmlspecialchars($p->nombre); ?>" <?php echo $gestionProyectoFiltro !== '' && $gestionProyectoFiltro === (string)$p->nombre ? 'selected' : ''; ?>><?php echo htmlspecialchars(($p->categoria ? $p->categoria . ' / ' : '') . $p->nombre); ?></option>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </select>
-        </div>
-        <div class="col text-end">
-            <button class="btn btn-sm btn-primary" onclick="abrirModalTarea()">+ Nueva</button>
         </div>
     </div>
     <div class="table-responsive">
         <table id="tablaTareas" class="table display compact" style="width:100%">
             <thead>
                 <tr>
+                    <td style="width: 30px; text-align: center;" title="Arrastrar para reordenar">⋮</td>
                     <td>ID</td>
                     <td>Tipo</td>
                     <td>Nombre</td>
@@ -63,6 +103,7 @@
                     <td>Quien Solicita</td>
                     <td>Estado</td>
                     <td>Prioridad</td>
+                    <td>Orden</td>
                     <td>Inicio</td>
                     <td>Vencimiento</td>
                     <td>Acciones</td>
@@ -71,16 +112,33 @@
             <tbody>
                 <?php if (!empty($tareas)): ?>
                     <?php foreach ($tareas as $row): ?>
-                        <tr>
+                        <tr data-id="<?php echo (int)$row->id; ?>" data-proyecto="<?php echo (int)($row->proyecto_id ?? 0); ?>">
+                            <td style="text-align: center; cursor: move; color: #999;" class="sortable-handle">⋮⋮</td>
                             <td><?php echo (int)$row->id; ?></td>
-                            <td><?php echo htmlspecialchars($row->tipo ?? 'prevista'); ?></td>
+                            <td><span class="badge badge-<?php 
+                                $tipo = $row->tipo ?? 'prevista';
+                                echo ($tipo === 'prevista') ? 'info' : 'warning';
+                            ?>">▪</span> <?php echo htmlspecialchars($tipo); ?></td>
                             <td><?php echo htmlspecialchars($row->nombre); ?></td>
                             <td><?php echo htmlspecialchars($row->proyecto_nombre ?? 'Sin proyecto'); ?></td>
                             <td><?php echo (int)($row->porcentaje_avance ?? 0); ?>%</td>
                             <td><?php echo htmlspecialchars($row->responsable ?? ''); ?></td>
                             <td><?php echo htmlspecialchars($row->quien_solicita ?? ''); ?></td>
-                            <td><?php echo htmlspecialchars($row->estado); ?></td>
-                            <td><?php echo htmlspecialchars($row->prioridad); ?></td>
+                            <td>
+                                <span class="badge badge-<?php
+                                    $estado = $row->estado;
+                                    echo ($estado === 'completada') ? 'success' : (($estado === 'en_progreso') ? 'primary' : (($estado === 'cancelada') ? 'danger' : 'secondary'));
+                                ?>">●</span>
+                                <?php echo htmlspecialchars($estado); ?>
+                            </td>
+                            <td>
+                                <span class="badge badge-<?php
+                                    $prioridad = $row->prioridad;
+                                    echo ($prioridad === 'urgente') ? 'danger' : (($prioridad === 'alta') ? 'warning' : (($prioridad === 'media') ? 'info' : 'light'));
+                                ?>">●</span>
+                                <?php echo htmlspecialchars($prioridad); ?>
+                            </td>
+                            <td><span class="badge badge-secondary"><?php echo htmlspecialchars(isset($row->orden_ejecucion) ? (string)$row->orden_ejecucion : '-'); ?></span></td>
                             <td><?php echo htmlspecialchars($row->fecha_inicio ?? '-'); ?></td>
                             <td><?php echo htmlspecialchars($row->fecha_vencimiento ?? '-'); ?></td>
                             <td>
@@ -95,6 +153,7 @@
                                     "estado" => $row->estado,
                                     "porcentaje_avance" => (int)($row->porcentaje_avance ?? 0),
                                     "prioridad" => $row->prioridad,
+                                    "orden_ejecucion" => isset($row->orden_ejecucion) ? (int)$row->orden_ejecucion : "",
                                     "fecha_inicio" => $row->fecha_inicio ?? "",
                                     "fecha_vencimiento" => $row->fecha_vencimiento ?? ""
                                 ], JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'>✏</button>
@@ -173,6 +232,10 @@
                             <option value="urgente">Urgente</option>
                         </select>
                     </div>
+                    <div class="col-6">
+                        <label class="small text-muted mb-0">Orden de ejecución</label>
+                        <input type="number" id="tOrden" class="form-control mb-2" min="1" step="1" placeholder="1, 2, 3...">
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col-6">
@@ -240,8 +303,87 @@
     <img id="lightboxImg" src="" style="max-width:90%;max-height:90%;border-radius:4px;box-shadow:0 0 30px #000">
 </div>
 
+<!-- SortableJS para drag-drop de tareas -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<script>
+    // Inicializar drag-drop en tabla de tareas
+    document.addEventListener('DOMContentLoaded', function() {
+        var tableBody = document.querySelector('#tablaTareas tbody');
+        if (tableBody) {
+            Sortable.create(tableBody, {
+                handle: '.sortable-handle',
+                ghostClass: 'sortable-ghost',
+                animation: 150,
+                onEnd: function(evt) {
+                    reordenarTareas();
+                }
+            });
+        }
+    });
+
+    function reordenarTareas() {
+        var rows = document.querySelectorAll('#tablaTareas tbody tr');
+        var reorden = [];
+        
+        rows.forEach(function(row, indice) {
+            var tareaId = parseInt(row.getAttribute('data-id'), 10);
+            var proyectoId = parseInt(row.getAttribute('data-proyecto'), 10);
+            if (!isNaN(tareaId)) {
+                reorden.push({
+                    id: tareaId,
+                    proyecto_id: proyectoId,
+                    orden_ejecucion: indice + 1
+                });
+            }
+        });
+
+        if (reorden.length === 0) return;
+
+        // Enviar al servidor
+        $.ajax({
+            url: 'ajax/tareas.php?accion=reordenar',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                tareas: reorden
+            }),
+            dataType: 'json',
+            success: function(resp) {
+                if (!resp.success) {
+                    alert('Error al reordenar: ' + (resp.mensaje || 'Error desconocido'));
+                    location.reload();
+                }
+                console.log('Tareas reordenadas exitosamente');
+            },
+            error: function(xhr) {
+                console.error('Error de AJAX:', xhr);
+                alert('Error al reordenar tareas');
+                location.reload();
+            }
+        });
+    }
+</script>
+<style>
+    .sortable-ghost {
+        opacity: 0.5;
+        background-color: #f0f0f0;
+    }
+    .sortable-handle {
+        user-select: none;
+        -webkit-user-select: none;
+    }
+    #tablaTareas tbody tr:hover .sortable-handle {
+        color: #333;
+        font-weight: bold;
+    }
+</style>
+
 <script>
 var usuarioActual = <?php echo json_encode($_SESSION['usuario'] ?? ''); ?>;
 </script>
 <script src="scripts/tareas.js?v=<?php echo @filemtime(__DIR__ . '/../../../scripts/tareas.js'); ?>"></script>
 <script src="scripts/tarea_panel.js"></script>
+<script>
+window.gestionProyectoInicial = <?php echo json_encode($gestionProyectoFiltro, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+window.gestionProyectoIdInicial = <?php echo json_encode($gestionProyectoIdInicial); ?>;
+</script>

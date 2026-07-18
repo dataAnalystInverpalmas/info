@@ -1,5 +1,5 @@
 <?php
-include("../funciones/conexion.php");
+require_once dirname(__DIR__) . '/funciones/conexion.php';
 
 $tipo = trim($_POST['tipo'] ?? '');
 $aplicar = trim($_POST['aplicar'] ?? '');

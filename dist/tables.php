@@ -50,17 +50,23 @@ $stmt_menu->close();
 $enruta = "../";
 
 // ============================================================
-// Función centralizada para verificar permisos por rol
+// Función centralizada para verificar permisos por rol con sistema de caché de sesión
+// Opitmiza drásticamente la velocidad de carga eliminando consultas repetitivas a la base de datos
 // ============================================================
 function tiene_permiso($conexion, $dir) {
-	$role = intval($_SESSION['role']);
-	$stmt = $conexion->prepare("SELECT dir FROM roles WHERE users_role = ? AND dir = ? LIMIT 1");
-	$stmt->bind_param("is", $role, $dir);
-	$stmt->execute();
-	$result = $stmt->get_result();
-	$tiene = $result->num_rows > 0;
-	$stmt->close();
-	return $tiene;
+	if (!isset($_SESSION['allowed_dirs']) || !is_array($_SESSION['allowed_dirs'])) {
+		$_SESSION['allowed_dirs'] = array();
+		$role = intval($_SESSION['role']);
+		$stmt = $conexion->prepare("SELECT dir FROM roles WHERE users_role = ?");
+		$stmt->bind_param("i", $role);
+		$stmt->execute();
+		$result = $stmt->get_result();
+		while ($row = $result->fetch_assoc()) {
+			$_SESSION['allowed_dirs'][] = strval($row['dir']);
+		}
+		$stmt->close();
+	}
+	return in_array($dir, $_SESSION['allowed_dirs'], true);
 }
 
 // ============================================================
@@ -75,6 +81,7 @@ $tablas = array(
 	'6'                  => 'tables/arrangements.php',
 	'20'                 => 'tables/arrangements_crud.php',
 	'21'                 => 'tables/arrangement_crud.php',
+	'22'                 => 'tables/festivos.php',
 	'7'                  => 'tables/companys.php',
 	'8'                  => 'tables/farms.php',
 	'9'                  => 'tables/products.php',
@@ -120,10 +127,14 @@ $reportes = array(
 	'108'      => 'views/report_pb_pto_vs_real.php',
 	'106'      => 'views/report_pb_demandas.php',
 	'107'      => 'views/report_pb_compara_prod.php',
+	'109'      => 'views/report_pb_jl_proyecciones.php',
+	'curvas'   => 'views/report_pb_jl_curvas_clavel.php',
 	'200'      => 'views/proyectos.php',
 	'201'      => 'views/tareas.php',
 	'202'      => 'views/bitacora.php',
 	'203'      => 'views/kanban.php',
+	'204'      => 'views/resumen_ejecutivo_mensual.php',
+	'205'      => 'views/gestion_dashboard.php',
 	'1000'     => 'covid/covid.php',
 	'1001'     => 'covid/settings.php',
 	'1002'     => 'covid/report.php',
@@ -140,6 +151,8 @@ $reportes = array(
 	'crud_varieties'    => 'views/varieties_crud.php',
 	'crud_seasons'      => 'views/seasons_crud.php',
 	'crud_emv'          => 'views/entrada_material_vegetal.php',
+	'plano_consulta'    => 'views/plano_consulta.php',
+	'plano_reemplazos'  => 'views/plano_reemplazos.php',
 	'1005'              => 'views/loadfiles.php',
 );
 
@@ -163,8 +176,21 @@ if (isset($_GET['table'])) {
 			</script>
 			<?php
 		} else {
-			echo "<h1>No tiene permisos</h1>";
+			?>
+			<div class="row justify-content-center align-items-center" style="min-height: 50vh;">
+				<div class="col-md-6 text-center">
+					<div class="p-5 bg-white border border-danger-subtle rounded-lg shadow-sm" style="border-radius: 12px;">
+						<span class="material-icons text-danger mb-3" style="font-size: 4rem;">block</span>
+						<h3 class="font-weight-bold text-dark mb-2">Acceso Restringido</h3>
+						<p class="text-secondary small mb-4">No tiene los permisos necesarios para visualizar esta tabla. Si considera que es un error, por favor contacte al administrador.</p>
+						<a href="index.php" class="btn btn-outline-secondary btn-sm px-4">Volver al Inicio</a>
+					</div>
+				</div>
+			</div>
+			<?php
 		}
+	} else {
+		include 'views/error_404.php';
 	}
 }
 
@@ -193,6 +219,10 @@ if (isset($_GET['report'])) {
 		], true) && intval($_SESSION['role']) === 1) {
 			$permitido = true;
 		}
+		// Fallback: módulo plano consulta accesible para cualquier usuario autenticado
+		if (!$permitido && in_array($dir, ['views/plano_consulta.php', 'views/plano_reemplazos.php'], true) && intval($_SESSION['role']) > 0) {
+			$permitido = true;
+		}
 		// Fallback: evaluaciones_crud puede estar registrada como views/orders.php (ruta histórica)
 		if (!$permitido && $dir === 'views/evaluaciones_crud.php') {
 			$permitido = tiene_permiso($conexion, 'views/orders.php');
@@ -203,6 +233,14 @@ if (isset($_GET['report'])) {
 		}
 		// Fallback: reporte Power BI del dashboard accesible a usuarios autenticados
 		if (!$permitido && $dir === 'views/report_pb_pto_vs_real.php' && intval($_SESSION['role']) > 0) {
+			$permitido = true;
+		}
+		// Fallback: resumen ejecutivo mensual accesible a usuarios autenticados
+		if (!$permitido && $dir === 'views/resumen_ejecutivo_mensual.php' && intval($_SESSION['role']) > 0) {
+			$permitido = true;
+		}
+		// Fallback: panel de gestion accesible para administradores aunque no exista rol cargado
+		if (!$permitido && $dir === 'views/gestion_dashboard.php' && intval($_SESSION['role']) === 1) {
 			$permitido = true;
 		}
 		if ($permitido) {
@@ -220,8 +258,21 @@ if (isset($_GET['report'])) {
 				include "$dir";
 			}
 		} else {
-			echo "<h1>No tiene permisos</h1>";
+			?>
+			<div class="row justify-content-center align-items-center" style="min-height: 50vh;">
+				<div class="col-md-6 text-center">
+					<div class="p-5 bg-white border border-danger-subtle rounded-lg shadow-sm" style="border-radius: 12px;">
+						<span class="material-icons text-danger mb-3" style="font-size: 4rem;">block</span>
+						<h3 class="font-weight-bold text-dark mb-2">Acceso Restringido</h3>
+						<p class="text-secondary small mb-4">No tiene los permisos necesarios para visualizar este reporte. Si considera que es un error, por favor contacte al administrador.</p>
+						<a href="index.php" class="btn btn-outline-secondary btn-sm px-4">Volver al Inicio</a>
+					</div>
+				</div>
+			</div>
+			<?php
 		}
+	} else {
+		include 'views/error_404.php';
 	}
 }
 ?>

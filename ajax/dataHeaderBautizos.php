@@ -1,5 +1,5 @@
 <?php
-include("../funciones/conexion.php");
+require_once dirname(__DIR__) . '/funciones/conexion.php';
 
 //consutla para devolver todos los encabezados de la  son los datos que van en la parte superior del bautizo
 
@@ -24,6 +24,7 @@ $sql = "
         a.plantas AS plantas,
         53.30 AS plantasm2,
         c.fecha_pico,
+        DATE_FORMAT(MAX(a.fecha_siembra), '%x%v') AS fecha_siembra_yyww,
         CASE
             WHEN a.tipo_siembra IN ('ADICIONAL' , 'REEMPLAZO', '1PICO') THEN 1
             WHEN a.tipo_siembra IN ('CONTINUA' , 'PICO') THEN 2
@@ -75,6 +76,7 @@ $sql = "
         informes.program AS b ON a.variedad = b.variedad
             AND c.nombre = b.temporada_obj
             AND c.año = b.programa
+            AND b.estado = 1
             AND b.ciclo = CASE
             WHEN a.tipo_siembra IN ('ADICIONAL' , 'REEMPLAZO', '1PICO') THEN 1
             WHEN a.tipo_siembra IN ('CONTINUA' , 'PICO') THEN 2

@@ -386,3 +386,51 @@ function crud_delete_endpoint($table)
     }
     crud_json(['success' => false, 'message' => $stmt->error]);
 }
+
+// ── Funciones de utilidad adicionales ───────────────────────────
+
+/**
+ * Sanitiza y valida input de POST/GET
+ */
+function crud_sanitize_input($input, $type = 'string') {
+    if ($input === null || $input === '') {
+        return null;
+    }
+    switch ($type) {
+        case 'int':
+            return filter_var($input, FILTER_VALIDATE_INT) !== false ? (int)$input : null;
+        case 'float':
+            return filter_var($input, FILTER_VALIDATE_FLOAT) !== false ? (float)$input : null;
+        case 'email':
+            return filter_var($input, FILTER_VALIDATE_EMAIL) ? trim($input) : null;
+        case 'string':
+        default:
+            return trim(strip_tags($input));
+    }
+}
+
+/**
+ * Valida campos requeridos
+ */
+function crud_validate_required($data, $required_fields) {
+    $errors = [];
+    foreach ($required_fields as $field) {
+        if (!isset($data[$field]) || $data[$field] === '' || $data[$field] === null) {
+            $errors[] = "Campo '$field' es requerido";
+        }
+    }
+    return $errors;
+}
+
+/**
+ * Genera respuesta JSON estandarizada
+ */
+function crud_response($success, $message = '', $data = null) {
+    $response = ['success' => $success, 'message' => $message];
+    if ($data !== null) {
+        $response['data'] = $data;
+    }
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($response);
+    exit;
+}

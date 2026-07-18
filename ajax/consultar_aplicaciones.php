@@ -1,6 +1,6 @@
 <?php
 // ajax/consultar_aplicaciones.php
-include("../funciones/conexion.php");
+require_once dirname(__DIR__) . '/funciones/conexion.php';
 
 // Asegurar respuesta JSON incluso si hay fatal error (evita HTML tipo "<br><b>Fatal error...</b>")
 ob_start();
@@ -12,7 +12,7 @@ register_shutdown_function(function () {
         while (ob_get_level()) {
             ob_end_clean();
         }
-        header('Content-Type: application/json', true, 500);
+        header('Content-Type: application/json; charset=utf-8', true, 500);
         echo json_encode([
             'error' => 'Fatal error',
             'message' => $err['message'],
@@ -235,7 +235,7 @@ $stmt->close();
 $conexion->close();
 
 // Devolver resultados
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 if (ob_get_length()) {
     ob_clean();
 }

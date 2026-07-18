@@ -1,5 +1,5 @@
 <?php
-include(__DIR__ . "/../funciones/conexion.php");
+require_once dirname(__DIR__) . '/funciones/conexion.php';
 
 //carga el plano de la finca para consulta de validacion  de ubicaciones y poder agrupar los resultados
 
@@ -9,7 +9,13 @@ $idfinca = $finca === 'INVERPALMAS' ? 1 : ($finca === 'PALERMO' ?  2 : 0);
 
 $sql = "
     SELECT
-        ubicacion, 
+        CONCAT(
+            id_finca,
+            bloque,
+            tabla,
+            LPAD(CAST(nave AS CHAR(2)), 2, '0'),
+            LPAD(CAST(cama AS CHAR(2)), 2, '0')
+        ) AS ubicacion,
         CASE
             WHEN id_finca = 1 THEN 'INVERPALMAS'
             WHEN id_finca = 2 THEN 'PALERMO'
@@ -20,7 +26,7 @@ $sql = "
         cama
     FROM  siembras.ubicaciones_plano
     WHERE  id_finca = ? AND bloque = ? 
-    ORDER BY tabla, nave, cama";
+    ORDER BY ubicacion";
 
 $stmt = $conexion->prepare($sql);
 $stmt->bind_param("ii", $idfinca, $bloque);

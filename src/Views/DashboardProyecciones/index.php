@@ -11,6 +11,26 @@
     .dp-sub-value.dp-positive { color: #198754; }
     .dp-sub-value.dp-negative { color: #dc3545; }
     .dp-divider { border-top: 1px dashed #dee2e6; margin: 0.5rem 0; }
+    
+    .chart-container-card {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 1.25rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+        border: 1px solid #E2E8F0;
+        margin-bottom: 1.5rem;
+        min-height: 380px;
+    }
+    .chart-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #2D3748;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid #EDF2F7;
+        padding-bottom: 0.5rem;
+    }
 </style>
 
 <div class="container-fluid">
@@ -42,11 +62,44 @@
     </div>
 
     <!-- Tarjetas por tipo de flor -->
-    <div class="row" id="dpFlorCards">
+    <div class="row mb-4" id="dpFlorCards">
         <div class="col-12 text-center text-muted py-5">
             <span class="spinner-border spinner-border-sm me-2"></span> Cargando...
         </div>
     </div>
+
+    <!-- Sección de Gráficos de Alto Nivel -->
+    <div class="row">
+        <!-- Gráfico 1: Plantas sembradas por flor -->
+        <div class="col-md-4">
+            <div class="chart-container-card">
+                <h5 class="chart-title"><span class="material-icons align-middle mr-1" style="font-size: 1.15rem; color: #00796B;">yard</span> Plantas Sembradas por Flor</h5>
+                <div style="position: relative; height: 300px;">
+                    <canvas id="chartPlantasFlor"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico 2: Relación de Edad de Siembras (Semanas transcurridas) -->
+        <div class="col-md-4">
+            <div class="chart-container-card">
+                <h5 class="chart-title"><span class="material-icons align-middle mr-1" style="font-size: 1.15rem; color: #4a5568;">query_builder</span> Edades y Densidad de Plantas</h5>
+                <div style="position: relative; height: 300px;">
+                    <canvas id="chartEdades"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfico 3: Distribución Porcentual por Color -->
+        <div class="col-md-4">
+            <div class="chart-container-card">
+                <h5 class="chart-title"><span class="material-icons align-middle mr-1" style="font-size: 1.15rem; color: #e53e3e;">pie_chart</span> Distribución por Color (%)</h5>
+                <div style="position: relative; height: 300px;">
+                    <canvas id="chartVariedades"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<script src="/scripts/dashboard_proyecciones.js?v=2"></script>
+<script src="/scripts/dashboard_proyecciones.js?v=4"></script>

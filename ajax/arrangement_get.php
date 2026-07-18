@@ -1,5 +1,5 @@
 <?php
-include("../funciones/conexion.php");
+require_once dirname(__DIR__) . '/funciones/conexion.php';
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($id > 0) {

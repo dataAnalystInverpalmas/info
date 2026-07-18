@@ -1,15 +1,25 @@
 function agruparPorUbicacion(resultados, ubicaciones) {
+  // Construye la clave de ubicacion con el mismo formato del backend: id_finca+bloque+tabla+nave+cama.
+  const construirCodigoUbicacion = (r) => {
+    const idFinca = String(r.finca || '').toUpperCase() === 'INVERPALMAS' ? '1' : '2';
+    const bloque = String(r.bloque ?? '').trim();
+    const tabla = String(r.tabla ?? '').trim();
+    const nave = String(r.nave ?? '').trim().padStart(2, '0');
+    const cama = String(r.cama ?? '').trim().padStart(2, '0');
+    return `${idFinca}${bloque}${tabla}${nave}${cama}`;
+  };
+
   // que constui aqui att: camilo :D
   // creo un indice que mapea cada ubicacion a su posicion (indice) en el array 'ubicaciones'
   const ubicIndex = {};
   ubicaciones.forEach((u, idx) => {
-    const key = `${u.finca}|${u.bloque}|${u.tabla}|${u.nave}|${u.cama}`;
+    const key = String(u.ubicacion || construirCodigoUbicacion(u));
     ubicIndex[key] = idx; // ej: "PALERMO|1|A|8|4" => 0
   });
 
   // asigno el indice de orden (segun la lista 'ubicaciones') a cada resultado
   resultados.forEach(r => {
-    const key = `${r.finca}|${r.bloque}|${r.tabla}|${r.nave}|${r.cama}`;
+    const key = construirCodigoUbicacion(r);
     r.orden = ubicIndex[key] ?? null; // si no esta en el indice, se marca como null
   });
 
@@ -20,16 +30,27 @@ function agruparPorUbicacion(resultados, ubicaciones) {
   let grupoActual = [];      // grupo actual que se esta construyendo
   let lastOrden = null;      // ultimo indice usado para controlar continuidad
 
+  const obtenerYYWW = (registro) => {
+    const valor = String(registro?.fecha_siembra_yyww || registro?.fecha_siembra_r || '').trim();
+    if (!valor) return '';
+    if (/^\d{6}$/.test(valor)) return valor;
+    if (valor.includes('/')) {
+      const [fecha, semana] = valor.split('/');
+      if (fecha && semana) return `${fecha.slice(0, 4)}${String(semana).padStart(2, '0')}`;
+    }
+    return valor;
+  };
+
   // funcion que detecta si algun campo clave cambio entre dos registros ayuda a discriminar mas los bautizos no solo por ubicacion
   const cambiaCampoClave = (a, b) => {
     return (
+      obtenerYYWW(a) !== obtenerYYWW(b) ||
       a.plantasm2 !== b.plantasm2 ||
       a.ciclo !== b.ciclo ||
       a.pico !== b.pico ||
       a.casa_comercial !== b.casa_comercial ||
       a.origen !== b.origen ||
       a.tipo_suelo !== b.tipo_suelo ||
-      a.nmanguera !== b.nmanguera ||
       a.ferradica !== b.ferradica
     );
   };
@@ -114,6 +135,56 @@ function actualizarContadorSeleccionados(){
     const desdeStorage = JSON.parse(localStorage.getItem('bautizosSeleccionados')) || [];
     contadorLateral.textContent = desdeStorage.length;
   }
+}
+
+function marcarTarjetaSeleccionada() {
+  const tarjetas = document.querySelectorAll('#contenedorTarjetas .card-custom');
+  const seleccionados = JSON.parse(localStorage.getItem('bautizosSeleccionados')) || [];
+
+  tarjetas.forEach(card => {
+    const finca = card.dataset.finca;
+    const bloque = card.dataset.bloque;
+    const variedad = card.dataset.variedad;
+    const temporada = card.dataset.temporada;
+    const fecha_siembra = card.dataset.fecha_siembra;
+    const origen = card.dataset.origen || '';
+
+    const botonSeleccion = card.querySelector('.btn-select');
+    const botonExpandir = card.querySelector('.btn-expand');
+
+    const estaSeleccionado = seleccionados.some(sel =>
+      sel.finca === finca &&
+      sel.bloque === bloque &&
+      sel.variedad === variedad &&
+      sel.temporada === temporada &&
+      (sel.origen || '') === origen &&
+      sel.fecha_siembra === fecha_siembra
+    );
+
+    if (estaSeleccionado) {
+      card.classList.add('selected');
+      if (botonSeleccion) {
+        botonSeleccion.textContent = 'Seleccionado';
+        botonSeleccion.classList.add('seleccionado');
+      }
+      if (botonExpandir) {
+        botonExpandir.style.backgroundColor = '#ffffff';
+        botonExpandir.style.color = '#19692c';
+        botonExpandir.style.borderColor = '#ffffff';
+      }
+    } else {
+      card.classList.remove('selected');
+      if (botonSeleccion) {
+        botonSeleccion.textContent = 'Seleccionar';
+        botonSeleccion.classList.remove('seleccionado');
+      }
+      if (botonExpandir) {
+        botonExpandir.style.backgroundColor = '';
+        botonExpandir.style.color = '';
+        botonExpandir.style.borderColor = '';
+      }
+    }
+  });
 }
 
 window.agruparPorUbicacion = agruparPorUbicacion;

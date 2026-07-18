@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS proyectos (
 CREATE TABLE IF NOT EXISTS tareas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     proyecto_id INT DEFAULT NULL COMMENT 'NULL = tarea sin proyecto',
+    orden_ejecucion INT UNSIGNED DEFAULT NULL COMMENT 'Orden manual de ejecucion dentro del proyecto',
     nombre VARCHAR(255) NOT NULL,
     tipo ENUM('prevista', 'imprevista') DEFAULT 'prevista',
     descripcion TEXT,
@@ -33,6 +34,7 @@ CREATE TABLE IF NOT EXISTS tareas (
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (proyecto_id) REFERENCES proyectos(id) ON DELETE CASCADE,
     KEY idx_proyecto (proyecto_id),
+    KEY idx_proyecto_orden (proyecto_id, orden_ejecucion),
     KEY idx_estado (estado),
     KEY idx_tipo (tipo)
 ) ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

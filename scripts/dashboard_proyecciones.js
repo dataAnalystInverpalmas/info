@@ -7,6 +7,10 @@
         ROS: '#fd7e14'
     };
 
+    var chartPlantasFlorInstance = null;
+    var chartEdadesInstance = null;
+    var chartVariedadesInstance = null;
+
     function getLastWeekSunday() {
         var today = new Date();
         var dow = today.getDay(); // 0=Sun, 1=Mon ... 6=Sat
@@ -88,6 +92,147 @@
         }
     }
 
+    function updateCharts(resp) {
+        // --- 1. Gráfico Plantas Sembradas por Flor ---
+        var ctxPlantasFlor = document.getElementById('chartPlantasFlor');
+        if (ctxPlantasFlor && resp.plantasPorFlor) {
+            if (chartPlantasFlorInstance) { chartPlantasFlorInstance.destroy(); }
+            chartPlantasFlorInstance = new Chart(ctxPlantasFlor, {
+                type: 'bar',
+                data: {
+                    labels: resp.plantasPorFlor.labels || [],
+                    datasets: [{
+                        label: 'Plantas Sembradas',
+                        data: resp.plantasPorFlor.data || [],
+                        backgroundColor: '#00796B',
+                        borderRadius: 6,
+                        maxBarThickness: 45
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + numberFormat(context.raw) + ' plantas';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#EDF2F7' },
+                            ticks: {
+                                callback: function(value) { return numberFormat(value); }
+                            }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // --- 2. Gráfico Edades y Cantidad de Plantas ---
+        var ctxEdades = document.getElementById('chartEdades');
+        if (ctxEdades && resp.edadesYPlantas) {
+            if (chartEdadesInstance) { chartEdadesInstance.destroy(); }
+            chartEdadesInstance = new Chart(ctxEdades, {
+                type: 'bar',
+                data: {
+                    labels: resp.edadesYPlantas.labels || [],
+                    datasets: [{
+                        label: 'Densidad de Plantas',
+                        data: resp.edadesYPlantas.data || [],
+                        backgroundColor: '#4E8098',
+                        borderRadius: 6,
+                        maxBarThickness: 45
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + numberFormat(context.raw) + ' plantas';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#EDF2F7' },
+                            ticks: {
+                                callback: function(value) { return numberFormat(value); }
+                            }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // --- 3. Gráfico Distribución por Color (%) ---
+        var ctxVariedades = document.getElementById('chartVariedades');
+        var dataDistribucion = resp.distribucionColor || resp.distribucionVariedad;
+        if (ctxVariedades && dataDistribucion) {
+            if (chartVariedadesInstance) { chartVariedadesInstance.destroy(); }
+            
+            var totalCount = (dataDistribucion.data || []).reduce(function(a, b) { return a + b; }, 0);
+
+            chartVariedadesInstance = new Chart(ctxVariedades, {
+                type: 'doughnut',
+                data: {
+                    labels: dataDistribucion.labels || [],
+                    datasets: [{
+                        data: dataDistribucion.data || [],
+                        backgroundColor: [
+                            '#FF6384',
+                            '#36A2EB',
+                            '#FFCE56',
+                            '#4BC0C0',
+                            '#9966FF',
+                            '#FF9F40'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                padding: 10,
+                                font: { size: 11 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    var val = context.raw;
+                                    var pct = totalCount > 0 ? ((val / totalCount) * 100).toFixed(1) : 0;
+                                    return ' ' + context.label + ': ' + numberFormat(val) + ' (' + pct + '%)';
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        }
+    }
+
     function loadDashboard() {
         showCardsLoading();
         var filters = getFilters();
@@ -106,6 +251,7 @@
             }
 
             renderFlorCards(resp.florCards || {});
+            updateCharts(resp);
 
         }).fail(function () {
             document.getElementById('dpFlorCards').innerHTML =

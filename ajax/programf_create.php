@@ -1,5 +1,5 @@
 <?php
-include("../funciones/conexion.php");
+require_once dirname(__DIR__) . '/funciones/conexion.php';
 
 $programa = (int)($_POST['programa'] ?? 0);
 $producto = $_POST['producto'] ?? '';

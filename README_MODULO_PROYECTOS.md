@@ -98,11 +98,16 @@ fecha_actualizacion
 ```
 id (PK)
 tarea_id (FK, NULLABLE)  ← Registros generales
+proyecto_id (FK, NULLABLE) ← Anotaciones y actividad a nivel proyecto
 tipo_registro (creacion|actualizacion|completada|nota|cambio_estado)
 descripcion
 autor
 fecha_registro
 ```
+
+### Notas de proyecto
+- Desde la vista de proyectos puedes abrir el panel de anotaciones por proyecto.
+- Las notas se guardan como registros de bitácora con `tipo_registro = nota` y `proyecto_id`.
 
 ---
 

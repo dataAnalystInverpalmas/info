@@ -35,7 +35,7 @@ $('#formLabors').submit(function(e){
 
     var tipo= $("#tipo").val();                             
         $.ajax({
-          url: "CRUD/crud.php",
+          url: "ajax/crud.php",
           type: "POST",
           datatype:"json",    
           data:  {id:id, variedad:variedad, temporada_obj:temporada_obj, fecha_ensarte_r:fecha_ensarte_r, esquejes_ensarte:esquejes_ensarte, fecha_cosecha_r:fecha_cosecha_r ,esquejes_cosecha:esquejes_cosecha,opcion:opcion, tipo:tipo, banco:banco},    
@@ -95,7 +95,7 @@ $(document).on("click", ".btnBorrar", function(){
     var respuesta = confirm("¿Está seguro de borrar el registro "+id+"?");                
     if (respuesta) {            
         $.ajax({
-          url: "CRUD/crud.php",
+          url: "ajax/crud.php",
           type: "POST",
           datatype:"json",    
           data:  {opcion:opcion, id:id},    
@@ -129,7 +129,7 @@ function listar(){
         'processing': true,
         "destroy": true,  
         "ajax":{            
-            "url": "CRUD/crud.php", 
+            "url": "ajax/crud.php", 
             "method": 'POST', //usamos el metodo POST
             "data":{opcion:opcion,fecha_ini:fecha_ini,fecha_fin:fecha_fin,tipo:tipo}, //enviamos opcion 4 para que haga un SELECT
             "dataSrc":"",

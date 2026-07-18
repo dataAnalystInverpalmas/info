@@ -2,12 +2,29 @@ var dtTareas;
 
 $(document).ready(function () {
     dtTareas = $('#tablaTareas').DataTable({ responsive: true });
+
+    var params = new URLSearchParams(window.location.search);
+    var proyectoInicial = typeof window.gestionProyectoInicial !== 'undefined' ? window.gestionProyectoInicial : params.get('proyecto');
+    var proyectoIdInicial = typeof window.gestionProyectoIdInicial !== 'undefined' ? window.gestionProyectoIdInicial : parseInt(params.get('proyecto_id') || '0', 10);
+    if (proyectoInicial) {
+        $('#filtroProyectoTarea').val(proyectoInicial);
+    }
+
+    filtrarTareas();
+
+    if (params.get('nueva') === '1') {
+        abrirModalTarea();
+        if (proyectoIdInicial) {
+            $('#tProyecto').val(String(proyectoIdInicial));
+        }
+    }
 });
 
 function filtrarTareas() {
     var tipo = $('#filtroTipo').val();
     var proy = $('#filtroProyectoTarea').val();
-    dtTareas.column(1).search(tipo).column(3).search(proy).draw();
+    // Ajustar índices de columna debido a la nueva columna handle (índice 0)
+    dtTareas.column(2).search(tipo).column(4).search(proy).draw();
 }
 
 function abrirModalTarea() {
@@ -21,6 +38,7 @@ function abrirModalTarea() {
     $('#tEstado').val('pendiente');
     $('#tAvance').val(0);
     $('#tPrioridad').val('media');
+    $('#tOrden').val('');
     $('#tInicio').val('');
     $('#tVencimiento').val('');
     $('#modalTarea').modal('show');
@@ -37,6 +55,7 @@ function editarTarea(d) {
     $('#tEstado').val(d.estado);
     $('#tAvance').val(d.porcentaje_avance || 0);
     $('#tPrioridad').val(d.prioridad);
+    $('#tOrden').val(d.orden_ejecucion || '');
     $('#tInicio').val(d.fecha_inicio);
     $('#tVencimiento').val(d.fecha_vencimiento);
     $('#modalTarea').modal('show');
@@ -77,6 +96,7 @@ function guardarTarea() {
         estado: $('#tEstado').val(),
         porcentaje_avance: avance,
         prioridad: $('#tPrioridad').val(),
+        orden_ejecucion: $('#tOrden').val(),
         fecha_inicio: $('#tInicio').val(),
         fecha_vencimiento: $('#tVencimiento').val()
     }, function (resp) {

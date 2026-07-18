@@ -1,43 +1,29 @@
 <?php
-include('../funciones/conexion.php');
+require_once dirname(__DIR__) . '/src/autoload.php';
+require_once dirname(__DIR__) . '/funciones/conexion.php';
 header('Content-Type: application/json; charset=utf-8');
+
+use App\Controllers\BitacoraController;
 
 $accion = $_POST['accion'] ?? '';
 
 switch ($accion) {
     case 'create':
-        if (empty($_POST['descripcion'])) {
-            echo json_encode(['success' => false, 'mensaje' => 'Descripcion requerida']);
-            exit;
-        }
-
-        $tarea_id = ($_POST['tarea_id'] ?? '') === '' ? null : (int)$_POST['tarea_id'];
-        $tipo_registro = $_POST['tipo_registro'] ?? 'nota';
-        $descripcion = $_POST['descripcion'];
-        $autor = $_POST['autor'] ?? ($_SESSION['usuario'] ?? 'Sistema');
-
-        $stmt = $conexion->prepare("INSERT INTO bitacora (tarea_id, tipo_registro, descripcion, autor) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("isss", $tarea_id, $tipo_registro, $descripcion, $autor);
-        $ok = $stmt->execute();
-
-        echo json_encode(['success' => $ok, 'mensaje' => $ok ? 'Creado' : $conexion->error]);
+        $result = BitacoraController::crear();
+        echo json_encode($result);
         break;
 
     case 'delete':
         $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) {
-            echo json_encode(['success' => false, 'mensaje' => 'ID invalido']);
+            echo json_encode(['success' => false, 'mensaje' => 'ID inválido']);
             exit;
         }
-
-        $stmt = $conexion->prepare("DELETE FROM bitacora WHERE id=?");
-        $stmt->bind_param("i", $id);
-        $ok = $stmt->execute();
-
-        echo json_encode(['success' => $ok, 'mensaje' => $ok ? 'Eliminado' : $conexion->error]);
+        $result = BitacoraController::eliminar($id);
+        echo json_encode($result);
         break;
 
     default:
-        echo json_encode(['success' => false, 'mensaje' => 'Accion invalida']);
+        echo json_encode(['success' => false, 'mensaje' => 'Acción inválida']);
         break;
 }

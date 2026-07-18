@@ -1,5 +1,5 @@
 <?php
-include("../funciones/conexion.php");
+require_once dirname(__DIR__) . '/funciones/conexion.php';
 
 $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
 $variedad = trim($_POST['variedad'] ?? '');

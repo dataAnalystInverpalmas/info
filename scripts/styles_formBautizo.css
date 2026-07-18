@@ -396,6 +396,80 @@ html, body {
   flex-direction: column;
 }
 
+.barcode-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+#contenedorBarcodeTabla {
+  border: 1px solid #dbe2ea;
+  border-radius: 10px;
+  padding: 0.75rem;
+  background: #ffffff;
+}
+
+#tablaBarcodeBautizos thead th {
+  position: sticky;
+  top: 0;
+  background: #f4f7fb;
+  z-index: 1;
+  white-space: nowrap;
+}
+
+.barcode-clave-invalida {
+  color: #b42318;
+  font-weight: 700;
+}
+
+.barcode-print-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8mm;
+  padding: 7mm;
+}
+
+.barcode-label-card {
+  border: 1px solid #2f2f2f;
+  padding: 3mm;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  min-height: 48mm;
+}
+
+.barcode-label-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  margin-bottom: 2mm;
+}
+
+.barcode-label-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5mm 2.5mm;
+  font-size: 11px;
+  line-height: 1.2;
+  margin-bottom: 1.5mm;
+}
+
+.barcode-label-meta span {
+  color: #374151;
+}
+
+.barcode-key {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 1mm;
+}
+
+.barcode-svg {
+  width: 100%;
+  height: auto;
+}
+
 @media print {
   body * {
     visibility: hidden !important;
@@ -416,6 +490,32 @@ html, body {
     background: white;
     padding: 0;
     margin: 0;
+  }
+
+  #contenedorImpresion .barcode-print-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6mm !important;
+    padding: 6mm !important;
+  }
+
+  #contenedorImpresion .barcode-label-card {
+    border: 1px solid #000;
+    min-height: 45mm;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  #contenedorImpresion .barcode-label-title {
+    font-size: 11px;
+  }
+
+  #contenedorImpresion .barcode-label-meta {
+    font-size: 10px;
+  }
+
+  #contenedorImpresion .barcode-key {
+    font-size: 13px;
   }
 
   .media-carta-hoja {
