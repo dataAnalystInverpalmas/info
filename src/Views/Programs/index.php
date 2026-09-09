@@ -88,6 +88,26 @@
                 </div>
 
                 <div class="form-group form-section">
+                    <label class="form-label" for="f_producto">Flor (Producto)</label>
+                    <select id="f_producto" class="form-control">
+                        <option value="">Todas</option>
+                        <?php foreach ($productos as $p): ?>
+                            <option value="<?php echo htmlspecialchars($p); ?>"><?php echo htmlspecialchars($p); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="form-group form-section">
+                    <label class="form-label" for="f_color">Color</label>
+                    <select id="f_color" class="form-control">
+                        <option value="">Todos</option>
+                        <?php foreach ($colores as $c): ?>
+                            <option value="<?php echo htmlspecialchars($c); ?>"><?php echo htmlspecialchars($c); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="form-group form-section">
                     <label class="form-label" for="f_semana_siembra">Semana Siembra (YYWW)</label>
                     <input type="text" id="f_semana_siembra" class="form-control" placeholder="ej: 2601" maxlength="4">
                 </div>

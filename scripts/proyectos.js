@@ -32,25 +32,35 @@ function filtrarProyectos() {
 }
 
 function abrirModalProyecto() {
-    $('#pId').val('');
-    $('#pCategoria').val('');
-    $('#pNombre').val('');
-    $('#pDesc').val('');
+    $('#pId, #pCategoria, #pNombre, #pDesc, #pTipo, #pArea, #pProblema, #pObjetivo, #pResponsable, #pInicio, #pFin, #pEntregable, #pRiesgo, #pHito, #pExito, #pStakeholders, #pEvidencias').val('');
     $('#pEstado').val('activo');
-    $('#pInicio').val('');
-    $('#pFin').val('');
+    $('#pPrioridad').val('media');
     $('#modalProyecto').modal('show');
 }
 
-function editarProyecto(id, categoria, nombre, descripcion, estado, inicio, fin) {
-    $('#pId').val(id);
-    $('#pCategoria').val(categoria);
-    $('#pNombre').val(nombre);
-    $('#pDesc').val(descripcion);
-    $('#pEstado').val(estado);
-    $('#pInicio').val(inicio);
-    $('#pFin').val(fin);
-    $('#modalProyecto').modal('show');
+function editarProyecto(id) {
+    $.getJSON('ajax/proyectos.php?id=' + encodeURIComponent(id), function (proyecto) {
+        $('#pId').val(proyecto.id || '');
+        $('#pCategoria').val(proyecto.categoria || '');
+        $('#pNombre').val(proyecto.nombre || '');
+        $('#pDesc').val(proyecto.descripcion || '');
+        $('#pTipo').val(proyecto.tipo || '');
+        $('#pArea').val(proyecto.area_solicitante || '');
+        $('#pProblema').val(proyecto.problema_negocio || '');
+        $('#pObjetivo').val(proyecto.objetivo_alcance || '');
+        $('#pResponsable').val(proyecto.responsable_proyecto || '');
+        $('#pPrioridad').val(proyecto.prioridad || 'media');
+        $('#pEstado').val(proyecto.estado || 'activo');
+        $('#pInicio').val(proyecto.fecha_inicio || '');
+        $('#pFin').val(proyecto.fecha_fin || '');
+        $('#pEntregable').val(proyecto.entregable_periodo || '');
+        $('#pRiesgo').val(proyecto.riesgo_principal || '');
+        $('#pHito').val(proyecto.proximo_hito || '');
+        $('#pExito').val(proyecto.criterio_exito || '');
+        $('#pStakeholders').val(proyecto.stakeholders || '');
+        $('#pEvidencias').val(proyecto.link_evidencias || '');
+        $('#modalProyecto').modal('show');
+    }).fail(function () { alert('No se pudo cargar el proyecto'); });
 }
 
 function guardarProyecto() {
@@ -65,9 +75,21 @@ function guardarProyecto() {
         categoria: $('#pCategoria').val(),
         nombre: $('#pNombre').val(),
         descripcion: $('#pDesc').val(),
+        tipo: $('#pTipo').val(),
+        area_solicitante: $('#pArea').val(),
+        problema_negocio: $('#pProblema').val(),
+        objetivo_alcance: $('#pObjetivo').val(),
+        responsable_proyecto: $('#pResponsable').val(),
+        prioridad: $('#pPrioridad').val(),
         estado: $('#pEstado').val(),
         fecha_inicio: $('#pInicio').val(),
-        fecha_fin: $('#pFin').val()
+        fecha_fin: $('#pFin').val(),
+        entregable_periodo: $('#pEntregable').val(),
+        riesgo_principal: $('#pRiesgo').val(),
+        proximo_hito: $('#pHito').val(),
+        criterio_exito: $('#pExito').val(),
+        stakeholders: $('#pStakeholders').val(),
+        link_evidencias: $('#pEvidencias').val()
     }, function (resp) {
         if (resp.success) {
             location.reload();

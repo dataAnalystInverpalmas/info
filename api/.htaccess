@@ -1,0 +1,4 @@
+Options -Indexes
+
+# Exponer el header Authorization a PHP (Apache/CGI a veces lo elimina).
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1

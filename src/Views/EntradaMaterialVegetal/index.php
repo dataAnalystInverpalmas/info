@@ -1,66 +1,210 @@
+<style>
+    .emv-nav {
+        border-radius: 8px !important;
+        font-weight: 500 !important;
+        padding: 0.45rem 0.9rem !important;
+    }
+    .emv-nav.btn-success,
+    .emv-nav.active {
+        background-color: #00796B !important;
+        border-color: #00796B !important;
+        color: #fff !important;
+    }
+    .emv-nav.btn-outline-success {
+        color: #00796B !important;
+        border-color: #00796B !important;
+        background-color: transparent !important;
+    }
+    .emv-nav.btn-outline-success:hover,
+    .emv-nav.btn-outline-success:focus {
+        background-color: #00796B !important;
+        color: #fff !important;
+    }
+    .card-header.emv-header-success {
+        background-color: #00796B !important;
+        border-color: #00796B !important;
+    }
+</style>
+
 <h4>Entrada de Material Vegetal</h4>
 
-<div class="container-fluid">
-    <div class="row">
+<div class="mb-3">
+    <div class="btn-group" role="group" aria-label="Menu de navegación EMV">
+        <button type="button" class="btn btn-sm btn-success emv-nav active" data-emv-view="entrada">
+            <i class="fas fa-clipboard-list"></i> Entradas
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-success emv-nav" data-emv-view="reporte">
+            <i class="fas fa-chart-bar"></i> Reporte / Detalle
+        </button>
+    </div>
+</div>
 
-        <!-- ===== Panel de filtros ===== -->
-        <div class="col-sm-2">
-            <div class="card shadow-sm">
-                <div class="card-header bg-success text-white py-2">
-                    <strong><i class="fas fa-filter"></i> Filtros</strong>
+<div id="emv_view_entrada">
+    <div class="container-fluid">
+        <div class="row">
+
+            <!-- ===== Panel de filtros ===== -->
+            <div class="col-sm-2">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white py-2">
+                        <strong><i class="fas fa-filter"></i> Filtros</strong>
+                    </div>
+                    <div class="card-body p-2">
+
+                        <div class="form-group mb-2">
+                            <label class="small font-weight-bold mb-0">Fecha Inicial</label>
+                            <input class="form-control form-control-sm" type="date" id="emv_fecha_ini">
+                        </div>
+
+                        <div class="form-group mb-2">
+                            <label class="small font-weight-bold mb-0">Fecha Final</label>
+                            <input class="form-control form-control-sm" type="date" id="emv_fecha_fin">
+                        </div>
+
+                        <div class="form-group mb-2">
+                            <label class="small font-weight-bold mb-0">Proveedor</label>
+                            <select class="form-control form-control-sm" id="emv_filtro_proveedor">
+                                <option value="">— todos —</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="small font-weight-bold mb-0">Material</label>
+                            <select class="form-control form-control-sm" id="emv_filtro_material">
+                                <option value="">— todos —</option>
+                                <option value="Esqueje">Esqueje</option>
+                                <option value="Planta madre">Planta madre</option>
+                            </select>
+                        </div>
+
+                        <button type="button" onclick="emvListar()" class="btn btn-success btn-sm btn-block">
+                            <i class="fas fa-search"></i> Consultar
+                        </button>
+
+                    </div>
                 </div>
-                <div class="card-body p-2">
+            </div>
+            <!-- ===== Fin panel de filtros ===== -->
 
-                    <div class="form-group mb-2">
-                        <label class="small font-weight-bold mb-0">Fecha Inicial</label>
-                        <input class="form-control form-control-sm" type="date" id="emv_fecha_ini">
+            <!-- ===== Contenido principal ===== -->
+            <div class="col-sm-10">
+                <div class="row mb-2">
+                    <div class="col-sm-12">
+                        <button id="btnEmvNuevo" type="button" class="btn btn-info">
+                            <i class="material-icons" style="vertical-align:middle">library_add</i> Nueva Entrada
+                        </button>
                     </div>
-
-                    <div class="form-group mb-3">
-                        <label class="small font-weight-bold mb-0">Fecha Final</label>
-                        <input class="form-control form-control-sm" type="date" id="emv_fecha_fin">
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 table-responsive">
+                        <table id="tableEmv" class="table table-bordered table-sm display" style="width:100%">
+                            <thead class="text-center">
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Fecha</th>
+                                    <th>Maquila</th>
+                                    <th>Proveedor</th>
+                                    <th>Remisión</th>
+                                    <th>Destino</th>
+                                    <th>Material</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
                     </div>
+                </div>
+            </div>
+            <!-- ===== Fin contenido principal ===== -->
 
-                    <button type="button" onclick="emvListar()" class="btn btn-success btn-sm btn-block">
+        </div>
+    </div>
+</div>
+
+<div id="emv_view_reporte" style="display:none;">
+    <div class="card shadow-sm mb-3">
+        <div class="card-header emv-header-success text-white py-2">
+            <strong><i class="fas fa-filter"></i> Filtros del reporte detallado</strong>
+        </div>
+        <div class="card-body">
+            <div class="form-row">
+                <div class="form-group col-md-2">
+                    <label class="small font-weight-bold mb-0">Fecha inicial</label>
+                    <input type="date" class="form-control form-control-sm" id="emv_rep_fecha_ini">
+                </div>
+                <div class="form-group col-md-2">
+                    <label class="small font-weight-bold mb-0">Fecha final</label>
+                    <input type="date" class="form-control form-control-sm" id="emv_rep_fecha_fin">
+                </div>
+                <div class="form-group col-md-2">
+                    <label class="small font-weight-bold mb-0">Maquila</label>
+                    <input type="text" class="form-control form-control-sm" id="emv_rep_maquila" maxlength="4" placeholder="0000">
+                </div>
+                <div class="form-group col-md-3">
+                    <label class="small font-weight-bold mb-0">Proveedor</label>
+                    <select class="form-control form-control-sm" id="emv_rep_proveedor">
+                        <option value="">— todos —</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-3">
+                    <label class="small font-weight-bold mb-0">Destino</label>
+                    <select class="form-control form-control-sm" id="emv_rep_destino">
+                        <option value="">— todos —</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-3">
+                    <label class="small font-weight-bold mb-0">Material</label>
+                    <select class="form-control form-control-sm" id="emv_rep_material">
+                        <option value="">— todos —</option>
+                        <option value="Esqueje">Esqueje</option>
+                        <option value="Planta madre">Planta madre</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-3">
+                    <label class="small font-weight-bold mb-0">Variedad</label>
+                    <select class="form-control form-control-sm" id="emv_rep_variedad">
+                        <option value="">— todas —</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-3">
+                    <label class="small font-weight-bold mb-0">Remisión</label>
+                    <input type="text" class="form-control form-control-sm" id="emv_rep_remision" placeholder="Número de remisión">
+                </div>
+                <div class="form-group col-md-3 d-flex align-items-end">
+                    <button type="button" id="btnEmvReporteConsultar" class="btn btn-success btn-sm btn-block">
                         <i class="fas fa-search"></i> Consultar
                     </button>
-
                 </div>
             </div>
         </div>
-        <!-- ===== Fin panel de filtros ===== -->
+    </div>
 
-        <!-- ===== Contenido principal ===== -->
-        <div class="col-sm-10">
-            <div class="row mb-2">
-                <div class="col-sm-12">
-                    <button id="btnEmvNuevo" type="button" class="btn btn-info">
-                        <i class="material-icons" style="vertical-align:middle">library_add</i> Nueva Entrada
-                    </button>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-12 table-responsive">
-                    <table id="tableEmv" class="table table-bordered table-sm display" style="width:100%">
-                        <thead class="text-center">
-                            <tr>
-                                <th>Id</th>
-                                <th>Fecha</th>
-                                <th>Maquila</th>
-                                <th>Proveedor</th>
-                                <th>Remisión</th>
-                                <th>Destino</th>
-                                <th>Material</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <!-- ===== Fin contenido principal ===== -->
-
+    <div class="table-responsive">
+        <table id="tableEmvReporte" class="table table-bordered table-sm display" style="width:100%">
+            <thead class="text-center">
+                <tr>
+                    <th>Id</th>
+                    <th>Fecha</th>
+                    <th>Maquila</th>
+                    <th>Proveedor</th>
+                    <th>Remisión</th>
+                    <th>Destino</th>
+                    <th>Material</th>
+                    <th>Variedad</th>
+                    <th>Recibida</th>
+                    <th>Facturado</th>
+                    <th>Reposición</th>
+                    <th>Excedente</th>
+                    <th>Obsequio</th>
+                    <th>Adicional</th>
+                    <th>Raíz</th>
+                    <th>Observación</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
     </div>
 </div>
 
@@ -243,5 +387,10 @@
         </div>
     </div>
 </div>
+
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <script src="scripts/entrada_material_vegetal.js?v=<?= time() ?>"></script>

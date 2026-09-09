@@ -16,17 +16,7 @@ if ($programa !== null) { $where[] = "programa = " . $programa; }
 if ($estado !== null && $estado !== '') { $estado_esc = $conexion->real_escape_string($estado); $where[] = "estado = '" . $estado_esc . "'"; }
 $where_sql = count($where) ? (' WHERE ' . implode(' AND ', $where)) : '';
 
-$data = ['variedades'=>[], 'temporadas'=>[]];
-
-// variedades
-$sql = "SELECT DISTINCT variedad FROM program " . $where_sql . " AND variedad IS NOT NULL AND variedad <> '' ORDER BY variedad";
-// small correction: if where_sql empty, the SQL will start with WHERE ... but we constructed properly; however when where_sql empty we shouldn't prepend AND. Let's build differently below.
-
-// Rebuild queries robustly
-$where = [];
-if ($programa !== null) { $where[] = "programa = " . $programa; }
-if ($estado !== null && $estado !== '') { $estado_esc = $conexion->real_escape_string($estado); $where[] = "estado = '" . $estado_esc . "'"; }
-$where_sql = count($where) ? (' WHERE ' . implode(' AND ', $where)) : '';
+$data = ['variedades'=>[], 'temporadas'=>[], 'productos'=>[], 'colores'=>[]];
 
 // Variedades
 $qv = "SELECT DISTINCT variedad FROM program" . $where_sql . " AND variedad IS NOT NULL AND variedad <> '' ORDER BY variedad";
@@ -46,6 +36,26 @@ if (!$where_sql) { $qt = "SELECT DISTINCT temporada_obj FROM program WHERE tempo
 $res = $conexion->query($qt);
 if ($res) {
     while ($r = $res->fetch_object()) { $data['temporadas'][] = $r->temporada_obj; }
+    $res->free();
+}
+
+// Productos (Flor)
+$qp = "SELECT DISTINCT producto FROM program" . $where_sql . " AND producto IS NOT NULL AND producto <> '' ORDER BY producto";
+if (!$where_sql) { $qp = "SELECT DISTINCT producto FROM program WHERE producto IS NOT NULL AND producto <> '' ORDER BY producto"; }
+
+$res = $conexion->query($qp);
+if ($res) {
+    while ($r = $res->fetch_object()) { $data['productos'][] = $r->producto; }
+    $res->free();
+}
+
+// Colores
+$qc = "SELECT DISTINCT color FROM program" . $where_sql . " AND color IS NOT NULL AND color <> '' ORDER BY color";
+if (!$where_sql) { $qc = "SELECT DISTINCT color FROM program WHERE color IS NOT NULL AND color <> '' ORDER BY color"; }
+
+$res = $conexion->query($qc);
+if ($res) {
+    while ($r = $res->fetch_object()) { $data['colores'][] = $r->color; }
     $res->free();
 }
 

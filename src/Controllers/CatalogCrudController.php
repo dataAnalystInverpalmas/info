@@ -3,12 +3,13 @@ namespace App\Controllers;
 
 class CatalogCrudController {
 
-    public function show(string $table, string $endpoint, string $title, string $selects = '') {
+    public function show(string $table, string $endpoint, string $title, string $selects = '', string $display = '') {
         extract([
             'table'    => $table,
             'endpoint' => $endpoint,
             'title'    => $title,
             'selects'  => $selects,
+            'display'  => $display,
         ]);
         require_once __DIR__ . '/../Views/Crud/catalog.php';
     }

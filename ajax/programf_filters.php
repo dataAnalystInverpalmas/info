@@ -16,7 +16,7 @@ if ($programa !== null) { $where[] = "programa = " . $programa; }
 if ($estado !== null && $estado !== '') { $estado_esc = $conexion->real_escape_string($estado); $where[] = "estado = '" . $estado_esc . "'"; }
 $where_sql = count($where) ? (' WHERE ' . implode(' AND ', $where)) : '';
 
-$data = ['variedades'=>[], 'temporadas'=>[], 'productos'=>[], 'fincas'=>[], 'bloques'=>[]];
+$data = ['variedades'=>[], 'temporadas'=>[], 'productos'=>[], 'fincas'=>[], 'bloques'=>[], 'colores'=>[]];
 
 // Variedades
 $qv = "SELECT DISTINCT variedad FROM programf" . $where_sql . " AND variedad IS NOT NULL AND variedad <> '' ORDER BY variedad";
@@ -60,6 +60,26 @@ if (!$where_sql) { $qb = "SELECT DISTINCT bloque FROM programf WHERE bloque IS N
 $res = $conexion->query($qb);
 if ($res) {
     while ($r = $res->fetch_object()) { $data['bloques'][] = $r->bloque; }
+    $res->free();
+}
+
+// Colores
+$qc = "SELECT DISTINCT TRIM(COALESCE(NULLIF(TRIM(p.color), ''), NULLIF(TRIM(v.color), ''))) AS color
+       FROM programf p
+       LEFT JOIN varieties v ON v.nombre = p.variedad
+       " . $where_sql . "
+       AND TRIM(COALESCE(NULLIF(TRIM(p.color), ''), NULLIF(TRIM(v.color), ''))) <> ''
+       ORDER BY color";
+if (!$where_sql) {
+    $qc = "SELECT DISTINCT TRIM(COALESCE(NULLIF(TRIM(p.color), ''), NULLIF(TRIM(v.color), ''))) AS color
+           FROM programf p
+           LEFT JOIN varieties v ON v.nombre = p.variedad
+           WHERE TRIM(COALESCE(NULLIF(TRIM(p.color), ''), NULLIF(TRIM(v.color), ''))) <> ''
+           ORDER BY color";
+}
+$res = $conexion->query($qc);
+if ($res) {
+    while ($r = $res->fetch_object()) { $data['colores'][] = $r->color; }
     $res->free();
 }
 

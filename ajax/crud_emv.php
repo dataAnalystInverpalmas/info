@@ -80,8 +80,10 @@ switch ($opcion) {
     case '4':
         $fi = isset($_POST['fecha_ini']) ? $_POST['fecha_ini'] : '';
         $ff = isset($_POST['fecha_fin']) ? $_POST['fecha_fin'] : '';
+        $proveedor = isset($_POST['proveedor']) ? intval($_POST['proveedor']) : 0;
+        $material = isset($_POST['material']) ? trim($_POST['material']) : '';
 
-        $stmt = $conexion->prepare(
+        $sql =
             "SELECT e.id, e.fecha, e.maquila,
                     e.proveedor AS proveedor_id,
                     COALESCE(bp.nombre, e.proveedor) AS proveedor,
@@ -92,10 +94,30 @@ switch ($opcion) {
              FROM entrada_material_vegetal e
              LEFT JOIN breeders bp ON bp.id = e.proveedor
              LEFT JOIN breeders bd ON bd.id = e.destino
-             WHERE e.fecha BETWEEN ? AND ?
-             ORDER BY e.fecha DESC, e.id DESC"
-        );
-        $stmt->bind_param("ss", $fi, $ff);
+             WHERE e.fecha BETWEEN ? AND ?";
+
+        $params = [$fi, $ff];
+        $types = 'ss';
+
+        if ($proveedor > 0) {
+            $sql .= ' AND e.proveedor = ?';
+            $params[] = $proveedor;
+            $types .= 'i';
+        }
+        if ($material !== '') {
+            $sql .= ' AND e.material = ?';
+            $params[] = $material;
+            $types .= 's';
+        }
+
+        $sql .= " ORDER BY e.fecha DESC, e.id DESC";
+
+        $stmt = $conexion->prepare($sql);
+        if (!$stmt) {
+            echo json_encode([]);
+            break;
+        }
+        $stmt->bind_param($types, ...$params);
         $stmt->execute();
         $res  = $stmt->get_result();
         $data = [];
@@ -175,6 +197,89 @@ switch ($opcion) {
         $new_id = $conexion->insert_id;
         $stmt->close();
         echo json_encode(['status' => 'ok', 'id' => $new_id]);
+        break;
+
+    // ---------------------------------------------------------------
+    // 8 – REPORTES (consulta detallada con filtros y exportación Excel)
+    // ---------------------------------------------------------------
+    case '8':
+        $fi = isset($_POST['fecha_ini']) ? $_POST['fecha_ini'] : '';
+        $ff = isset($_POST['fecha_fin']) ? $_POST['fecha_fin'] : '';
+        $maquila = isset($_POST['maquila']) ? trim($_POST['maquila']) : '';
+        $proveedor = isset($_POST['proveedor']) ? intval($_POST['proveedor']) : 0;
+        $destino = isset($_POST['destino']) ? intval($_POST['destino']) : 0;
+        $material = isset($_POST['material']) ? trim($_POST['material']) : '';
+        $variedad = isset($_POST['variedad']) ? trim($_POST['variedad']) : '';
+        $remision = isset($_POST['remision']) ? trim($_POST['remision']) : '';
+
+        $sql = "SELECT e.id, e.fecha, e.maquila,
+                       COALESCE(bp.nombre, e.proveedor) AS proveedor,
+                       e.remision,
+                       COALESCE(bd.nombre, e.destino) AS destino,
+                       e.material,
+                       d.variedad AS variedad_codigo,
+                       COALESCE(v.nombre, d.variedad) AS variedad,
+                       d.cantidad_recibida,
+                       d.facturado, d.reposicion, d.excedente, d.obsequio, d.adicional,
+                       d.raiz, d.observacion
+                FROM entrada_material_vegetal e
+                LEFT JOIN entrada_material_vegetal_detalle d ON d.entrada_id = e.id
+                LEFT JOIN breeders bp ON bp.id = e.proveedor
+                LEFT JOIN breeders bd ON bd.id = e.destino
+                LEFT JOIN ld_variedades v ON v.codigo = d.variedad
+                WHERE e.fecha BETWEEN ? AND ?";
+
+        $params = [$fi, $ff];
+        $types = 'ss';
+
+        if ($maquila !== '') {
+            $sql .= ' AND e.maquila = ?';
+            $params[] = $maquila;
+            $types .= 's';
+        }
+        if ($proveedor > 0) {
+            $sql .= ' AND e.proveedor = ?';
+            $params[] = $proveedor;
+            $types .= 'i';
+        }
+        if ($destino > 0) {
+            $sql .= ' AND e.destino = ?';
+            $params[] = $destino;
+            $types .= 'i';
+        }
+        if ($material !== '') {
+            $sql .= ' AND e.material = ?';
+            $params[] = $material;
+            $types .= 's';
+        }
+        if ($variedad !== '') {
+            $sql .= ' AND d.variedad = ?';
+            $params[] = $variedad;
+            $types .= 's';
+        }
+        if ($remision !== '') {
+            $sql .= ' AND e.remision LIKE ?';
+            $params[] = '%' . $remision . '%';
+            $types .= 's';
+        }
+
+        $sql .= ' ORDER BY e.fecha DESC, e.id DESC, d.id ASC';
+
+        $stmt = $conexion->prepare($sql);
+        if (!$stmt) {
+            echo json_encode([]);
+            break;
+        }
+
+        $stmt->bind_param($types, ...$params);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $data = [];
+        while ($row = $res->fetch_assoc()) {
+            $data[] = $row;
+        }
+        $stmt->close();
+        echo json_encode($data);
         break;
 
     // ---------------------------------------------------------------

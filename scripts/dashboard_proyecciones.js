@@ -1,15 +1,6 @@
 (function () {
-    var FLORES = ['CLA', 'CM0', 'ROC', 'ROS'];
-    var FLOR_COLORS = {
-        CLA: '#0d6efd',
-        CM0: '#198754',
-        ROC: '#dc3545',
-        ROS: '#fd7e14'
-    };
-
-    var chartPlantasFlorInstance = null;
-    var chartEdadesInstance = null;
-    var chartVariedadesInstance = null;
+    var chartEdadClavel = null;
+    var chartEdadMiniclavel = null;
 
     function getLastWeekSunday() {
         var today = new Date();
@@ -25,19 +16,24 @@
     function setDefaultDates() {
         var desde = document.getElementById('dpFechaDesde');
         var hasta = document.getElementById('dpFechaHasta');
-        if (desde && !desde.value) { desde.value = '2025-12-29'; }
+        if (desde && !desde.value) {
+            var d = new Date();
+            d.setFullYear(d.getFullYear() - 1);
+            desde.value = d.toISOString().slice(0, 10);
+        }
         if (hasta && !hasta.value) { hasta.value = getLastWeekSunday(); }
     }
 
     function getFilters() {
         return {
             finca: (document.getElementById('dpFiltroFinca').value || '').trim(),
+            producto: (document.getElementById('dpFiltroProducto').value || '').trim(),
             fecha_desde: (document.getElementById('dpFechaDesde').value || '').trim(),
             fecha_hasta: (document.getElementById('dpFechaHasta').value || '').trim()
         };
     }
 
-    function numberFormat(value) {
+    function integerFormat(value) {
         var n = Number(value);
         if (!isFinite(n)) {
             return String(value);
@@ -45,196 +41,213 @@
         return n.toLocaleString('es-CO', { maximumFractionDigits: 0 });
     }
 
-    function subCard(label, value, cssClass) {
-        return '<div class="dp-sub-card">'
-            + '<div class="dp-sub-label">' + label + '</div>'
-            + '<div class="dp-sub-value ' + cssClass + '">' + numberFormat(value) + '</div>'
-            + '</div>';
+    function decimalFormat(value, decimals) {
+        var n = Number(value);
+        if (!isFinite(n)) {
+            return String(value);
+        }
+        return n.toLocaleString('es-CO', {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
+        });
     }
 
-    function renderFlorCards(florCards) {
-        var container = document.getElementById('dpFlorCards');
+    function setStatus(type, text) {
+        var container = document.getElementById('dpEstadoCarga');
         if (!container) {
+            return;
+        }
+        container.innerHTML = '<div class="alert alert-' + type + ' mb-0">' + text + '</div>';
+    }
+
+    function renderKpi(totales) {
+        var el = document.getElementById('dpTotalCamas');
+        if (!el) {
+            return;
+        }
+        var camas = totales && totales.camas ? totales.camas : 0;
+        el.textContent = decimalFormat(camas, 1);
+    }
+
+    function renderRowsFincaFlor(rows) {
+        var tbody = document.getElementById('dpTablaFincaFlor');
+        if (!tbody) {
+            return;
+        }
+
+        if (!rows || rows.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Sin datos</td></tr>';
             return;
         }
 
         var html = '';
-        FLORES.forEach(function (flor) {
-            var data = (florCards && florCards[flor]) ? florCards[flor] : {};
-            var re  = Number(data.RE)  || 0;
-            var pt  = Number(data.PT)  || 0;
-            var aj  = Number(data.AJ)  || 0;
-            var diffREAJ = re - aj;
-            var diffREPT = re - pt;
-            var color = FLOR_COLORS[flor] || '#6c757d';
+        rows.forEach(function (row) {
+            html += '<tr>'
+                + '<td>' + (row.finca || '-') + '</td>'
+                + '<td>' + (row.flor || '-') + '</td>'
+                + '<td class="text-end">' + integerFormat(row.plantas) + '</td>'
+                + '<td class="text-end">' + decimalFormat(row.camas, 1) + '</td>'
+                + '</tr>';
+        });
+        tbody.innerHTML = html;
+    }
 
-            html += '<div class="col-md-3 col-sm-6 mb-3">';
-            html += '<div class="dp-flor-card">';
-            html += '<div class="dp-flor-card-header" style="background:' + color + '">' + flor + '</div>';
-            html += '<div class="dp-flor-card-body">';
-            html += subCard('Tallos RE (Real)',         re,       'dp-neutral');
-            html += subCard('Tallos PT (Presupuesto)',  pt,       'dp-neutral');
-            html += subCard('Tallos AJ (Ajuste)',       aj,       'dp-neutral');
-            html += '<div class="dp-divider"></div>';
-            html += subCard('Diferencia RE &minus; AJ', diffREAJ, diffREAJ >= 0 ? 'dp-positive' : 'dp-negative');
-            html += subCard('Diferencia RE &minus; PT', diffREPT, diffREPT >= 0 ? 'dp-positive' : 'dp-negative');
-            html += '</div></div></div>';
+    function renderRowsFlor(rows) {
+        var tbody = document.getElementById('dpTablaFlor');
+        if (!tbody) {
+            return;
+        }
+
+        if (!rows || rows.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Sin datos</td></tr>';
+            return;
+        }
+
+        var html = '';
+        rows.forEach(function (row) {
+            html += '<tr>'
+                + '<td>' + (row.flor || '-') + '</td>'
+                + '<td class="text-end">' + integerFormat(row.plantas) + '</td>'
+                + '<td class="text-end">' + decimalFormat(row.camas, 1) + '</td>'
+                + '</tr>';
+        });
+        tbody.innerHTML = html;
+    }
+
+    function paletteAt(index) {
+        var colors = ['#2563eb', '#f97316', '#16a34a', '#7c3aed', '#dc2626', '#0891b2', '#ca8a04', '#334155'];
+        return colors[index % colors.length];
+    }
+
+    function normalizeDatasets(payload) {
+        var datasets = (payload && payload.datasets) ? payload.datasets : [];
+        return datasets.map(function (dataset, idx) {
+            var color = paletteAt(idx);
+            return {
+                label: dataset.label || ('Finca ' + (idx + 1)),
+                data: dataset.data || [],
+                borderColor: color,
+                backgroundColor: color,
+                fill: false,
+                tension: 0.25,
+                pointRadius: 2.5,
+                pointHoverRadius: 4,
+                borderWidth: 2
+            };
+        });
+    }
+
+    function renderAgeChart(canvasId, chartRefName, payload, title) {
+        var canvas = document.getElementById(canvasId);
+        if (!canvas) {
+            return;
+        }
+
+        var labels = (payload && payload.labels) ? payload.labels : [];
+        var datasets = normalizeDatasets(payload);
+
+        if (chartRefName === 'clavel' && chartEdadClavel) {
+            chartEdadClavel.destroy();
+        }
+        if (chartRefName === 'miniclavel' && chartEdadMiniclavel) {
+            chartEdadMiniclavel.destroy();
+        }
+
+        if (labels.length === 0 || datasets.length === 0) {
+            var emptyChart = new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: [0],
+                    datasets: [{
+                        label: 'Sin datos',
+                        data: [0],
+                        borderColor: '#cbd5e1',
+                        backgroundColor: '#cbd5e1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true },
+                        title: { display: true, text: title }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Edad (semanas)' } },
+                        y: { beginAtZero: true, title: { display: true, text: 'Camas' } }
+                    }
+                }
+            });
+            if (chartRefName === 'clavel') {
+                chartEdadClavel = emptyChart;
+            } else {
+                chartEdadMiniclavel = emptyChart;
+            }
+            return;
+        }
+
+        var chart = new Chart(canvas, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: true,
+                        text: title
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return ' ' + decimalFormat(context.raw, 1) + ' camas';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Edad (semanas)'
+                        },
+                        ticks: {
+                            callback: function (value) {
+                                var label = this.getLabelForValue(value);
+                                return label;
+                            }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Camas'
+                        },
+                        ticks: {
+                            callback: function (value) { return decimalFormat(value, 1); }
+                        }
+                    }
+                }
+            }
         });
 
-        container.innerHTML = html;
-    }
-
-    function showCardsLoading() {
-        var container = document.getElementById('dpFlorCards');
-        if (container) {
-            container.innerHTML = '<div class="col-12 text-center text-muted py-5">'
-                + '<span class="spinner-border spinner-border-sm me-2"></span> Cargando...</div>';
-        }
-    }
-
-    function updateCharts(resp) {
-        // --- 1. Gráfico Plantas Sembradas por Flor ---
-        var ctxPlantasFlor = document.getElementById('chartPlantasFlor');
-        if (ctxPlantasFlor && resp.plantasPorFlor) {
-            if (chartPlantasFlorInstance) { chartPlantasFlorInstance.destroy(); }
-            chartPlantasFlorInstance = new Chart(ctxPlantasFlor, {
-                type: 'bar',
-                data: {
-                    labels: resp.plantasPorFlor.labels || [],
-                    datasets: [{
-                        label: 'Plantas Sembradas',
-                        data: resp.plantasPorFlor.data || [],
-                        backgroundColor: '#00796B',
-                        borderRadius: 6,
-                        maxBarThickness: 45
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return ' ' + numberFormat(context.raw) + ' plantas';
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: '#EDF2F7' },
-                            ticks: {
-                                callback: function(value) { return numberFormat(value); }
-                            }
-                        },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
-        }
-
-        // --- 2. Gráfico Edades y Cantidad de Plantas ---
-        var ctxEdades = document.getElementById('chartEdades');
-        if (ctxEdades && resp.edadesYPlantas) {
-            if (chartEdadesInstance) { chartEdadesInstance.destroy(); }
-            chartEdadesInstance = new Chart(ctxEdades, {
-                type: 'bar',
-                data: {
-                    labels: resp.edadesYPlantas.labels || [],
-                    datasets: [{
-                        label: 'Densidad de Plantas',
-                        data: resp.edadesYPlantas.data || [],
-                        backgroundColor: '#4E8098',
-                        borderRadius: 6,
-                        maxBarThickness: 45
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return ' ' + numberFormat(context.raw) + ' plantas';
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: '#EDF2F7' },
-                            ticks: {
-                                callback: function(value) { return numberFormat(value); }
-                            }
-                        },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
-        }
-
-        // --- 3. Gráfico Distribución por Color (%) ---
-        var ctxVariedades = document.getElementById('chartVariedades');
-        var dataDistribucion = resp.distribucionColor || resp.distribucionVariedad;
-        if (ctxVariedades && dataDistribucion) {
-            if (chartVariedadesInstance) { chartVariedadesInstance.destroy(); }
-            
-            var totalCount = (dataDistribucion.data || []).reduce(function(a, b) { return a + b; }, 0);
-
-            chartVariedadesInstance = new Chart(ctxVariedades, {
-                type: 'doughnut',
-                data: {
-                    labels: dataDistribucion.labels || [],
-                    datasets: [{
-                        data: dataDistribucion.data || [],
-                        backgroundColor: [
-                            '#FF6384',
-                            '#36A2EB',
-                            '#FFCE56',
-                            '#4BC0C0',
-                            '#9966FF',
-                            '#FF9F40'
-                        ],
-                        borderWidth: 2,
-                        borderColor: '#ffffff'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                boxWidth: 12,
-                                padding: 10,
-                                font: { size: 11 }
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    var val = context.raw;
-                                    var pct = totalCount > 0 ? ((val / totalCount) * 100).toFixed(1) : 0;
-                                    return ' ' + context.label + ': ' + numberFormat(val) + ' (' + pct + '%)';
-                                }
-                            }
-                        }
-                    },
-                    cutout: '60%'
-                }
-            });
+        if (chartRefName === 'clavel') {
+            chartEdadClavel = chart;
+        } else {
+            chartEdadMiniclavel = chart;
         }
     }
 
     function loadDashboard() {
-        showCardsLoading();
+        setStatus('info', 'Consultando camas sembradas...');
         var filters = getFilters();
 
         $.ajax({
@@ -245,17 +258,19 @@
         }).done(function (resp) {
             if (!resp || resp.ok !== true) {
                 var msg = (resp && resp.message) ? resp.message : 'No se pudo cargar el dashboard';
-                document.getElementById('dpFlorCards').innerHTML =
-                    '<div class="col-12"><div class="alert alert-warning">' + msg + '</div></div>';
+                setStatus('warning', msg);
                 return;
             }
 
-            renderFlorCards(resp.florCards || {});
-            updateCharts(resp);
+            renderKpi(resp.totales || {});
+            renderRowsFincaFlor(resp.camasPorFincaFlor || []);
+            renderRowsFlor(resp.camasPorFlor || []);
+            renderAgeChart('dpChartEdadClavel', 'clavel', resp.chartCamasEdadClavel || {}, 'CLAVEL');
+            renderAgeChart('dpChartEdadMiniclavel', 'miniclavel', resp.chartCamasEdadMiniclavel || {}, 'MINICLAVEL');
+            setStatus('success', 'Información actualizada.');
 
         }).fail(function () {
-            document.getElementById('dpFlorCards').innerHTML =
-                '<div class="col-12"><div class="alert alert-danger">Error al conectar con el servidor.</div></div>';
+            setStatus('danger', 'Error al conectar con el servidor.');
         });
     }
 
@@ -266,7 +281,7 @@
             loadDashboard();
         });
 
-        $('#dpFiltroFinca, #dpFechaDesde, #dpFechaHasta').on('keypress', function (e) {
+        $('#dpFiltroFinca, #dpFiltroProducto, #dpFechaDesde, #dpFechaHasta').on('keypress', function (e) {
             if (e.key === 'Enter') {
                 loadDashboard();
             }

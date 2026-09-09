@@ -31,6 +31,44 @@ $(document).ready(function(){
         arrangementsTable.ajax.reload();
     });
 
+    $('#btnCopyArrangements').on('click', function(){
+        var variedadOrigen = ($('#copy_variedad_origen').val() || '').trim();
+        var variedadDestino = ($('#copy_variedad_destino').val() || '').trim();
+
+        if(!variedadOrigen || !variedadDestino){
+            alert('Debe ingresar variedad origen y variedad destino');
+            return;
+        }
+
+        if(variedadOrigen.toLowerCase() === variedadDestino.toLowerCase()){
+            alert('La variedad origen y destino deben ser diferentes');
+            return;
+        }
+
+        if(!confirm('Se copiaran los datos de "' + variedadOrigen + '" hacia "' + variedadDestino + '". Desea continuar?')) return;
+
+        $.post('../ajax/arrangements_copy_variety.php', {
+            variedad_origen: variedadOrigen,
+            variedad_destino: variedadDestino
+        }, function(res){
+            if(res && res.success){
+                var msg = 'Copiado completado.';
+                if(typeof res.copied_count !== 'undefined'){
+                    msg += ' Registros insertados: ' + res.copied_count;
+                }
+                if(typeof res.skipped_count !== 'undefined'){
+                    msg += '. Registros omitidos: ' + res.skipped_count;
+                }
+                alert(msg);
+                arrangementsTable.ajax.reload(null, false);
+            } else {
+                alert((res && res.message) ? res.message : 'Error al copiar datos');
+            }
+        }, 'json').fail(function(xhr){
+            alert('Error en la peticion: ' + (xhr && xhr.responseText ? xhr.responseText : 'sin respuesta'));
+        });
+    });
+
     $('#btnNewArrangements').on('click', function(){
         $('#arrangementsForm')[0].reset();
         $('#ar_id').val('');

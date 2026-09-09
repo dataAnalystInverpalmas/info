@@ -26,17 +26,41 @@ $(document).ready(function(){
             ////////////////////////////////////////////
     
         listar();
+
+        $(window).on('resize', function(){
+            ajustarAlturaTabla();
+            if ($.fn.DataTable.isDataTable('#rFloreros')) {
+                $('#rFloreros').DataTable().columns.adjust();
+            }
+        });
     
 
     });
+
+    function calcularScrollY(){
+        var viewport = $(window).height();
+        var tableTop = $('#rFloreros').offset() ? $('#rFloreros').offset().top : 250;
+        var footerSpace = 170;
+        var available = viewport - tableTop - footerSpace;
+        if (available < 260) {
+            available = 260;
+        }
+        return available + 'px';
+    }
+
+    function ajustarAlturaTabla(){
+        var height = calcularScrollY();
+        $('.dataTables_scrollBody').css({
+            'max-height': height,
+            'height': height
+        });
+    }
+
          ///////////////REPORTE//////////////////////
          var listar = function(){ 
-            var flor = $("#nflor").val();
-            var fecha_ini =  $("#finicial").val(); 
-            var fecha_fin =  $("#ffinal").val(); 
             var tabla = $('#rFloreros').DataTable({
                 "order": [[ 0, "desc" ]],
-                "scrollY": "300px",
+                "scrollY": calcularScrollY(),
                 "scrollCollapse": true,
                  "footerCallback": function ( row, data, start, end, display ) {
                     var api = this.api(), data;
@@ -86,10 +110,11 @@ $(document).ready(function(){
                     "dataSrc": "",
                     "method": "post",
                     "data": function(data) {
-                            // Read values
-                           data.flor = flor;
-                           data.fini = fecha_ini;
-                           data.ffin = fecha_fin;
+                            data.flor = $("#nflor").val() || "";
+                            data.descripcion = $("#fdesc").val() || "";
+                            data.granel = $("#ngranel").val() || "";
+                            data.fini = $("#finicial").val() || "";
+                            data.ffin = $("#ffinal").val() || "";
                     }
                 },
                 "columns": [
@@ -118,6 +143,7 @@ $(document).ready(function(){
                     { "searchable": false, "targets": 10 }
                   ]
             });
+            ajustarAlturaTabla();
             /////////////////////////////////////////////////////
             $('#rFloreros tbody').on('click', 'tr', function () {
                 var data = tabla.row( this ).data();

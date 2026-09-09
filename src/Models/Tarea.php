@@ -5,17 +5,27 @@ use App\Helpers\Database;
 
 class Tarea {
 
+    private static $columnCache = [];
+
     private static function columnExists($table, $column) {
+        $key = $table . '.' . $column;
+        if (array_key_exists($key, self::$columnCache)) {
+            return self::$columnCache[$key];
+        }
+
         $conexion = Database::getConnection();
         $stmt = $conexion->prepare("SELECT COUNT(*) AS total FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?");
         if (!$stmt) {
+            self::$columnCache[$key] = false;
             return false;
         }
 
         $stmt->bind_param("ss", $table, $column);
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc();
-        return ((int)($row['total'] ?? 0)) > 0;
+        $result = ((int)($row['total'] ?? 0)) > 0;
+        self::$columnCache[$key] = $result;
+        return $result;
     }
 
     private static function ordenSelect($alias = 't') {
@@ -105,6 +115,38 @@ class Tarea {
         }
         $stmt->execute();
         return $stmt->get_result()->fetch_object();
+    }
+
+    public static function getParaExportarExcel($usuario_id = null) {
+        $conexion = Database::getConnection();
+        $ordenSelect  = self::columnExists('tareas', 'orden_ejecucion')  ? ', t.orden_ejecucion'  : ', NULL AS orden_ejecucion';
+        $cronoSelect  = self::columnExists('tareas', 'etapa_fase')
+            ? ', t.etapa_fase, t.fecha_fin_real, t.entregable_concreto, t.evidencia_soporte, t.observaciones, t.dependencia'
+            : ', NULL AS etapa_fase, NULL AS fecha_fin_real, NULL AS entregable_concreto, NULL AS evidencia_soporte, NULL AS observaciones, NULL AS dependencia';
+        $sql = "SELECT t.id, t.nombre, t.descripcion, t.estado, t.porcentaje_avance,
+                       t.fecha_inicio, t.fecha_vencimiento, t.fecha_actualizacion, t.responsable,
+                       t.proyecto_id{$ordenSelect}{$cronoSelect}, p.nombre AS proyecto_nombre
+                FROM tareas t
+                LEFT JOIN proyectos p ON t.proyecto_id = p.id";
+
+        if ($usuario_id !== null) {
+            $stmt = $conexion->prepare($sql . ' WHERE (t.usuario_id = ? OR t.usuario_id IS NULL)
+                                              ORDER BY t.proyecto_id ASC, t.orden_ejecucion ASC, t.fecha_creacion ASC, t.id ASC');
+            if (!$stmt) return [];
+            $stmt->bind_param('i', $usuario_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+        } else {
+            $result = $conexion->query($sql . ' ORDER BY t.proyecto_id ASC, t.orden_ejecucion ASC, t.fecha_creacion ASC, t.id ASC');
+        }
+
+        $data = [];
+        if ($result) {
+            while ($row = $result->fetch_object()) {
+                $data[] = $row;
+            }
+        }
+        return $data;
     }
 
     public static function getPendientes($usuario_id = null) {

@@ -23,6 +23,49 @@
             margin: 0.75rem auto;
         }
     }
+
+    /* Acciones de fila: mismo tamaño e icono para todas, color solo al interactuar */
+    .action-icons {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        flex-wrap: nowrap;
+    }
+
+    .action-icon-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        border: none;
+        border-radius: 6px;
+        background: transparent;
+        color: #6c757d;
+        line-height: 1;
+        cursor: pointer;
+        transition: background-color .15s ease, color .15s ease;
+    }
+
+    .action-icon-btn .material-icons {
+        font-size: 17px;
+        line-height: 1;
+    }
+
+    .action-icon-btn:hover,
+    .action-icon-btn:focus {
+        background-color: #eef1f4;
+        color: #495057;
+        text-decoration: none;
+        outline: none;
+    }
+
+    .action-icon-btn[data-variant="danger"]:hover,
+    .action-icon-btn[data-variant="danger"]:focus {
+        background-color: #fdecea;
+        color: #dc3545;
+    }
 </style>
 
 <?php
@@ -31,36 +74,11 @@ $gestionTitle = 'Gestión de Tareas';
 $gestionSubtitle = 'Consulta pendientes, prioriza ejecución y salta al tablero Kanban sin perder el hilo operativo.';
 $gestionProyectoFiltro = trim((string)($_GET['proyecto'] ?? ''));
 $gestionProyectoIdInicial = (int)($_GET['proyecto_id'] ?? 0);
-$gestionQuickActions = [
-    [
-        'label' => 'Panel',
-        'href' => 'index.php?report=205',
-        'class' => 'btn-outline-secondary',
-        'icon' => 'space_dashboard'
-    ],
-    [
-        'label' => 'Nueva Tarea',
-        'onclick' => 'abrirModalTarea()',
-        'class' => 'btn-primary',
-        'icon' => 'add_task'
-    ],
-    [
-        'label' => 'Ir a Kanban',
-        'href' => 'index.php?report=203',
-        'class' => 'btn-outline-success',
-        'icon' => 'view_kanban'
-    ],
-    [
-        'label' => 'Ver Proyectos',
-        'href' => 'index.php?report=200',
-        'class' => 'btn-outline-secondary',
-        'icon' => 'folder_open'
-    ],
-];
+$gestionQuickActions = [];
 require __DIR__ . '/../Shared/gestion_header.php';
 ?>
 
-<div class="container-fluid">
+<div class="container-fluid px-3 px-lg-4 pt-2 pb-4">
     <?php if ($gestionProyectoFiltro !== ''): ?>
         <div class="alert alert-light border d-flex align-items-center justify-content-between mb-3">
             <div>
@@ -69,27 +87,57 @@ require __DIR__ . '/../Shared/gestion_header.php';
             <a class="btn btn-sm btn-outline-secondary" href="index.php?report=201">Limpiar filtro</a>
         </div>
     <?php endif; ?>
-    <div class="row mb-2">
-        <div class="col-auto">
-            <select id="filtroTipo" class="form-control form-control-sm" onchange="filtrarTareas()">
-                <option value="">-- Todos los tipos --</option>
-                <option value="prevista">Prevista</option>
-                <option value="imprevista">Imprevista</option>
-            </select>
+    <div class="row">
+        <div class="col-md-2 col-lg-2">
+            <div class="filtro-sidebar mr-0 mr-lg-3">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header">
+                        <span class="material-icons" style="font-size:1rem;vertical-align:middle;">filter_list</span>
+                        Filtros
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="mb-3">
+                            <label for="filtroEstado">Estado</label>
+                            <select id="filtroEstado" class="form-control form-control-sm" onchange="filtrarTareas()">
+                                <option value="">Todos</option>
+                                <option value="pendiente">Pendiente</option>
+                                <option value="en_progreso">En Progreso</option>
+                                <option value="completada">Completada</option>
+                                <option value="cancelada">Cancelada</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="filtroPrioridad">Prioridad</label>
+                            <select id="filtroPrioridad" class="form-control form-control-sm" onchange="filtrarTareas()">
+                                <option value="">Todas</option>
+                                <option value="baja">Baja</option>
+                                <option value="media">Media</option>
+                                <option value="alta">Alta</option>
+                                <option value="urgente">Urgente</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="filtroProyectoTarea">Proyecto</label>
+                            <select id="filtroProyectoTarea" class="form-control form-control-sm" onchange="filtrarTareas()">
+                                <option value="">Todos</option>
+                                <option value="Sin proyecto">Sin proyecto</option>
+                                <?php if (!empty($proyectos)): ?>
+                                    <?php foreach ($proyectos as $p): ?>
+                                        <option value="<?php echo htmlspecialchars($p->nombre); ?>" <?php echo $gestionProyectoFiltro !== '' && $gestionProyectoFiltro === (string)$p->nombre ? 'selected' : ''; ?>><?php echo htmlspecialchars(($p->categoria ? $p->categoria . ' / ' : '') . $p->nombre); ?></option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-brand-green btn-sm w-100" onclick="abrirModalTarea()">
+                    <span class="material-icons" style="font-size:1rem;">add_task</span> Nueva Tarea
+                </button>
+            </div>
         </div>
-        <div class="col-auto">
-            <select id="filtroProyectoTarea" class="form-control form-control-sm" onchange="filtrarTareas()">
-                <option value="">-- Todos los proyectos --</option>
-                <option value="Sin proyecto">Sin proyecto</option>
-                <?php if (!empty($proyectos)): ?>
-                    <?php foreach ($proyectos as $p): ?>
-                        <option value="<?php echo htmlspecialchars($p->nombre); ?>" <?php echo $gestionProyectoFiltro !== '' && $gestionProyectoFiltro === (string)$p->nombre ? 'selected' : ''; ?>><?php echo htmlspecialchars(($p->categoria ? $p->categoria . ' / ' : '') . $p->nombre); ?></option>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </select>
-        </div>
-    </div>
-    <div class="table-responsive">
+
+        <div class="col-md-10 col-lg-10">
+            <div class="table-responsive gestion-table-card">
         <table id="tablaTareas" class="table display compact" style="width:100%">
             <thead>
                 <tr>
@@ -142,29 +190,19 @@ require __DIR__ . '/../Shared/gestion_header.php';
                             <td><?php echo htmlspecialchars($row->fecha_inicio ?? '-'); ?></td>
                             <td><?php echo htmlspecialchars($row->fecha_vencimiento ?? '-'); ?></td>
                             <td>
-                                <button class="btn btn-xs btn-warning" onclick='editarTarea(<?php echo json_encode([
-                                    "id" => (int)$row->id,
-                                    "tipo" => $row->tipo ?? "prevista",
-                                    "nombre" => $row->nombre,
-                                    "descripcion" => $row->descripcion ?? "",
-                                    "proyecto_id" => $row->proyecto_id ?? "",
-                                    "responsable" => $row->responsable ?? "",
-                                    "quien_solicita" => $row->quien_solicita ?? "",
-                                    "estado" => $row->estado,
-                                    "porcentaje_avance" => (int)($row->porcentaje_avance ?? 0),
-                                    "prioridad" => $row->prioridad,
-                                    "orden_ejecucion" => isset($row->orden_ejecucion) ? (int)$row->orden_ejecucion : "",
-                                    "fecha_inicio" => $row->fecha_inicio ?? "",
-                                    "fecha_vencimiento" => $row->fecha_vencimiento ?? ""
-                                ], JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'>✏</button>
-                                <button class="btn btn-xs btn-info" title="Imágenes / Bitácora" onclick="abrirPanelTarea(<?php echo (int)$row->id; ?>, '<?php echo addslashes($row->nombre); ?>')">📎</button>
-                                <button class="btn btn-xs btn-danger" onclick="eliminarTarea(<?php echo (int)$row->id; ?>)">🗑</button>
+                                <div class="action-icons">
+                                    <button class="action-icon-btn" data-variant="edit" title="Editar" onclick="editarTarea(<?php echo (int)$row->id; ?>)"><span class="material-icons">edit</span></button>
+                                    <button class="action-icon-btn" data-variant="panel" title="Imágenes / Bitácora" onclick="abrirPanelTarea(<?php echo (int)$row->id; ?>, '<?php echo addslashes($row->nombre); ?>')"><span class="material-icons">attach_file</span></button>
+                                    <button class="action-icon-btn" data-variant="danger" title="Eliminar" onclick="eliminarTarea(<?php echo (int)$row->id; ?>)"><span class="material-icons">delete</span></button>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </tbody>
         </table>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -203,12 +241,22 @@ require __DIR__ . '/../Shared/gestion_header.php';
                 <input type="text" id="tNombre" class="form-control mb-2" placeholder="Nombre de la tarea">
                 <label class="small text-muted mb-0">Descripción</label>
                 <textarea id="tDesc" class="form-control mb-2" rows="6" placeholder="Descripción (puede superar 100 caracteres)"></textarea>
-                <label class="small text-muted mb-0">Responsable</label>
-                <input type="text" id="tResponsable" class="form-control mb-2" placeholder="¿Quién ejecuta?">
-                <label class="small text-muted mb-0">Quien Solicita</label>
-                <input type="text" id="tSolicita" class="form-control mb-2" placeholder="¿Quién lo solicita? (opcional)">
                 <div class="row">
-                    <div class="col-6">
+                    <div class="col-4">
+                        <label class="small text-muted mb-0">Responsable</label>
+                        <input type="text" id="tResponsable" class="form-control mb-2" placeholder="¿Quién ejecuta?">
+                    </div>
+                    <div class="col-4">
+                        <label class="small text-muted mb-0">Quien Solicita</label>
+                        <input type="text" id="tSolicita" class="form-control mb-2" placeholder="¿Quién lo solicita? (opcional)">
+                    </div>
+                    <div class="col-4">
+                        <label class="small text-muted mb-0">Etapa / Fase</label>
+                        <input type="text" id="tEtapa" class="form-control mb-2" placeholder="Ej: Análisis, Desarrollo, Pruebas">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
                         <label class="small text-muted mb-0">Estado</label>
                         <select id="tEstado" class="form-control mb-2">
                             <option value="pendiente">Pendiente</option>
@@ -217,13 +265,11 @@ require __DIR__ . '/../Shared/gestion_header.php';
                             <option value="cancelada">Cancelada</option>
                         </select>
                     </div>
-                    <div class="col-6">
+                    <div class="col-4">
                         <label class="small text-muted mb-0">% Avance</label>
                         <input type="number" id="tAvance" class="form-control mb-2" min="0" max="100" step="1" value="0">
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-6">
+                    <div class="col-4">
                         <label class="small text-muted mb-0">Prioridad</label>
                         <select id="tPrioridad" class="form-control mb-2">
                             <option value="baja">Baja</option>
@@ -232,19 +278,43 @@ require __DIR__ . '/../Shared/gestion_header.php';
                             <option value="urgente">Urgente</option>
                         </select>
                     </div>
-                    <div class="col-6">
+                </div>
+                <div class="row">
+                    <div class="col-4">
                         <label class="small text-muted mb-0">Orden de ejecución</label>
                         <input type="number" id="tOrden" class="form-control mb-2" min="1" step="1" placeholder="1, 2, 3...">
+                    </div>
+                    <div class="col-4">
+                        <label class="small text-muted mb-0">Fecha inicio</label>
+                        <input type="date" id="tInicio" class="form-control mb-2">
+                    </div>
+                    <div class="col-4">
+                        <label class="small text-muted mb-0">Vencimiento</label>
+                        <input type="date" id="tVencimiento" class="form-control mb-2">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label class="small text-muted mb-0">Fecha fin real</label>
+                        <input type="date" id="tFinReal" class="form-control mb-2">
+                    </div>
+                    <div class="col-4">
+                        <label class="small text-muted mb-0">Evidencia / Link</label>
+                        <input type="text" id="tEvidencia" class="form-control mb-2" placeholder="URL o ruta">
+                    </div>
+                    <div class="col-4">
+                        <label class="small text-muted mb-0">Dependencia</label>
+                        <input type="text" id="tDependencia" class="form-control mb-2">
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-6">
-                        <label class="small text-muted mb-0">Fecha inicio</label>
-                        <input type="date" id="tInicio" class="form-control mb-2">
+                        <label class="small text-muted mb-0">Entregable concreto</label>
+                        <input type="text" id="tEntregable" class="form-control mb-2">
                     </div>
                     <div class="col-6">
-                        <label class="small text-muted mb-0">Vencimiento</label>
-                        <input type="date" id="tVencimiento" class="form-control">
+                        <label class="small text-muted mb-0">Observaciones</label>
+                        <textarea id="tObservaciones" class="form-control mb-2" rows="2"></textarea>
                     </div>
                 </div>
             </div>
@@ -303,8 +373,8 @@ require __DIR__ . '/../Shared/gestion_header.php';
     <img id="lightboxImg" src="" style="max-width:90%;max-height:90%;border-radius:4px;box-shadow:0 0 30px #000">
 </div>
 
-<!-- SortableJS para drag-drop de tareas -->
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<!-- SortableJS para drag-drop de tareas (local) -->
+<script src="scripts/vendor/Sortable.min.js"></script>
 <script>
     // Inicializar drag-drop en tabla de tareas
     document.addEventListener('DOMContentLoaded', function() {

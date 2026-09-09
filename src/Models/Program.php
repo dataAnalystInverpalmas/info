@@ -43,4 +43,30 @@ class Program {
         }
         return $data;
     }
+
+    public static function getProductos() {
+        $conexion = Database::getConnection();
+        $result = $conexion->query(
+            "SELECT DISTINCT producto FROM informes.program WHERE producto IS NOT NULL AND producto <> '' ORDER BY producto"
+        );
+        $data = [];
+        if ($result) {
+            while ($row = $result->fetch_object()) { $data[] = $row->producto; }
+            $result->free();
+        }
+        return $data;
+    }
+
+    public static function getColores() {
+        $conexion = Database::getConnection();
+        $result = $conexion->query(
+            "SELECT DISTINCT color FROM informes.program WHERE color IS NOT NULL AND color <> '' ORDER BY color"
+        );
+        $data = [];
+        if ($result) {
+            while ($row = $result->fetch_object()) { $data[] = $row->color; }
+            $result->free();
+        }
+        return $data;
+    }
 }

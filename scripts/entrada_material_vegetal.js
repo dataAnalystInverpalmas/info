@@ -9,6 +9,20 @@ $(document).ready(function () {
     var ano  = hoy.getFullYear();
     $('#emv_fecha_ini').val(ano + '-01-01');
     $('#emv_fecha_fin').val(ano + '-' + mes + '-' + dia);
+    $('#emv_rep_fecha_ini').val(ano + '-01-01');
+    $('#emv_rep_fecha_fin').val(ano + '-' + mes + '-' + dia);
+
+    $('.emv-nav').on('click', function () {
+        var view = $(this).data('emv-view');
+        $('.emv-nav').removeClass('btn-success').addClass('btn-outline-success');
+        $(this).removeClass('btn-outline-success').addClass('btn-success');
+        $('#emv_view_entrada, #emv_view_reporte').hide();
+        if (view === 'reporte') {
+            $('#emv_view_reporte').show();
+        } else {
+            $('#emv_view_entrada').show();
+        }
+    });
 
     /* ---------------------------------------------------------------
        Poblar selects de proveedores y destino (breeders)
@@ -16,11 +30,20 @@ $(document).ready(function () {
     $.post('ajax/crud_emv.php', { opcion: 'breeders' }, function (data) {
         var $selP = $('#emv_proveedor');
         var $selD = $('#emv_destino');
+        var $selPR = $('#emv_rep_proveedor');
+        var $selDR = $('#emv_rep_destino');
+        var $selFP = $('#emv_filtro_proveedor');
         $selP.empty().append('<option value="">— seleccione —</option>');
         $selD.empty().append('<option value="">— seleccione —</option>');
+        $selPR.empty().append('<option value="">— todos —</option>');
+        $selDR.empty().append('<option value="">— todos —</option>');
+        $selFP.empty().append('<option value="">— todos —</option>');
         $.each(data, function (i, item) {
             $selP.append($('<option>').val(item.id).text(item.nombre));
             $selD.append($('<option>').val(item.id).text(item.nombre));
+            $selPR.append($('<option>').val(item.id).text(item.nombre));
+            $selDR.append($('<option>').val(item.id).text(item.nombre));
+            $selFP.append($('<option>').val(item.id).text(item.nombre));
         });
     }, 'json');
 
@@ -46,9 +69,16 @@ $(document).ready(function () {
         $sel.val(valorActual);
     }
 
+    function poblarReporteVariedades() {
+        var $sel = $('#emv_rep_variedad');
+        $sel.empty().append('<option value="">— todas —</option>');
+        $.each(todasVariedades, function (i, item) {
+            $sel.append($('<option>').val(item.codigo).text(item.nombre));
+        });
+    }
+
     $.post('ajax/crud_emv.php', { opcion: 'variedades' }, function (data) {
         todasVariedades = data;
-        // Poblar filtro de flores (valores únicos)
         var flores = {};
         $.each(data, function (i, item) {
             var cf = item.codflor || '';
@@ -57,6 +87,7 @@ $(document).ready(function () {
                 $('#det_filtro_flor').append($('<option>').val(cf).text(cf));
             }
         });
+        poblarReporteVariedades();
         aplicarFiltroVariedad();
     }, 'json');
 
@@ -78,7 +109,9 @@ $(document).ready(function () {
                 return {
                     opcion: '4',
                     fecha_ini: $('#emv_fecha_ini').val(),
-                    fecha_fin: $('#emv_fecha_fin').val()
+                    fecha_fin: $('#emv_fecha_fin').val(),
+                    proveedor: $('#emv_filtro_proveedor').val(),
+                    material: $('#emv_filtro_material').val()
                 };
             },
             dataSrc: ''
@@ -115,6 +148,68 @@ $(document).ready(function () {
     window.emvListar = function () {
         tableEmv.ajax.reload(null, false);
     };
+
+    var tableEmvReporte = $('#tableEmvReporte').DataTable({
+        processing: true,
+        ordering: true,
+        pageLength: 25,
+        dom: 'Bfrtip',
+        buttons: [
+            {
+                extend: 'excelHtml5',
+                text: '<i class="fas fa-file-excel"></i> Exportar Excel',
+                title: 'Reporte_EMV',
+                className: 'btn btn-success btn-sm',
+                exportOptions: { columns: ':visible' }
+            }
+        ],
+        ajax: {
+            url: 'ajax/crud_emv.php',
+            type: 'POST',
+            data: function () {
+                return {
+                    opcion: '8',
+                    fecha_ini: $('#emv_rep_fecha_ini').val(),
+                    fecha_fin: $('#emv_rep_fecha_fin').val(),
+                    maquila: $('#emv_rep_maquila').val(),
+                    proveedor: $('#emv_rep_proveedor').val(),
+                    destino: $('#emv_rep_destino').val(),
+                    material: $('#emv_rep_material').val(),
+                    variedad: $('#emv_rep_variedad').val(),
+                    remision: $('#emv_rep_remision').val()
+                };
+            },
+            dataSrc: ''
+        },
+        columns: [
+            { data: 'id', title: 'Id' },
+            { data: 'fecha', title: 'Fecha' },
+            { data: 'maquila', title: 'Maquila' },
+            { data: 'proveedor', title: 'Proveedor' },
+            { data: 'remision', title: 'Remisión' },
+            { data: 'destino', title: 'Destino' },
+            { data: 'material', title: 'Material' },
+            { data: 'variedad', title: 'Variedad' },
+            { data: 'cantidad_recibida', title: 'Recibida' },
+            { data: 'facturado', title: 'Facturado' },
+            { data: 'reposicion', title: 'Reposición' },
+            { data: 'excedente', title: 'Excedente' },
+            { data: 'obsequio', title: 'Obsequio' },
+            { data: 'adicional', title: 'Adicional' },
+            {
+                data: 'raiz',
+                title: 'Raíz',
+                render: function (v) {
+                    return v == 1 ? 'Con raíz' : 'Sin raíz';
+                }
+            },
+            { data: 'observacion', title: 'Observación', defaultContent: '' }
+        ]
+    });
+
+    $('#btnEmvReporteConsultar').on('click', function () {
+        tableEmvReporte.ajax.reload(null, false);
+    });
 
     /* ---------------------------------------------------------------
        Estado del formulario cabecera

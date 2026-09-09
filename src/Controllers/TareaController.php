@@ -7,16 +7,26 @@ use App\Models\Proyecto;
 class TareaController {
     private const JSON_FLAGS = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
 
+    private static $columnCache = [];
+
     private static function columnExists($conexion, string $table, string $column): bool {
+        $key = $table . '.' . $column;
+        if (array_key_exists($key, self::$columnCache)) {
+            return self::$columnCache[$key];
+        }
+
         $stmt = $conexion->prepare("SELECT COUNT(*) AS total FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?");
         if (!$stmt) {
+            self::$columnCache[$key] = false;
             return false;
         }
 
         $stmt->bind_param("ss", $table, $column);
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc();
-        return ((int)($row['total'] ?? 0)) > 0;
+        $result = ((int)($row['total'] ?? 0)) > 0;
+        self::$columnCache[$key] = $result;
+        return $result;
     }
 
     private static function siguienteOrdenTarea($conexion, $proyecto_id) {
@@ -153,6 +163,13 @@ class TareaController {
         $fecha_inicio = $fecha_inicio !== '' ? $fecha_inicio : null;
         $fecha_vencimiento = trim((string)($input['fecha_vencimiento'] ?? ''));
         $fecha_vencimiento = $fecha_vencimiento !== '' ? $fecha_vencimiento : null;
+        $n = static function ($k) use ($input) { $v = trim((string)($input[$k] ?? '')); return $v !== '' ? $v : null; };
+        $etapa_fase        = $n('etapa_fase');
+        $fecha_fin_real    = $n('fecha_fin_real');
+        $entregable_concreto = $n('entregable_concreto');
+        $evidencia_soporte = $n('evidencia_soporte');
+        $obs_tarea         = $n('observaciones');
+        $dependencia       = $n('dependencia');
 
         if (empty($nombre)) {
             return ['success' => false, 'mensaje' => 'Nombre requerido'];
@@ -168,8 +185,13 @@ class TareaController {
             $orden_ejecucion = self::siguienteOrdenTarea($conexion, $proyecto_id);
         }
         $tieneQuienSolicita = self::columnExists($conexion, 'tareas', 'quien_solicita');
+        $tieneCronograma    = self::columnExists($conexion, 'tareas', 'etapa_fase');
 
-        if ($tieneOrden && $tieneQuienSolicita) {
+        if ($tieneOrden && $tieneQuienSolicita && $tieneCronograma) {
+            $stmt = $conexion->prepare("INSERT INTO tareas (usuario_id, nombre, tipo, descripcion, proyecto_id, etapa_fase, orden_ejecucion, responsable, quien_solicita, estado, porcentaje_avance, prioridad, fecha_inicio, fecha_vencimiento, fecha_fin_real, entregable_concreto, evidencia_soporte, observaciones, dependencia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            if (!$stmt) return ['success' => false, 'mensaje' => $conexion->error ?: 'Error de consulta'];
+            $stmt->bind_param("isssisisssissssssss", $usuario_id, $nombre, $tipo, $descripcion, $proyecto_id, $etapa_fase, $orden_ejecucion, $responsable, $quien_solicita, $estado, $porcentaje_avance, $prioridad, $fecha_inicio, $fecha_vencimiento, $fecha_fin_real, $entregable_concreto, $evidencia_soporte, $obs_tarea, $dependencia);
+        } elseif ($tieneOrden && $tieneQuienSolicita) {
             $stmt = $conexion->prepare("INSERT INTO tareas (usuario_id, nombre, tipo, descripcion, proyecto_id, orden_ejecucion, responsable, quien_solicita, estado, porcentaje_avance, prioridad, fecha_inicio, fecha_vencimiento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             if (!$stmt) return ['success' => false, 'mensaje' => $conexion->error ?: 'Error de consulta'];
             $stmt->bind_param("isssiisssisss", $usuario_id, $nombre, $tipo, $descripcion, $proyecto_id, $orden_ejecucion, $responsable, $quien_solicita, $estado, $porcentaje_avance, $prioridad, $fecha_inicio, $fecha_vencimiento);
@@ -227,13 +249,25 @@ class TareaController {
             return ['success' => false, 'mensaje' => 'Sesion no valida. Inicia sesion nuevamente.'];
         }
 
+        $n = static function ($k) use ($input) { $v = trim((string)($input[$k] ?? '')); return $v !== '' ? $v : null; };
+        $etapa_fase          = $n('etapa_fase');
+        $fecha_fin_real      = $n('fecha_fin_real');
+        $entregable_concreto = $n('entregable_concreto');
+        $evidencia_soporte   = $n('evidencia_soporte');
+        $obs_tarea           = $n('observaciones');
+        $dependencia         = $n('dependencia');
+
         $conexion = \App\Helpers\Database::getConnection();
         $tieneOrden = self::columnExists($conexion, 'tareas', 'orden_ejecucion');
         $tieneQuienSolicita = self::columnExists($conexion, 'tareas', 'quien_solicita');
+        $tieneCronograma    = self::columnExists($conexion, 'tareas', 'etapa_fase');
 
         $quienSolicitaSelect = $tieneQuienSolicita ? 'quien_solicita' : 'NULL AS quien_solicita';
         $ordenSelect = $tieneOrden ? 'orden_ejecucion' : 'NULL AS orden_ejecucion';
-        $stmtAntes = $conexion->prepare("SELECT nombre, tipo, descripcion, proyecto_id, {$ordenSelect}, responsable, {$quienSolicitaSelect}, estado, porcentaje_avance, prioridad, fecha_inicio, fecha_vencimiento FROM tareas WHERE id=? AND (usuario_id=? OR usuario_id IS NULL) LIMIT 1");
+        $cronoSelect = $tieneCronograma
+            ? ', etapa_fase, fecha_fin_real, entregable_concreto, evidencia_soporte, observaciones, dependencia'
+            : ', NULL AS etapa_fase, NULL AS fecha_fin_real, NULL AS entregable_concreto, NULL AS evidencia_soporte, NULL AS observaciones, NULL AS dependencia';
+        $stmtAntes = $conexion->prepare("SELECT nombre, tipo, descripcion, proyecto_id, {$ordenSelect}, responsable, {$quienSolicitaSelect}, estado, porcentaje_avance, prioridad, fecha_inicio, fecha_vencimiento{$cronoSelect} FROM tareas WHERE id=? AND (usuario_id=? OR usuario_id IS NULL) LIMIT 1");
         if (!$stmtAntes) {
             return ['success' => false, 'mensaje' => $conexion->error ?: 'Error de consulta'];
         }
@@ -252,7 +286,10 @@ class TareaController {
                 : self::siguienteOrdenTarea($conexion, $proyecto_id);
         }
 
-        if ($tieneOrden && $tieneQuienSolicita) {
+        if ($tieneOrden && $tieneQuienSolicita && $tieneCronograma) {
+            $stmt = $conexion->prepare("UPDATE tareas SET nombre=?, tipo=?, descripcion=?, proyecto_id=?, etapa_fase=?, orden_ejecucion=?, responsable=?, quien_solicita=?, estado=?, porcentaje_avance=?, prioridad=?, fecha_inicio=?, fecha_vencimiento=?, fecha_fin_real=?, entregable_concreto=?, evidencia_soporte=?, observaciones=?, dependencia=? WHERE id=? AND (usuario_id=? OR usuario_id IS NULL)");
+            $stmt->bind_param("sssisisssissssssssii", $nombre, $tipo, $descripcion, $proyecto_id, $etapa_fase, $orden_ejecucion, $responsable, $quien_solicita, $estado, $porcentaje_avance, $prioridad, $fecha_inicio, $fecha_vencimiento, $fecha_fin_real, $entregable_concreto, $evidencia_soporte, $obs_tarea, $dependencia, $id, $usuario_id);
+        } elseif ($tieneOrden && $tieneQuienSolicita) {
             $stmt = $conexion->prepare("UPDATE tareas SET nombre=?, tipo=?, descripcion=?, proyecto_id=?, orden_ejecucion=?, responsable=?, quien_solicita=?, estado=?, porcentaje_avance=?, prioridad=?, fecha_inicio=?, fecha_vencimiento=? WHERE id=? AND (usuario_id=? OR usuario_id IS NULL)");
             $stmt->bind_param("sssiisssisssii", $nombre, $tipo, $descripcion, $proyecto_id, $orden_ejecucion, $responsable, $quien_solicita, $estado, $porcentaje_avance, $prioridad, $fecha_inicio, $fecha_vencimiento, $id, $usuario_id);
         } elseif ($tieneOrden) {

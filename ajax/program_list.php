@@ -6,6 +6,8 @@ $programa = isset($_GET['programa']) && $_GET['programa'] !== '' ? (int)$_GET['p
 $estado = isset($_GET['estado']) && $_GET['estado'] !== '' ? $conexion->real_escape_string($_GET['estado']) : null;
 $variedad = isset($_GET['variedad']) && $_GET['variedad'] !== '' ? $conexion->real_escape_string($_GET['variedad']) : null;
 $temporada = isset($_GET['temporada']) && $_GET['temporada'] !== '' ? $conexion->real_escape_string($_GET['temporada']) : null;
+$producto = isset($_GET['producto']) && $_GET['producto'] !== '' ? $conexion->real_escape_string($_GET['producto']) : null;
+$color = isset($_GET['color']) && $_GET['color'] !== '' ? $conexion->real_escape_string($_GET['color']) : null;
 $ciclo = isset($_GET['ciclo']) && $_GET['ciclo'] !== '' ? (int)$_GET['ciclo'] : null;
 $adicional = isset($_GET['adicional']) && $_GET['adicional'] !== '' ? (int)$_GET['adicional'] : null;
 $semana_siembra = isset($_GET['semana_siembra']) && $_GET['semana_siembra'] !== '' ? $conexion->real_escape_string($_GET['semana_siembra']) : null;
@@ -17,6 +19,8 @@ if($programa !== null){ $where[] = "programa = " . $programa; }
 if($estado !== null){ $where[] = "estado = '" . $estado . "'"; }
 if($variedad !== null){ $where[] = "variedad = '" . $variedad . "'"; }
 if($temporada !== null){ $where[] = "temporada_obj LIKE '%" . $temporada . "%'"; }
+if($producto !== null){ $where[] = "producto = '" . $producto . "'"; }
+if($color !== null){ $where[] = "color = '" . $color . "'"; }
 if($ciclo !== null){ $where[] = "ciclo = " . $ciclo; }
 if($adicional !== null){ $where[] = "adicional = " . $adicional; }
 if($semana_siembra !== null && strlen($semana_siembra) === 4){

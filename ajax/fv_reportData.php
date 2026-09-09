@@ -13,23 +13,33 @@ if ($_POST){
 	$fini = $_POST['fini'] ?? '';
 	$ffin = $_POST['ffin'] ?? '';
 	$flor = $_POST['flor'] ?? '';
+    $descripcion = trim($_POST['descripcion'] ?? '');
+    $granel = $_POST['granel'] ?? '';
 
-	if ($fini != "" && $ffin != "" && $flor != ""){
-		$where .= "AND v.producto = ? AND f.fecha_florero BETWEEN ? AND ? ";
-		$types .= "sss";
-		$params[] = $flor;
-		$params[] = $fini;
-		$params[] = $ffin;
-	}elseif ($fini != "" && $ffin != ""){
-		$where .= "AND f.fecha_florero BETWEEN ? AND ? ";
-		$types .= "ss";
-		$params[] = $fini;
-		$params[] = $ffin;
-	}elseif ($flor != ""){
-		$where .= "AND v.producto = ? ";
-		$types .= "s";
-		$params[] = $flor;
-	}
+    if ($flor !== "") {
+        $where .= "AND v.nombre = ? ";
+        $types .= "s";
+        $params[] = $flor;
+    }
+
+    if ($descripcion !== "") {
+        $where .= "AND f.grupo_descripcion LIKE ? ";
+        $types .= "s";
+        $params[] = '%' . $descripcion . '%';
+    }
+
+    if ($granel !== "") {
+        $where .= "AND f.guarde_granel = ? ";
+        $types .= "i";
+        $params[] = (int)$granel;
+    }
+
+    if ($fini !== "" && $ffin !== "") {
+        $where .= "AND f.fecha_florero BETWEEN ? AND ? ";
+        $types .= "ss";
+        $params[] = $fini;
+        $params[] = $ffin;
+    }
 }
 
 $query="

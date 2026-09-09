@@ -118,7 +118,7 @@ class Application {
                 FROM plane AS p
                 INNER JOIN arrangements as a ON a.variedad=p.variedad and a.finca=p.finca
                 INNER JOIN arrangement as aa ON a.aplicar=aa.aplicar and a.tipo=aa.tipo
-                INNER JOIN supplies as s ON s.arrangement_id=aa.id
+                INNER JOIN supplies as s ON s.arrangement_id=aa.id AND s.finca=p.finca
                 $where
                 GROUP BY a.aplicar,s.insumo";
         $result = $conexion->query($sql);

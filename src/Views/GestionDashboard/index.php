@@ -2,26 +2,6 @@
 $gestionActive = 'panel';
 $gestionTitle = 'Centro de Gestión';
 $gestionSubtitle = 'Entrada rápida para proyectos, tareas, tablero Kanban y seguimiento operativo por proyecto.';
-$gestionQuickActions = [
-    [
-        'label' => 'Nuevo Proyecto',
-        'href' => 'index.php?report=200',
-        'class' => 'btn-outline-secondary',
-        'icon' => 'create_new_folder'
-    ],
-    [
-        'label' => 'Nueva Tarea',
-        'href' => 'index.php?report=201&nueva=1',
-        'class' => 'btn-primary',
-        'icon' => 'add_task'
-    ],
-    [
-        'label' => 'Abrir Kanban',
-        'href' => 'index.php?report=203',
-        'class' => 'btn-outline-success',
-        'icon' => 'view_kanban'
-    ],
-];
 require __DIR__ . '/../Shared/gestion_header.php';
 
 $resumen = $dashboard['resumen'] ?? [];

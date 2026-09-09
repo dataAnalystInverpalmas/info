@@ -18,6 +18,8 @@ $(document).ready(function () {
     var dt = null;
     var selectsConfig = {};
     try { selectsConfig = JSON.parse($root.attr('data-selects') || '{}'); } catch(e) { selectsConfig = {}; }
+    var displayConfig = {};
+    try { displayConfig = JSON.parse($root.attr('data-display') || '{}'); } catch(e) { displayConfig = {}; }
 
     function escHtml(v) {
         return String(v == null ? '' : v)
@@ -113,7 +115,13 @@ $(document).ready(function () {
 
     function initTable() {
         var columns = meta.columns.map(function (c) {
-            return { data: c.name, defaultContent: '' };
+            var colDef = { data: c.name, defaultContent: '' };
+            if (displayConfig[c.name]) {
+                colDef.render = function (data, type, row) {
+                    return escHtml((row && row[displayConfig[c.name]]) || data);
+                };
+            }
+            return colDef;
         });
 
         columns.push({

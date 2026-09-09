@@ -128,11 +128,13 @@ $reportes = array(
 	'106'      => 'views/report_pb_demandas.php',
 	'107'      => 'views/report_pb_compara_prod.php',
 	'109'      => 'views/report_pb_jl_proyecciones.php',
+	'110'      => 'views/report_pb_nacional.php',
 	'curvas'   => 'views/report_pb_jl_curvas_clavel.php',
 	'200'      => 'views/proyectos.php',
 	'201'      => 'views/tareas.php',
 	'202'      => 'views/bitacora.php',
 	'203'      => 'views/kanban.php',
+	'206'      => 'views/solicitudes_extra.php',
 	'204'      => 'views/resumen_ejecutivo_mensual.php',
 	'205'      => 'views/gestion_dashboard.php',
 	'1000'     => 'covid/covid.php',
@@ -205,6 +207,9 @@ if (isset($_GET['report'])) {
 		// Fallback: si la ruta nueva de arrangements no está en roles, usar el permiso del original
 		if (!$permitido && ($dir === 'views/arrangements_crud.php' || $dir === 'views/arrangement_crud.php')) {
 			$permitido = tiene_permiso($conexion, 'tables/arrangements.php');
+		}
+		if (!$permitido && $dir === 'views/solicitudes_extra.php') {
+			$permitido = tiene_permiso($conexion, 'views/proyectos.php');
 		}
 		// Fallback: CRUD nuevos de catálogos visibles para admin aunque no exista rol cargado
 		if (!$permitido && in_array($dir, [

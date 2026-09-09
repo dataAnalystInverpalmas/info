@@ -63,6 +63,8 @@ $(document).ready(function(){
                 d.estado = $('#f_estado').val() || '';
                 d.variedad = $('#f_variedad').val() || '';
                 d.temporada = $('#f_temporada').val() || '';
+                d.producto = $('#f_producto').val() || '';
+                d.color = $('#f_color').val() || '';
                 d.ciclo = $('#f_ciclo').val() || '';
                 d.adicional = $('#f_adicional').val() || '';
                 d.semana_siembra = $('#f_semana_siembra').val() || '';
@@ -109,8 +111,8 @@ $(document).ready(function(){
         ]
     });
 
-    // Inicializar Select2 en variedad y temporada
-    $('#f_variedad, #f_temporada').select2({
+    // Inicializar Select2 en filtros de texto
+    $('#f_variedad, #f_temporada, #f_producto, #f_color').select2({
         placeholder: 'Buscar...',
         allowClear: true,
         width: '100%'
@@ -143,6 +145,26 @@ $(document).ready(function(){
             $t.val(sels);
             // re-init Select2
             $t.select2({ placeholder: 'Buscar...', allowClear: true, width: '100%' });
+
+            // rebuild producto
+            var $p = $('#f_producto');
+            var selp = $p.val();
+            $p.empty().append($('<option>').attr('value','').text('Todas'));
+            if(res.productos && res.productos.length){
+                res.productos.forEach(function(v){ $p.append($('<option>').attr('value',v).text(v)); });
+            }
+            $p.val(selp);
+            $p.select2({ placeholder: 'Buscar...', allowClear: true, width: '100%' });
+
+            // rebuild color
+            var $c = $('#f_color');
+            var selc = $c.val();
+            $c.empty().append($('<option>').attr('value','').text('Todos'));
+            if(res.colores && res.colores.length){
+                res.colores.forEach(function(v){ $c.append($('<option>').attr('value',v).text(v)); });
+            }
+            $c.val(selc);
+            $c.select2({ placeholder: 'Buscar...', allowClear: true, width: '100%' });
         }, 'json');
     }
 
@@ -172,6 +194,8 @@ $(document).ready(function(){
         $('#f_estado').val('1');
         $('#f_variedad').val('').trigger('change');
         $('#f_temporada').val('').trigger('change');
+        $('#f_producto').val('').trigger('change');
+        $('#f_color').val('').trigger('change');
         $('#f_ciclo').val('');
         $('#f_adicional').val('');
         $('#f_semana_siembra').val('');

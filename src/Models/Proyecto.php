@@ -5,32 +5,53 @@ use App\Helpers\Database;
 
 class Proyecto {
 
+    private static $metaCache = [];
+
     private static function tableExists($table) {
+        $key = 'table.' . $table;
+        if (array_key_exists($key, self::$metaCache)) {
+            return self::$metaCache[$key];
+        }
+
         $conexion = Database::getConnection();
         $stmt = $conexion->prepare("SELECT COUNT(*) AS total FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?");
         if (!$stmt) {
+            self::$metaCache[$key] = false;
             return false;
         }
         $stmt->bind_param("s", $table);
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc();
-        return ((int)($row['total'] ?? 0)) > 0;
+        $result = ((int)($row['total'] ?? 0)) > 0;
+        self::$metaCache[$key] = $result;
+        return $result;
     }
 
     private static function columnExists($table, $column) {
+        $key = $table . '.' . $column;
+        if (array_key_exists($key, self::$metaCache)) {
+            return self::$metaCache[$key];
+        }
+
         $conexion = Database::getConnection();
         $stmt = $conexion->prepare("SELECT COUNT(*) AS total FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?");
         if (!$stmt) {
+            self::$metaCache[$key] = false;
             return false;
         }
         $stmt->bind_param("ss", $table, $column);
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc();
-        return ((int)($row['total'] ?? 0)) > 0;
+        $result = ((int)($row['total'] ?? 0)) > 0;
+        self::$metaCache[$key] = $result;
+        return $result;
     }
 
     public static function getAll($usuario_id = null) {
         $conexion = Database::getConnection();
+        $filtroMigrados = self::columnExists('proyectos', 'migrado_a_solicitud_en')
+            ? ' AND p.migrado_a_solicitud_en IS NULL'
+            : '';
         if ($usuario_id !== null) {
             $stmt = $conexion->prepare(
                 "SELECT p.id, p.nombre, p.categoria, p.descripcion, p.estado, p.fecha_inicio, p.fecha_fin, p.fecha_creacion,
@@ -53,7 +74,7 @@ class Proyecto {
                         ) AS avance_proyecto
                  FROM proyectos p
                  LEFT JOIN tareas t ON t.proyecto_id = p.id
-                       WHERE (p.usuario_id = ? OR p.usuario_id IS NULL)
+                         WHERE (p.usuario_id = ? OR p.usuario_id IS NULL){$filtroMigrados}
                  GROUP BY p.id, p.nombre, p.categoria, p.descripcion, p.estado, p.fecha_inicio, p.fecha_fin, p.fecha_creacion
                  ORDER BY p.fecha_creacion DESC"
             );
@@ -82,6 +103,7 @@ class Proyecto {
                         ) AS avance_proyecto
                  FROM proyectos p
                  LEFT JOIN tareas t ON t.proyecto_id = p.id
+                 WHERE 1=1{$filtroMigrados}
                  GROUP BY p.id, p.nombre, p.categoria, p.descripcion, p.estado, p.fecha_inicio, p.fecha_fin, p.fecha_creacion
                  ORDER BY p.fecha_creacion DESC"
             );
@@ -97,13 +119,16 @@ class Proyecto {
 
     public static function getCategorias($usuario_id = null) {
         $conexion = Database::getConnection();
+        $filtroMigrados = self::columnExists('proyectos', 'migrado_a_solicitud_en')
+            ? ' AND migrado_a_solicitud_en IS NULL'
+            : '';
         if ($usuario_id !== null) {
             $stmt = $conexion->prepare(
                                 "SELECT DISTINCT categoria
                                  FROM proyectos
                                  WHERE categoria IS NOT NULL
                                      AND categoria != ''
-                                     AND (usuario_id = ? OR usuario_id IS NULL)
+                                     AND (usuario_id = ? OR usuario_id IS NULL){$filtroMigrados}
                                  ORDER BY categoria"
             );
             $stmt->bind_param("i", $usuario_id);
@@ -111,13 +136,72 @@ class Proyecto {
             $result = $stmt->get_result();
         } else {
             $result = $conexion->query(
-                "SELECT DISTINCT categoria FROM proyectos WHERE categoria IS NOT NULL AND categoria != '' ORDER BY categoria"
+                "SELECT DISTINCT categoria FROM proyectos WHERE categoria IS NOT NULL AND categoria != ''{$filtroMigrados} ORDER BY categoria"
             );
         }
         $data = [];
         if ($result) {
             while ($row = $result->fetch_object()) {
                 $data[] = $row->categoria;
+            }
+        }
+        return $data;
+    }
+
+    public static function getParaExportarExcel($usuario_id = null) {
+        $conexion = Database::getConnection();
+        $tieneObjetivo = self::columnExists('proyectos', 'objetivo_alcance');
+        $tieneResponsable = self::columnExists('proyectos', 'responsable_proyecto');
+        $objetivo = $tieneObjetivo ? 'p.objetivo_alcance' : 'p.descripcion AS objetivo_alcance';
+        $responsable = $tieneResponsable ? 'p.responsable_proyecto' : 'NULL AS responsable_proyecto';
+        $grupoObjetivo = $tieneObjetivo ? ', p.objetivo_alcance' : '';
+        $grupoResponsable = $tieneResponsable ? ', p.responsable_proyecto' : '';
+        $campo = static function (string $nombre) {
+            return self::columnExists('proyectos', $nombre) ? "MAX(p.{$nombre}) AS {$nombre}" : "NULL AS {$nombre}";
+        };
+        $filtroMigrados = self::columnExists('proyectos', 'migrado_a_solicitud_en')
+            ? ' AND p.migrado_a_solicitud_en IS NULL'
+            : '';
+        $sql = "SELECT p.id, p.nombre, p.categoria, p.descripcion, {$objetivo},
+                       {$responsable}, p.estado, p.fecha_inicio, p.fecha_fin,
+                       {$campo('tipo')}, {$campo('area_solicitante')}, {$campo('problema_negocio')},
+                       {$campo('prioridad')}, {$campo('entregable_periodo')}, {$campo('riesgo_principal')},
+                       {$campo('proximo_hito')}, {$campo('criterio_exito')}, {$campo('stakeholders')},
+                       {$campo('link_evidencias')},
+                       ROUND(COALESCE(SUM(
+                           CASE t.prioridad
+                               WHEN 'urgente' THEN 4 WHEN 'alta' THEN 3 WHEN 'media' THEN 2 ELSE 1
+                           END * COALESCE(t.porcentaje_avance, 0)
+                       ) / NULLIF(SUM(
+                           CASE t.prioridad
+                               WHEN 'urgente' THEN 4 WHEN 'alta' THEN 3 WHEN 'media' THEN 2 ELSE 1
+                           END
+                       ), 0), 0)) AS avance_proyecto
+                FROM proyectos p
+                LEFT JOIN tareas t ON t.proyecto_id = p.id";
+
+        if ($usuario_id !== null) {
+            $stmt = $conexion->prepare($sql . " WHERE (p.usuario_id = ? OR p.usuario_id IS NULL){$filtroMigrados}
+                                              GROUP BY p.id, p.nombre, p.categoria, p.descripcion{$grupoObjetivo}{$grupoResponsable},
+                                                       p.estado, p.fecha_inicio, p.fecha_fin
+                                              ORDER BY p.fecha_inicio ASC, p.id ASC");
+            if (!$stmt) {
+                return [];
+            }
+            $stmt->bind_param('i', $usuario_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+        } else {
+            $result = $conexion->query($sql . " WHERE 1=1{$filtroMigrados}
+                                               GROUP BY p.id, p.nombre, p.categoria, p.descripcion{$grupoObjetivo}{$grupoResponsable},
+                                                        p.estado, p.fecha_inicio, p.fecha_fin
+                                               ORDER BY p.fecha_inicio ASC, p.id ASC");
+        }
+
+        $data = [];
+        if ($result) {
+            while ($row = $result->fetch_object()) {
+                $data[] = $row;
             }
         }
         return $data;

@@ -23,6 +23,12 @@
 			  <label for="">Fecha Final</label>
 			  <input class="form-control" type="date" value="" name="" id="ffinal">
 			  <br><select name="" id="nflor" class="form-control"></select>
+			  <br><input class="form-control" type="text" value="" name="" id="fdesc" placeholder="Descripcion (contiene)">
+			  <br><select name="" id="ngranel" class="form-control">
+				<option value="">Guarde granel: Todos</option>
+				<option value="1">Guarde granel: Si</option>
+				<option value="0">Guarde granel: No</option>
+			  </select>
 			  <br><input id="listar" type="submit" onclick="listar()" class="btn btn-success" value="Consultar">
 			</div>
 

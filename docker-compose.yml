@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: php:7.4.1-apache
+    container_name: php_web
+    restart: always
+    ports:
+      - "9258:80"
+    environment:
+      # Token del API. Docker Compose interpola ${API_SECRET_TOKEN} desde el
+      # entorno o desde el archivo .env que esté junto a este docker-compose.yml.
+      # Si no está definido, se usa el valor legacy por defecto (sigue funcionando).
+      # Para rotarlo: export API_SECRET_TOKEN=$(openssl rand -hex 32) o crear .env
+      API_SECRET_TOKEN: "${API_SECRET_TOKEN:-9035232260ca3fc11faa82b6b32b20605fe55c242e6903ca2f7e0887c3e9be17}"
+    volumes:
+      - ./info:/var/www/html
+      - ./php.ini:/usr/local/etc/php/php.ini
+
+    networks:
+      - proyecto-net
+
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: AdmSys2014
+      MYSQL_DATABASE: info
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: AdmSys2014
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./my.cnf:/etc/mysql/conf.d/my.cnf
+    networks:
+      - proyecto-net
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: AdmSys2014
+    ports:
+      - "8081:80"
+    networks:
+      - proyecto-net
+
+networks:
+  proyecto-net:
+
+volumes:
+  db_data:
+

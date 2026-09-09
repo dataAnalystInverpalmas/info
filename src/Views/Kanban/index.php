@@ -3,28 +3,33 @@
     #kanbanBoard {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 1rem;
+        gap: 1.5rem;
         align-items: stretch;
-        height: calc(100dvh - 220px);
-        min-height: 420px;
+        height: calc(100dvh - 230px);
+        min-height: 440px;
         padding-bottom: 0.25rem;
         width: 100%;
     }
+
     .kanban-col {
-        background: #f4f6fb;
-        border-radius: 8px;
-        padding: 0.75rem 0.6rem;
+        background: #f1f5f9;
+        border: 1px solid #e4e9f0;
+        border-radius: 14px;
+        padding: 0.85rem;
         min-height: 200px;
         display: flex;
         flex-direction: column;
         min-width: 0;
     }
+
     .kanban-col-header {
-        font-weight: 600;
-        font-size: 0.9rem;
-        margin-bottom: 0.6rem;
-        padding: 0.35rem 0.6rem;
-        border-radius: 5px;
+        font-weight: 700;
+        font-size: 0.82rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin-bottom: 0.75rem;
+        padding: 0.45rem 0.75rem;
+        border-radius: 8px;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -32,10 +37,10 @@
         top: 0;
         z-index: 2;
     }
-    .col-pendiente   .kanban-col-header { background: #fdecea; color: #c0392b; }
-    .col-en_progreso .kanban-col-header { background: #e3f7fc; color: #0984a8; }
-    .col-completada  .kanban-col-header { background: #eafaf1; color: #1a7a44; }
-    .col-cancelada   .kanban-col-header { background: #f5f5f5; color: #7f8c8d; }
+    .col-pendiente   .kanban-col-header { background: #fef2f2; color: #b91c1c; }
+    .col-en_progreso .kanban-col-header { background: #e0f2fe; color: #0369a1; }
+    .col-completada  .kanban-col-header { background: #dcfce7; color: #15803d; }
+    .col-cancelada   .kanban-col-header { background: #f1f5f9; color: #475569; }
 
     .kanban-cards {
         min-height: 60px;
@@ -54,67 +59,86 @@
     @media (max-width: 767px) {
         #kanbanBoard {
             grid-template-columns: minmax(0, 1fr);
-            height: calc(100dvh - 250px);
+            height: auto;
             min-height: 360px;
         }
     }
 
+    /* ── Tarjetas de tareas ─────────────────────────────────── */
     .kanban-card {
-        background: #fff;
-        border-radius: 6px;
-        padding: 0.55rem 0.65rem;
-        margin-bottom: 0.5rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,.10);
+        background: #ffffff;
+        border-radius: 12px;
+        border-left: 4px solid #cbd5e1;
+        padding: 0.9rem 1rem 2.1rem;
+        margin-bottom: 0.75rem;
+        box-shadow: 0 1px 3px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.04);
         cursor: grab;
-        border-left: 4px solid #ccc;
-        transition: box-shadow .15s;
-        font-size: 0.82rem;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        font-size: 0.84rem;
         -webkit-user-select: none;
         user-select: none;
         position: relative;
-        padding-bottom: 1.65rem;
+    }
+    .kanban-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 22px rgba(16, 24, 40, 0.10);
     }
     .kanban-card:active { cursor: grabbing; }
     .kanban-card.dragging { opacity: .45; }
-    .kanban-card.drag-over-target { box-shadow: 0 0 0 2px #0d6efd; }
+    .kanban-card.drag-over-target { box-shadow: 0 0 0 2px #00796B; }
 
-    .kanban-col.drag-over { background: #e8eeff; }
+    .kanban-col.drag-over { background: #eafff8; border-color: #8fd8c8; }
 
-    /* Prioridad → borde izquierdo */
-    .prio-urgente  { border-left-color: #dc3545; }
-    .prio-alta     { border-left-color: #fd7e14; }
-    .prio-media    { border-left-color: #ffc107; }
-    .prio-baja     { border-left-color: #6c757d; }
+    /* Prioridad → borde izquierdo de 4px */
+    .prio-urgente  { border-left-color: #dc2626; }
+    .prio-alta     { border-left-color: #f97316; }
+    .prio-media    { border-left-color: #f5b301; }
+    .prio-baja     { border-left-color: #94a3b8; }
 
-    .kanban-card .card-title { font-weight: 600; margin-bottom: 2px; }
-    .kanban-card .card-meta  { color: #6c757d; font-size: 0.75rem; }
-
-    .badge-prio {
-        font-size: 0.68rem;
-        padding: 2px 5px;
-        border-radius: 3px;
+    .kanban-card .card-title {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #1f2937;
+        line-height: 1.35;
+        margin-bottom: 4px;
     }
-    .badge-urgente { background:#dc3545; color:#fff; }
-    .badge-alta    { background:#fd7e14; color:#fff; }
-    .badge-media   { background:#ffc107; color:#000; }
-    .badge-baja    { background:#6c757d; color:#fff; }
+    .kanban-card .card-meta { color: #6b7280; font-size: 0.74rem; line-height: 1.5; }
+
+    /* Insignia de prioridad sutil (estilo outline, sin saturación) */
+    .badge-prio {
+        font-size: 0.64rem;
+        font-weight: 600;
+        padding: 3px 9px;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        letter-spacing: 0.02em;
+        flex: 0 0 auto;
+    }
+    .badge-urgente { background: #fdecea; color: #c0392b; border-color: #f3c1ba; }
+    .badge-alta    { background: #fff3e6; color: #b45309; border-color: #fcd9b0; }
+    .badge-media   { background: #fdf6e3; color: #92610c; border-color: #f0dc9c; }
+    .badge-baja    { background: #eef2f6; color: #4b5563; border-color: #dde4ec; }
 
     .count-badge {
-        background: #fff !important;
-        color: #2c3e50 !important;
-        border: 1px solid #d8dee8;
+        background: #ffffff !important;
+        color: #334155 !important;
+        border: 1px solid #d8dee8 !important;
+        font-weight: 600;
+        border-radius: 999px;
+        padding: 3px 9px;
     }
 
+    /* % Avance en la esquina inferior derecha */
     .kanban-card .card-avance {
         position: absolute;
-        right: 0.6rem;
-        bottom: 0.4rem;
-        font-size: 0.72rem;
-        color: #4b5563;
-        background: #f2f4f7;
-        border-radius: 10px;
-        padding: 2px 8px;
+        right: 0.85rem;
+        bottom: 0.6rem;
+        font-size: 0.7rem;
         font-weight: 600;
+        color: #00796B;
+        background: #e6f4f1;
+        border-radius: 999px;
+        padding: 2px 10px;
     }
 
     #kGeneralWrap {
@@ -132,89 +156,79 @@
 $gestionActive = 'kanban';
 $gestionTitle = 'Gestión de Kanban';
 $gestionSubtitle = 'Visualiza el flujo de trabajo por estado y actúa rápido sobre proyectos y tareas vinculadas.';
-$gestionQuickActions = [
-    [
-        'label' => 'Panel',
-        'href' => 'index.php?report=205',
-        'class' => 'btn-outline-secondary',
-        'icon' => 'space_dashboard'
-    ],
-    [
-        'label' => 'Nueva Tarea',
-        'onclick' => 'abrirModalTarea ? abrirModalTarea() : window.location.href="index.php?report=201"',
-        'class' => 'btn-primary',
-        'icon' => 'add_task'
-    ],
-    [
-        'label' => 'Ver Tareas',
-        'href' => 'index.php?report=201',
-        'class' => 'btn-outline-secondary',
-        'icon' => 'assignment'
-    ],
-    [
-        'label' => 'Ver Proyectos',
-        'href' => 'index.php?report=200',
-        'class' => 'btn-outline-success',
-        'icon' => 'folder_open'
-    ],
-];
+$gestionQuickActions = [];
 require __DIR__ . '/../Shared/gestion_header.php';
 ?>
 
-<div class="container-fluid">
-    <!-- Barra de filtros -->
-    <div class="row align-items-center mb-3 g-2">
-        <div class="col-auto">
-            <label class="small text-muted mb-0">Desde</label>
-            <input type="date" id="kDesde" class="form-control form-control-sm">
-        </div>
-        <div class="col-auto">
-            <label class="small text-muted mb-0">Hasta</label>
-            <input type="date" id="kHasta" class="form-control form-control-sm">
-        </div>
-        <div class="col-auto mt-3">
-            <button class="btn btn-sm btn-primary" onclick="cargarKanban()">Aplicar</button>
-            <button class="btn btn-sm btn-outline-secondary ms-1" onclick="semanaActual(); cargarKanban();">Esta semana</button>
-            <button class="btn btn-sm btn-success ms-1" onclick="exportarKanbanExcel()">Exportar Excel</button>
-            <button class="btn btn-sm btn-danger ms-1" onclick="exportarKanbanPDF()">Exportar PDF</button>
-        </div>
-        <div class="col-auto mt-3 ms-auto">
-            <div id="kGeneralWrap" class="text-end">
-                <div id="kResumen" class="small text-muted"></div>
-                <div class="small text-muted mt-1">Avance general: <span id="kGeneralPct">0%</span></div>
-                <div class="progress mt-1" style="height: 8px;">
-                    <div id="kGeneralBar" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+<div class="container-fluid px-3 px-lg-4 pt-2 pb-4">
+    <div class="row">
+        <div class="col-md-2 col-lg-2">
+            <div class="filtro-sidebar mr-0 mr-lg-3">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header">
+                        <span class="material-icons" style="font-size:1rem;vertical-align:middle;">filter_list</span>
+                        Filtros
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="mb-3">
+                            <label for="kDesde">Desde</label>
+                            <input type="date" id="kDesde" class="form-control form-control-sm">
+                        </div>
+                        <div class="mb-3">
+                            <label for="kHasta">Hasta</label>
+                            <input type="date" id="kHasta" class="form-control form-control-sm">
+                        </div>
+                        <div class="mt-3">
+                            <button class="btn btn-sm btn-block btn-brand-green mb-2" onclick="cargarKanban()">Aplicar</button>
+                            <button class="btn btn-sm btn-block btn-outline-secondary" onclick="semanaActual(); cargarKanban();">Esta semana</button>
+                        </div>
+                        <hr class="my-3">
+                        <button class="btn btn-sm btn-block btn-outline-secondary mb-2" onclick="exportarKanbanExcel()">
+                            <span class="material-icons" style="font-size:0.95rem;vertical-align:text-bottom;">file_download</span> Exportar Excel
+                        </button>
+                        <button class="btn btn-sm btn-block btn-outline-secondary" onclick="exportarKanbanPDF()">
+                            <span class="material-icons" style="font-size:0.95rem;vertical-align:text-bottom;">picture_as_pdf</span> Exportar PDF
+                        </button>
+                    </div>
+                </div>
+                <div id="kGeneralWrap">
+                    <div id="kResumen" class="small text-muted"></div>
+                    <div class="small text-muted mt-1">Avance general: <span id="kGeneralPct">0%</span></div>
+                    <div class="progress mt-1" style="height: 8px;">
+                        <div id="kGeneralBar" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Tablero -->
-    <div id="kanbanBoard">
-        <?php
-        $columnas = [
-            'pendiente'   => 'Pendiente',
-            'en_progreso' => 'En Progreso',
-            'completada'  => 'Completada',
-            'cancelada'   => 'Cancelada',
-        ];
-        foreach ($columnas as $estado => $label): ?>
-            <div class="kanban-col col-<?php echo $estado; ?>"
-                 id="col-<?php echo $estado; ?>"
-                 data-estado="<?php echo $estado; ?>"
-                 ondragover="onDragOver(event)"
-                 ondragleave="onDragLeave(event)"
-                 ondrop="onDrop(event)">
-                <div class="kanban-col-header">
-                    <span><?php echo $label; ?></span>
-                    <span class="badge bg-secondary count-badge" id="count-<?php echo $estado; ?>">0</span>
-                </div>
-                <div class="kanban-cards" id="cards-<?php echo $estado; ?>"
-                     ondragover="onDragOver(event)"
-                     ondragleave="onDragLeave(event)"
-                     ondrop="onDrop(event)"></div>
+        <div class="col-md-10 col-lg-10">
+            <div id="kanbanBoard">
+                <?php
+                $columnas = [
+                    'pendiente'   => 'Pendiente',
+                    'en_progreso' => 'En Progreso',
+                    'completada'  => 'Completada',
+                    'cancelada'   => 'Cancelada',
+                ];
+                foreach ($columnas as $estado => $label): ?>
+                    <div class="kanban-col col-<?php echo $estado; ?>"
+                         id="col-<?php echo $estado; ?>"
+                         data-estado="<?php echo $estado; ?>"
+                         ondragover="onDragOver(event)"
+                         ondragleave="onDragLeave(event)"
+                         ondrop="onDrop(event)">
+                        <div class="kanban-col-header">
+                            <span><?php echo $label; ?></span>
+                            <span class="badge bg-secondary count-badge" id="count-<?php echo $estado; ?>">0</span>
+                        </div>
+                        <div class="kanban-cards" id="cards-<?php echo $estado; ?>"
+                             ondragover="onDragOver(event)"
+                             ondragleave="onDragLeave(event)"
+                             ondrop="onDrop(event)"></div>
+                    </div>
+                <?php endforeach; ?>
             </div>
-        <?php endforeach; ?>
+        </div>
     </div>
 </div>
 

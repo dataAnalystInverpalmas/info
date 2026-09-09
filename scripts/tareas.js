@@ -1,7 +1,11 @@
 var dtTareas;
 
 $(document).ready(function () {
-    dtTareas = $('#tablaTareas').DataTable({ responsive: true });
+    dtTareas = $('#tablaTareas').DataTable({
+        responsive: true,
+        // columnas 1=ID, 2=Tipo, 10=Orden ocultas por defecto; visibles con el botón de columnas si se necesitan
+        columnDefs: [{ visible: false, targets: [1, 2, 10] }]
+    });
 
     var params = new URLSearchParams(window.location.search);
     var proyectoInicial = typeof window.gestionProyectoInicial !== 'undefined' ? window.gestionProyectoInicial : params.get('proyecto');
@@ -21,44 +25,56 @@ $(document).ready(function () {
 });
 
 function filtrarTareas() {
-    var tipo = $('#filtroTipo').val();
+    var estado = $('#filtroEstado').val();
+    var prioridad = $('#filtroPrioridad').val();
     var proy = $('#filtroProyectoTarea').val();
     // Ajustar índices de columna debido a la nueva columna handle (índice 0)
-    dtTareas.column(2).search(tipo).column(4).search(proy).draw();
+    dtTareas.column(8).search(estado).column(9).search(prioridad).column(4).search(proy).draw();
 }
 
 function abrirModalTarea() {
     $('#tId').val('');
     $('#tTipo').val('prevista');
-    $('#tNombre').val('');
-    $('#tDesc').val('');
+    $('#tNombre, #tDesc, #tEtapa, #tEntregable, #tEvidencia, #tObservaciones, #tDependencia').val('');
     $('#tProyecto').val('');
     $('#tResponsable').val(typeof usuarioActual !== 'undefined' ? usuarioActual : '');
     $('#tSolicita').val('');
     $('#tEstado').val('pendiente');
     $('#tAvance').val(0);
     $('#tPrioridad').val('media');
-    $('#tOrden').val('');
-    $('#tInicio').val('');
-    $('#tVencimiento').val('');
+    $('#tOrden, #tInicio, #tVencimiento, #tFinReal').val('');
     $('#modalTarea').modal('show');
 }
 
-function editarTarea(d) {
-    $('#tId').val(d.id);
-    $('#tTipo').val(d.tipo);
-    $('#tNombre').val(d.nombre);
-    $('#tDesc').val(d.descripcion);
-    $('#tProyecto').val(d.proyecto_id);
-    $('#tResponsable').val(d.responsable);
-    $('#tSolicita').val(d.quien_solicita);
-    $('#tEstado').val(d.estado);
-    $('#tAvance').val(d.porcentaje_avance || 0);
-    $('#tPrioridad').val(d.prioridad);
-    $('#tOrden').val(d.orden_ejecucion || '');
-    $('#tInicio').val(d.fecha_inicio);
-    $('#tVencimiento').val(d.fecha_vencimiento);
-    $('#modalTarea').modal('show');
+function editarTarea(id) {
+    $.getJSON('ajax/tareas.php', { id: id }, function (d) {
+        if (!d || !d.id) {
+            alert('Tarea no encontrada');
+            return;
+        }
+        $('#tId').val(d.id);
+        $('#tTipo').val(d.tipo || 'prevista');
+        $('#tNombre').val(d.nombre);
+        $('#tDesc').val(d.descripcion);
+        $('#tEtapa').val(d.etapa_fase || '');
+        $('#tProyecto').val(d.proyecto_id || '');
+        $('#tResponsable').val(d.responsable);
+        $('#tSolicita').val(d.quien_solicita);
+        $('#tEstado').val(d.estado);
+        $('#tAvance').val(d.porcentaje_avance || 0);
+        $('#tPrioridad').val(d.prioridad);
+        $('#tOrden').val(d.orden_ejecucion || '');
+        $('#tInicio').val(d.fecha_inicio);
+        $('#tVencimiento').val(d.fecha_vencimiento);
+        $('#tFinReal').val(d.fecha_fin_real || '');
+        $('#tEntregable').val(d.entregable_concreto || '');
+        $('#tEvidencia').val(d.evidencia_soporte || '');
+        $('#tObservaciones').val(d.observaciones || '');
+        $('#tDependencia').val(d.dependencia || '');
+        $('#modalTarea').modal('show');
+    }).fail(function () {
+        alert('Error al cargar la tarea');
+    });
 }
 
 $('#tEstado').on('change', function () {
@@ -98,7 +114,13 @@ function guardarTarea() {
         prioridad: $('#tPrioridad').val(),
         orden_ejecucion: $('#tOrden').val(),
         fecha_inicio: $('#tInicio').val(),
-        fecha_vencimiento: $('#tVencimiento').val()
+        fecha_vencimiento: $('#tVencimiento').val(),
+        etapa_fase: $('#tEtapa').val(),
+        fecha_fin_real: $('#tFinReal').val(),
+        entregable_concreto: $('#tEntregable').val(),
+        evidencia_soporte: $('#tEvidencia').val(),
+        observaciones: $('#tObservaciones').val(),
+        dependencia: $('#tDependencia').val()
     }, function (resp) {
         if (resp.success) {
             if (typeof resp.porcentaje_avance !== 'undefined') {

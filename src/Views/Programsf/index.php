@@ -93,18 +93,31 @@
                 </div>
 
                 <div class="form-group form-section">
-                    <label class="form-label" for="ff_temporada">Temporada</label>
-                    <select id="ff_temporada" class="form-control">
-                        <option value="">Todas</option>
-                        <?php foreach ($temporadas as $t): ?>
-                            <option value="<?php echo htmlspecialchars($t); ?>"><?php echo htmlspecialchars($t); ?></option>
-                        <?php endforeach; ?>
-                    </select>
+                    <label class="form-label" for="ff_temporada">Temporadas</label>
+                    <select id="ff_temporada" class="form-control" multiple="multiple" data-placeholder="ej: FE2707, FE2708"></select>
+                </div>
+
+                <div class="row-compact">
+                    <div class="form-group form-section">
+                        <label class="form-label" for="ff_fecha_inicio">Fecha inicio</label>
+                        <input type="date" id="ff_fecha_inicio" class="form-control">
+                    </div>
+                    <div class="form-group form-section">
+                        <label class="form-label" for="ff_fecha_fin">Fecha fin</label>
+                        <input type="date" id="ff_fecha_fin" class="form-control">
+                    </div>
                 </div>
 
                 <div class="form-group form-section">
                     <label class="form-label" for="ff_semana_siembra">Semana Siembra (YYWW)</label>
                     <input type="text" id="ff_semana_siembra" class="form-control" placeholder="ej: 2601" maxlength="4">
+                </div>
+
+                <div class="form-group form-section">
+                    <label class="form-label" for="ff_color">Color</label>
+                    <select id="ff_color" class="form-control">
+                        <option value="">Todos</option>
+                    </select>
                 </div>
 
                 <div class="form-group form-section">
@@ -238,7 +251,8 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label class="form-label">Fecha Siembra</label>
-                                <input type="date" class="form-control" name="fecha_siembra" id="pf_fecha_siembra">
+                                <input type="date" class="form-control" name="fecha_siembra" id="pf_fecha_siembra" oninput="if(window.updateProgramfIsoWeek){window.updateProgramfIsoWeek(this.value);}">
+                                <small id="pf_fecha_siembra_iso" class="form-text text-muted">Semana ISO: -</small>
                             </div>
                         </div>
                         <div class="col-md-2">
@@ -277,7 +291,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script src="scripts/programsf.js?v=4"></script>
+<script src="scripts/programsf.js?v=5"></script>
 
 <script>
 $(function(){

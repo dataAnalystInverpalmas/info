@@ -2,6 +2,8 @@
 	.arr-card { background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.06); padding:16px; }
 	.arr-toolbar { display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
 	.arr-toolbar .form-control { max-width:220px; }
+	.arr-copy-panel { border:1px solid #e9ecef; border-radius:8px; padding:12px; margin-bottom:14px; background:#fafafa; }
+	.arr-copy-panel .form-control { max-width:260px; }
 	#arrangementsTable td { vertical-align:middle; }
 	#arrangementsTable .btn { margin-right:6px; white-space:nowrap; }
 	.arr-modal .form-label { font-weight:500; font-size:0.92rem; }
@@ -20,6 +22,20 @@
 			<button id="btnFilterArrangements" class="btn btn-success btn-sm">Filtrar</button>
 			<button id="btnClearArrangements" class="btn btn-secondary btn-sm">Limpiar</button>
 			<button id="btnNewArrangements" class="btn btn-dark btn-sm">Nuevo</button>
+		</div>
+		<div class="arr-copy-panel">
+			<div class="d-flex flex-wrap align-items-end" style="gap:8px;">
+				<div class="form-group mb-0">
+					<label for="copy_variedad_origen" class="form-label mb-1">Variedad origen</label>
+					<input type="text" id="copy_variedad_origen" class="form-control form-control-sm" placeholder="Ej: ROSA A">
+				</div>
+				<div class="form-group mb-0">
+					<label for="copy_variedad_destino" class="form-label mb-1">Variedad destino</label>
+					<input type="text" id="copy_variedad_destino" class="form-control form-control-sm" placeholder="Ej: ROSA B">
+				</div>
+				<button id="btnCopyArrangements" type="button" class="btn btn-primary btn-sm">Copiar</button>
+			</div>
+			<small class="text-muted d-block mt-2">Copia todos los registros de la variedad origen hacia la variedad destino (sin duplicar existentes).</small>
 		</div>
 		<div class="table-responsive">
 			<table id="arrangementsTable" class="display table table-striped" style="width:100%">

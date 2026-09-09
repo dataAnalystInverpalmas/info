@@ -20,50 +20,40 @@ foreach (($registros ?? []) as $registroBitacora) {
 }
 $gestionProyectosBitacora = array_keys($gestionProyectosBitacora);
 sort($gestionProyectosBitacora, SORT_NATURAL | SORT_FLAG_CASE);
-$gestionQuickActions = [
-    [
-        'label' => 'Panel',
-        'href' => 'index.php?report=205',
-        'class' => 'btn-outline-secondary',
-        'icon' => 'space_dashboard'
-    ],
-    [
-        'label' => 'Ver Tareas',
-        'href' => 'index.php?report=201',
-        'class' => 'btn-outline-secondary',
-        'icon' => 'assignment'
-    ],
-    [
-        'label' => 'Abrir Kanban',
-        'href' => 'index.php?report=203',
-        'class' => 'btn-outline-success',
-        'icon' => 'view_kanban'
-    ],
-];
+$gestionQuickActions = [];
 require __DIR__ . '/../Shared/gestion_header.php';
 ?>
 <div class="container-fluid">
-    <div class="row mb-3 align-items-center">
-        <div class="col-auto">
-            <select id="filtroProyectoBitacora" class="form-control form-control-sm">
-                <option value="">-- Todos los proyectos --</option>
-                <?php foreach ($gestionProyectosBitacora as $gestionProyectoNombre): ?>
-                    <option value="<?php echo htmlspecialchars($gestionProyectoNombre); ?>" <?php echo $gestionProyectoFiltro === $gestionProyectoNombre ? 'selected' : ''; ?>><?php echo htmlspecialchars($gestionProyectoNombre); ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-        <?php if ($gestionProyectoFiltro !== ''): ?>
-            <div class="col-auto">
-                <span class="small text-muted">Contexto activo: <strong><?php echo htmlspecialchars($gestionProyectoFiltro); ?></strong></span>
-            </div>
-            <div class="col-auto">
-                <a class="btn btn-sm btn-outline-secondary" href="index.php?report=202">Limpiar filtro</a>
-            </div>
-        <?php endif; ?>
-    </div>
     <div class="row">
-        <div class="table-responsive">
-            <table id="tablaBitacora" class="table display compact" style="width:100%">
+        <div class="col-md-2 col-lg-2">
+            <div class="filtro-sidebar">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <span class="material-icons" style="font-size:1rem;vertical-align:middle;">filter_list</span>
+                        Filtros
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="mb-2">
+                            <label>Proyecto</label>
+                            <select id="filtroProyectoBitacora" class="form-control form-control-sm">
+                                <option value="">Todos</option>
+                                <?php foreach ($gestionProyectosBitacora as $gestionProyectoNombre): ?>
+                                    <option value="<?php echo htmlspecialchars($gestionProyectoNombre); ?>" <?php echo $gestionProyectoFiltro === $gestionProyectoNombre ? 'selected' : ''; ?>><?php echo htmlspecialchars($gestionProyectoNombre); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <?php if ($gestionProyectoFiltro !== ''): ?>
+                            <div class="small text-muted mt-2">Contexto activo: <strong><?php echo htmlspecialchars($gestionProyectoFiltro); ?></strong></div>
+                            <a class="btn btn-sm btn-outline-secondary w-100 mt-2" href="index.php?report=202">Limpiar filtro</a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-10 col-lg-10">
+            <div class="table-responsive gestion-table-card">
+                <table id="tablaBitacora" class="table display compact" style="width:100%">
                 <thead>
                     <tr>
                         <td>ID</td>
@@ -118,6 +108,7 @@ require __DIR__ . '/../Shared/gestion_header.php';
                     <?php endif; ?>
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
 </div>

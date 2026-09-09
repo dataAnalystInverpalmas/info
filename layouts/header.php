@@ -195,6 +195,7 @@ $directorio = $GLOBALS['src'];
             <a class="dropdown-item" href="index.php?report=108">Plano de siembras</a>
             <a class="dropdown-item" href="index.php?report=103">Informe de Clavel por picos</a>
             <a class="dropdown-item" href="index.php?report=104">Proyecciones real - quipus - inver</a>
+            <a class="dropdown-item" href="index.php?report=110">Causas Nacional</a>
             <a class="dropdown-item" href="index.php?report=106">Demandas</a>
             <a class="dropdown-item" href="index.php?report=107">Compara Producción</a>
             <div class="dropdown-divider"></div>

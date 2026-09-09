@@ -38,6 +38,30 @@ class ProyectoRiesgo {
         return $data;
     }
 
+    public static function getParaExportarExcel($usuario_id = null) {
+        $conexion = Database::getConnection();
+        $sql = "SELECT r.*, p.nombre AS proyecto_nombre
+                FROM proyecto_riesgos r
+                INNER JOIN proyectos p ON p.id = r.proyecto_id
+                WHERE (p.migrado_a_solicitud_en IS NULL OR p.migrado_a_solicitud_en IS NULL)";
+        if ($usuario_id !== null) {
+            $stmt = $conexion->prepare($sql . ' AND (p.usuario_id = ? OR p.usuario_id IS NULL) ORDER BY p.nombre ASC, r.fecha_creacion ASC');
+            if (!$stmt) return [];
+            $stmt->bind_param('i', $usuario_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+        } else {
+            $result = $conexion->query($sql . ' ORDER BY p.nombre ASC, r.fecha_creacion ASC');
+        }
+        $data = [];
+        if ($result) {
+            while ($row = $result->fetch_object()) {
+                $data[] = $row;
+            }
+        }
+        return $data;
+    }
+
     public static function getById($id, $usuario_id = null) {
         $conexion = Database::getConnection();
         if ($usuario_id !== null) {

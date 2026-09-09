@@ -9,7 +9,8 @@
          data-table="<?php echo htmlspecialchars($table); ?>"
          data-endpoint="<?php echo htmlspecialchars($endpoint); ?>"
          data-title="<?php echo htmlspecialchars($title); ?>"
-         <?php if (!empty($selects)): ?>data-selects='<?php echo $selects; ?>'<?php endif; ?>>
+         <?php if (!empty($selects)): ?>data-selects='<?php echo $selects; ?>'<?php endif; ?>
+         <?php if (!empty($display)): ?>data-display='<?php echo $display; ?>'<?php endif; ?>>
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="m-0" id="catalogTitle"><?php echo htmlspecialchars($title); ?></h4>
             <small class="text-muted" id="catalogSubtitle">Tabla <?php echo htmlspecialchars($table); ?></small>
