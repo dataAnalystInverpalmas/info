@@ -33,3 +33,49 @@
 .pink {
     background-color: pink !important;
 }
+
+/* ============================================================
+   Botón primario de marca — color único para las acciones
+   principales de los formularios (Nuevo, Guardar, Filtrar,
+   Buscar, Consultar, Aplicar), en reemplazo de los azules/
+   verdes/negros de Bootstrap por defecto que quedaban sueltos
+   en algunas pantallas. Mismo tono que la barra de navegación,
+   Reportes y Gestión PM (#00796B).
+   ============================================================ */
+.btn-brand-green {
+    background-color: #00796B !important;
+    border: 1px solid #00796B !important;
+    color: #ffffff !important;
+}
+
+.btn-brand-green:hover,
+.btn-brand-green:focus,
+.btn-brand-green:active {
+    background-color: #004D40 !important;
+    border-color: #004D40 !important;
+    color: #ffffff !important;
+}
+
+.btn-brand-green:focus {
+    box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.25) !important;
+}
+
+.btn-outline-brand-green {
+    color: #00796B !important;
+    border: 1px solid #00796B !important;
+    background-color: transparent !important;
+}
+
+.btn-outline-brand-green:hover,
+.btn-outline-brand-green:focus {
+    background-color: #00796B !important;
+    color: #ffffff !important;
+}
+
+/* Cabecera de tarjeta de marca, para paneles de filtros que no
+   usan el sidebar colapsable (.filtro-sidebar / .crud-filtro-sidebar) */
+.card-header-brand-green {
+    background-color: #00796B !important;
+    border-color: #00796B !important;
+    color: #ffffff !important;
+}

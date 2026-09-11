@@ -8,8 +8,6 @@ use Carbon\Carbon;
 class ApplicationController {
 
     public function index() {
-        require_once __DIR__ . '/../../dist/Barcode39.php';
-
         $conexion = Database::getConnection();
 
         $di = Carbon::now();

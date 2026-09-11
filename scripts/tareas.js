@@ -10,7 +10,17 @@ $(document).ready(function () {
     var params = new URLSearchParams(window.location.search);
     var proyectoInicial = typeof window.gestionProyectoInicial !== 'undefined' ? window.gestionProyectoInicial : params.get('proyecto');
     var proyectoIdInicial = typeof window.gestionProyectoIdInicial !== 'undefined' ? window.gestionProyectoIdInicial : parseInt(params.get('proyecto_id') || '0', 10);
-    if (proyectoInicial) {
+
+    // Restaurar filtros desde localStorage si existen
+    var filtrosGuardados = null;
+    try { filtrosGuardados = JSON.parse(localStorage.getItem('tareas_filtros')); } catch (e) { /* ignore */ }
+
+    if (filtrosGuardados) {
+        if (filtrosGuardados.estado) $('#filtroEstado').val(filtrosGuardados.estado);
+        if (filtrosGuardados.prioridad) $('#filtroPrioridad').val(filtrosGuardados.prioridad);
+        if (filtrosGuardados.proyecto) $('#filtroProyectoTarea').val(filtrosGuardados.proyecto);
+        localStorage.removeItem('tareas_filtros');
+    } else if (proyectoInicial) {
         $('#filtroProyectoTarea').val(proyectoInicial);
     }
 
@@ -24,6 +34,14 @@ $(document).ready(function () {
     }
 });
 
+function guardarFiltros() {
+    localStorage.setItem('tareas_filtros', JSON.stringify({
+        estado: $('#filtroEstado').val(),
+        prioridad: $('#filtroPrioridad').val(),
+        proyecto: $('#filtroProyectoTarea').val()
+    }));
+}
+
 function filtrarTareas() {
     var estado = $('#filtroEstado').val();
     var prioridad = $('#filtroPrioridad').val();
@@ -36,13 +54,26 @@ function abrirModalTarea() {
     $('#tId').val('');
     $('#tTipo').val('prevista');
     $('#tNombre, #tDesc, #tEtapa, #tEntregable, #tEvidencia, #tObservaciones, #tDependencia').val('');
-    $('#tProyecto').val('');
     $('#tResponsable').val(typeof usuarioActual !== 'undefined' ? usuarioActual : '');
     $('#tSolicita').val('');
     $('#tEstado').val('pendiente');
     $('#tAvance').val(0);
     $('#tPrioridad').val('media');
     $('#tOrden, #tInicio, #tVencimiento, #tFinReal').val('');
+
+    // Pre-seleccionar proyecto del filtro activo
+    var proyectoFiltro = $('#filtroProyectoTarea').val();
+    var proyectoId = '';
+    if (proyectoFiltro) {
+        $('#tProyecto option').each(function () {
+            if ($(this).text().indexOf(proyectoFiltro) !== -1 && $(this).val() !== '') {
+                proyectoId = $(this).val();
+                return false;
+            }
+        });
+    }
+    $('#tProyecto').val(proyectoId);
+
     $('#modalTarea').modal('show');
 }
 
@@ -126,6 +157,7 @@ function guardarTarea() {
             if (typeof resp.porcentaje_avance !== 'undefined') {
                 console.log('porcentaje_avance guardado:', resp.porcentaje_avance, 'filas_afectadas:', resp.filas_afectadas);
             }
+            guardarFiltros();
             location.reload();
         } else {
             alert(resp.mensaje || 'Error al guardar');
@@ -143,6 +175,7 @@ function eliminarTarea(id) {
         id: id
     }, function (resp) {
         if (resp.success) {
+            guardarFiltros();
             location.reload();
         } else {
             alert(resp.mensaje || 'Error al eliminar');

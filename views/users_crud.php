@@ -2,5 +2,5 @@
 include_once('funciones/conexion.php');
 
 $c = new \App\Controllers\CatalogCrudController();
-$c->show('users', 'users', 'CRUD Users');
+$c->show('users', 'users', 'CRUD Users', '', '', '["name","role","email"]');
 ?>

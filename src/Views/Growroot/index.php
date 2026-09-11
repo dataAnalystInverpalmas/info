@@ -96,8 +96,8 @@ $COM2 = $conexion->query($slqCOMBO2);
     </select>
   </div>
 
-  <button name="buscar" type="submit" class="btn btn-primary mb-2">Buscar</button>
-  <button name="print" type="submit" class="btn btn-success mb-2" onclick="imprime();">Imprimir</button>
+  <button name="buscar" type="submit" class="btn btn-brand-green mb-2">Buscar</button>
+  <button name="print" type="submit" class="btn btn-outline-brand-green mb-2" onclick="imprime();">Imprimir</button>
 </form>
 </div>
 

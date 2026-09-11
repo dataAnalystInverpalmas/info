@@ -10,7 +10,7 @@
 			  <label for="">Fecha Final</label>
 			  <input class="form-control" type="date" value="" name="" id="ffinal">
 			  <br><select name="" id="nflor" class="form-control"></select>
-			  <br><input id="listar" type="submit" onclick="listarEvaluaciones()" class="btn btn-success" value="Consultar">
+			  <br><input id="listar" type="submit" onclick="listarEvaluaciones()" class="btn btn-brand-green" value="Consultar">
 			</div>
 
 		</div>

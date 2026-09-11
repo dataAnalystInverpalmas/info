@@ -131,8 +131,8 @@
                 </div>
 
                 <div class="d-flex gap-2">
-                    <button id="btnFilterF" class="btn btn-sm btn-success">Filtrar</button>
-                    <button id="btnClearFilterF" class="btn btn-sm btn-secondary">Limpiar</button>
+                    <button id="btnFilterF" class="btn btn-sm btn-brand-green">Filtrar</button>
+                    <button id="btnClearFilterF" class="btn btn-sm btn-outline-secondary">Limpiar</button>
                 </div>
             </div>
         </div>
@@ -143,7 +143,7 @@
                     <h4 class="m-0">Programa de siembras por finca</h4>
                     <div>
                         <button id="btnToggleFiltersF" class="btn btn-outline-secondary mr-2">Filtros</button>
-                        <button id="btnNewF" class="btn btn-primary">Nuevo registro</button>
+                        <button id="btnNewF" class="btn btn-brand-green">Nuevo registro</button>
                     </div>
                 </div>
                 <div class="table-responsive">
@@ -284,7 +284,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-light" data-dismiss="modal">Cerrar</button>
-                <button type="button" id="saveProgramf" class="btn btn-dark">Guardar</button>
+                <button type="button" id="saveProgramf" class="btn btn-brand-green">Guardar</button>
             </div>
         </div>
     </div>

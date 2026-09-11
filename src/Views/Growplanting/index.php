@@ -92,10 +92,10 @@ $COM4 = $conexion->query($slqCOMBO4);
   </div>
 
   <div class="form-group mx-sm-3 mb-2">
-    <button name="buscar" type="submit" class="btn btn-primary mb-2">Buscar</button>
+    <button name="buscar" type="submit" class="btn btn-brand-green mb-2">Buscar</button>
   </div>
   <div class="form-group mx-sm-3 mb-2">
-    <button name="print" type="submit" class="btn btn-success mb-2" onclick="imprime();">Imprimir</button>
+    <button name="print" type="submit" class="btn btn-outline-brand-green mb-2" onclick="imprime();">Imprimir</button>
   </div>
 </form>
 </div>

@@ -46,7 +46,7 @@
             <!-- ===== Panel de filtros ===== -->
             <div class="col-sm-2">
                 <div class="card shadow-sm">
-                    <div class="card-header bg-success text-white py-2">
+                    <div class="card-header emv-header-success text-white py-2">
                         <strong><i class="fas fa-filter"></i> Filtros</strong>
                     </div>
                     <div class="card-body p-2">
@@ -77,7 +77,7 @@
                             </select>
                         </div>
 
-                        <button type="button" onclick="emvListar()" class="btn btn-success btn-sm btn-block">
+                        <button type="button" onclick="emvListar()" class="btn btn-brand-green btn-sm btn-block">
                             <i class="fas fa-search"></i> Consultar
                         </button>
 
@@ -90,7 +90,7 @@
             <div class="col-sm-10">
                 <div class="row mb-2">
                     <div class="col-sm-12">
-                        <button id="btnEmvNuevo" type="button" class="btn btn-info">
+                        <button id="btnEmvNuevo" type="button" class="btn btn-brand-green">
                             <i class="material-icons" style="vertical-align:middle">library_add</i> Nueva Entrada
                         </button>
                     </div>
@@ -173,7 +173,7 @@
                     <input type="text" class="form-control form-control-sm" id="emv_rep_remision" placeholder="Número de remisión">
                 </div>
                 <div class="form-group col-md-3 d-flex align-items-end">
-                    <button type="button" id="btnEmvReporteConsultar" class="btn btn-success btn-sm btn-block">
+                    <button type="button" id="btnEmvReporteConsultar" class="btn btn-brand-green btn-sm btn-block">
                         <i class="fas fa-search"></i> Consultar
                     </button>
                 </div>
@@ -263,10 +263,10 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success">
+                    <button type="submit" class="btn btn-brand-green">
                         <i class="material-icons" style="vertical-align:middle;font-size:18px">save</i> Guardar
                     </button>
-                    <button type="button" id="btnEmvVerDetalles" class="btn btn-primary" style="display:none;">
+                    <button type="button" id="btnEmvVerDetalles" class="btn btn-outline-brand-green" style="display:none;">
                         <i class="material-icons" style="vertical-align:middle;font-size:18px">list_alt</i> Ir a Detalles
                     </button>
                 </div>
@@ -281,7 +281,7 @@
 <div class="modal fade bs-example-modal-lg" id="modalEmvDetalles" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header emv-header-success text-white">
                 <h5 class="modal-title" id="modalEmvDetallesTitle">Detalles de Entrada</h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar">
                     <span aria-hidden="true">&times;</span>
@@ -350,7 +350,7 @@
                                 <label>Observación</label>
                                 <input type="text" class="form-control" id="det_observacion" placeholder="Observación (opcional)">
                             </div>
-                            <button type="submit" class="btn btn-success btn-block">
+                            <button type="submit" class="btn btn-brand-green btn-block">
                                 <i class="material-icons" style="vertical-align:middle;font-size:18px">add_circle</i>
                                 Agregar detalle
                             </button>

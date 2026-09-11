@@ -56,7 +56,7 @@
     <div class="col-sm-2">
       <div class="pull-left">
         <div class="row d-flex justify-content-center mt-200"> 
-          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal"> Nuevo </button>
+          <button type="button" class="btn btn-brand-green" data-toggle="modal" data-target="#exampleModal"> Nuevo </button>
         </div> <!-- Modal -->
       </div>
     </div>
@@ -211,7 +211,7 @@
                         <option value="" disabled selected>Valor</option>
                       </select>
                     </div>
-                      <input type="submit" class="btn btn-success" id="guardaEvaluacion" onclick="guardaEvaluacion()">
+                      <input type="submit" class="btn btn-brand-green" id="guardaEvaluacion" onclick="guardaEvaluacion()">
                     <div class="form-group">
                       <br><label for=""><span class="badge badge-secondary" id="florero"></span></label>
                     </div>
@@ -240,7 +240,7 @@
                     <div class="form-group">  
                       <input type="number" name="" id="cantidad" class="form-control" placeholder="#Tallos">
                     </div>
-                      <input type="submit" class="btn btn-success" id="guardaCausa" onclick="guardaCausa()">
+                      <input type="submit" class="btn btn-brand-green" id="guardaCausa" onclick="guardaCausa()">
                     <div class="form-group">
                       <br><label for=""><span class="badge badge-secondary" id="floreroo"></span></label>
                     </div>

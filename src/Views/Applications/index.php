@@ -10,9 +10,41 @@
             margin-left: 0px;
         }
     }
+
+    @media print {
+        /* elimina el espacio superior del navbar fijo y del formulario de filtros */
+        body {
+            padding-top: 0 !important;
+        }
+        .imprimir-form,
+        .imprimir-gap {
+            display: none !important;
+        }
+        h5 {
+            margin: 0 0 4px 0;
+            font-size: 1.05rem;
+        }
+
+        @page {
+            margin-top: 10mm;
+            margin-bottom: 15mm;
+
+            @bottom-left {
+                content: "Impreso el: <?php echo date('d/m/Y H:i'); ?>";
+                font-size: 9px;
+                font-family: Arial, sans-serif;
+            }
+
+            @bottom-right {
+                content: "Página " counter(page) " de " counter(pages);
+                font-size: 9px;
+                font-family: Arial, sans-serif;
+            }
+        }
+    }
 </style>
 
-<div class="card">
+<div class="card imprimir-form">
     <div class="card-header">
         <form class="form-inline" action="home.php?menu=tables&report=2" method="post" enctype="multipart/form-data">
             <div class="form-group mx-sm-3 mb-2">
@@ -44,15 +76,15 @@
                 </select>
             </div>
             <div class="form-group mx-sm-3 mb-2">
-                <button name="buscar" type="submit" class="btn btn-primary mb-2">Buscar</button>
+                <button name="buscar" type="submit" class="btn btn-brand-green mb-2">Buscar</button>
             </div>
             <div class="form-group mx-sm-3 mb-2">
-                <button name="imprimir" type="submit" class="btn btn-primary mb-2" onclick="window.print();">Imprimir</button>
+                <button name="imprimir" type="submit" class="btn btn-outline-brand-green mb-2" onclick="window.print();">Imprimir</button>
             </div>
         </form>
     </div>
 </div>
-<br>
+<br class="imprimir-gap">
 
 <?php if (!empty($rows)): ?>
     <?php
@@ -72,16 +104,8 @@
                     <th>Variedad</th><th>Temporada</th>
                     <th>#Cama Fisica</th><th>#Cama Real</th>
                     <th>Realizado</th>
-                    <th>Barcode</th>
                 </tr>
                 <?php foreach ($rows as $f): ?>
-                    <?php
-                        $codigo     = '*' . ($f->finca === 'INVERPALMAS' ? '10' : '20') . $f->bloque . $f->codigo . $f->temporada . '*';
-                        $barcode    = new Barcode39($codigo);
-                        ob_start();
-                        $barcode->draw();
-                        $barcodeImg = ob_get_clean();
-                    ?>
                     <tr>
                         <td><?php echo htmlspecialchars($f->bloque); ?></td>
                         <td><?php echo htmlspecialchars($f->aplicar); ?></td>
@@ -90,11 +114,10 @@
                         <td><?php echo number_format($f->camas, 0, '', '.'); ?></td>
                         <td><?php echo number_format($f->ncamas, 0, '', '.'); ?></td>
                         <td></td>
-                        <td><img src="data:image/png;base64,<?php echo base64_encode($barcodeImg); ?>" alt="Código de Barras"></td>
                     </tr>
                 <?php endforeach; ?>
                 <tr style="height:30px">
-                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
                 </tr>
             </table>
         </div>
@@ -121,6 +144,83 @@
         </div>
         <div class="col-6"></div>
     </div>
+
+    <?php if (!empty($supplies)): ?>
+        <?php
+            $totalGeneral = 0.0;
+            $totalesPorInsumo = [];
+            foreach ($supplies as $sp) {
+                $cant = (float)$sp->cantidad;
+                $totalGeneral += $cant;
+                $key = $sp->insumo . '|' . $sp->medida;
+                if (!isset($totalesPorInsumo[$key])) $totalesPorInsumo[$key] = 0.0;
+                $totalesPorInsumo[$key] += $cant;
+            }
+        ?>
+        <div class="saltoDePagina d-print-block"></div>
+
+        <div class="row">
+            <div class="col-8">
+                <h5>Resumen de Insumos por Semana</h5>
+                <table class="table table-sm">
+                    <tr>
+                        <th>Finca</th><th>Aplicar</th><th>Insumo</th><th>Medida</th><th>Dosis</th><th>#Cama Real</th><th>Cantidad a Usar</th>
+                    </tr>
+                    <?php
+                        $subtotal = 0.0;
+                        $prevFinca = null;
+                        foreach ($supplies as $sp):
+                            if ($prevFinca !== null && $sp->finca !== $prevFinca):
+                    ?>
+                        <tr>
+                            <td colspan="6" class="text-right"><strong>Subtotal <?php echo htmlspecialchars($prevFinca); ?></strong></td>
+                            <td><strong><?php echo number_format($subtotal, 2, ',', '.'); ?></strong></td>
+                        </tr>
+                    <?php
+                            endif;
+                            $prevFinca = $sp->finca;
+                            $subtotal += (float)$sp->cantidad;
+                    ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($sp->finca); ?></td>
+                        <td><?php echo htmlspecialchars($sp->aplicacion); ?></td>
+                        <td><?php echo htmlspecialchars($sp->insumo); ?></td>
+                        <td><?php echo htmlspecialchars($sp->medida); ?></td>
+                        <td><?php echo number_format($sp->dosis, 2, ',', '.'); ?></td>
+                        <td><?php echo number_format($sp->ncamas, 0, '', '.'); ?></td>
+                        <td><?php echo number_format($sp->cantidad, 2, ',', '.'); ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                    <?php if ($prevFinca !== null): ?>
+                    <tr>
+                        <td colspan="6" class="text-right"><strong>Subtotal <?php echo htmlspecialchars($prevFinca); ?></strong></td>
+                        <td><strong><?php echo number_format($subtotal, 2, ',', '.'); ?></strong></td>
+                    </tr>
+                    <?php endif; ?>
+                    <tr>
+                        <td colspan="6" class="text-right"><strong>TOTAL</strong></td>
+                        <td><strong><?php echo number_format($totalGeneral, 2, ',', '.'); ?></strong></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-4">
+                <h5>Total por Insumo</h5>
+                <table class="table table-sm">
+                    <tr>
+                        <th>Insumo</th><th>Medida</th><th>Total</th>
+                    </tr>
+                    <?php foreach ($totalesPorInsumo as $key => $tot): ?>
+                        <?php list($insumo, $medida) = explode('|', $key); ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($insumo); ?></td>
+                            <td><?php echo htmlspecialchars($medida); ?></td>
+                            <td><?php echo number_format($tot, 2, ',', '.'); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </table>
+            </div>
+        </div>
+    <?php endif; ?>
 
 <?php else: ?>
     <p>0 results</p>

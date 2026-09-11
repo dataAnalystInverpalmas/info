@@ -78,15 +78,10 @@ $tablas = array(
 	'3'                  => 'tables/program.php',
 	'4'                  => 'tables/seasons.php',
 	'5'                  => 'tables/fusarium.php',
-	'6'                  => 'tables/arrangements.php',
-	'20'                 => 'tables/arrangements_crud.php',
-	'21'                 => 'tables/arrangement_crud.php',
 	'22'                 => 'tables/festivos.php',
 	'7'                  => 'tables/companys.php',
 	'8'                  => 'tables/farms.php',
 	'9'                  => 'tables/products.php',
-	'10'                 => 'tables/addxvariety.php',
-	'11'                 => 'tables/areas.php',
 	'12'                 => 'tables/programf.php',
 	'13'                 => 'tables/hplane.php',
 	'14'                 => 'tables/viewReportsP.php',
@@ -101,7 +96,6 @@ $tablas = array(
 	'loadEmployees'      => 'tables/employees.php',
 	'loadSupervisors'    => 'tables/supervisors.php',
 	'loadAssistances'    => 'tables/assistances.php',
-	'withoutdatacovid'   => 'tables/withoutdatacovid.php',
 	'generateViewBudget' => 'tables/viewBudget.php',
 );
 
@@ -137,10 +131,11 @@ $reportes = array(
 	'206'      => 'views/solicitudes_extra.php',
 	'204'      => 'views/resumen_ejecutivo_mensual.php',
 	'205'      => 'views/gestion_dashboard.php',
-	'1000'     => 'covid/covid.php',
-	'1001'     => 'covid/settings.php',
-	'1002'     => 'covid/report.php',
-	'1004'     => 'covid/reportout.php',
+	'reportes_produccion' => 'views/reportes_dashboard.php',
+	'reportes_real_vs_teorico' => 'views/reporte_comparativo.php',
+	'curvas_clavel_produccion' => 'views/curvas_clavel_produccion.php',
+	'seguimiento_produccion' => 'views/seguimiento_produccion.php',
+	'demanda_tika' => 'views/demanda_tika.php',
 	'programs'         => 'views/programs.php',
 	'programsf'        => 'views/programsf.php',
 	'orders'           => 'views/evaluaciones_crud.php',
@@ -152,6 +147,7 @@ $reportes = array(
 	'crud_supplies'     => 'views/supplies_crud.php',
 	'crud_varieties'    => 'views/varieties_crud.php',
 	'crud_seasons'      => 'views/seasons_crud.php',
+	'crud_greenhouses'  => 'views/greenhouses_crud.php',
 	'crud_emv'          => 'views/entrada_material_vegetal.php',
 	'plano_consulta'    => 'views/plano_consulta.php',
 	'plano_reemplazos'  => 'views/plano_reemplazos.php',
@@ -166,9 +162,6 @@ if (isset($_GET['table'])) {
 	if (isset($tablas[$key])) {
 		$dir = $tablas[$key];
 		$permitido = tiene_permiso($conexion, $dir);
-		if (!$permitido && ($key === '20' || $key === '21')) {
-			$permitido = tiene_permiso($conexion, 'tables/arrangements.php');
-		}
 
 		if ($permitido) {
 			?>
@@ -219,6 +212,7 @@ if (isset($_GET['report'])) {
 			'views/supplies_crud.php',
 			'views/varieties_crud.php',
 			'views/seasons_crud.php',
+			'views/greenhouses_crud.php',
 			'views/entrada_material_vegetal.php',
 			'views/evaluaciones_crud.php',
 		], true) && intval($_SESSION['role']) === 1) {

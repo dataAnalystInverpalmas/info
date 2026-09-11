@@ -16,6 +16,9 @@ $(document).ready(function () {
 
     var meta = null;
     var dt = null;
+    var bulkField = $root.attr('data-bulk-field') || '';
+    var usesBulk = bulkField !== '';
+    var selectedIds = {};
     var selectsConfig = {};
     try { selectsConfig = JSON.parse($root.attr('data-selects') || '{}'); } catch(e) { selectsConfig = {}; }
     var displayConfig = {};
@@ -40,10 +43,72 @@ $(document).ready(function () {
 
     function buildFilters() {
         var html = '';
-        meta.columns.forEach(function (c) {
-            html += '<input type="text" class="form-control form-control-sm mr-1 mb-1 f-col" data-col="' + escHtml(c.name) + '" placeholder="Filtrar ' + escHtml(c.name) + '">';
+        var filtersConfig = null;
+        try { filtersConfig = JSON.parse($root.attr('data-filters') || 'null'); } catch(e) { filtersConfig = null; }
+        var list = null;
+        var map = null;
+        if (Array.isArray(filtersConfig)) {
+            list = filtersConfig.filter(function (n) { return typeof n === 'string'; });
+        } else if (filtersConfig && typeof filtersConfig === 'object') {
+            map = filtersConfig;
+            list = Object.keys(map);
+        }
+        var names = list || meta.columns.map(function (c) { return c.name; });
+        names.forEach(function (name) {
+            var cfg = map ? map[name] : null;
+            var isUrl = typeof cfg === 'string' && cfg.length > 0;
+            if (isUrl) {
+                html += '<select class="form-control form-control-sm f-col" data-col="' + escHtml(name) + '" data-url="' + escHtml(cfg) + '"></select>';
+            } else {
+                html += '<input type="text" class="form-control form-control-sm f-col" data-col="' + escHtml(name) + '" placeholder="Filtrar ' + escHtml(name) + '">';
+            }
         });
         $('#crudFilters').html(html);
+
+        $('#crudFilters select.f-col[data-url]').each(function () {
+            var $sel = $(this);
+            var url = $sel.data('url');
+            $.get(url, function (optHtml) {
+                if (optHtml) $sel.html(optHtml);
+                $sel.select2({
+                    width: '100%',
+                    placeholder: 'Filtrar ' + $sel.data('col') + '...',
+                    allowClear: true
+                });
+                var pending = $sel.data('pending');
+                if (pending) {
+                    $sel.val(pending).trigger('change');
+                    $sel.removeData('pending');
+                }
+            });
+        });
+    }
+
+    function catselRow(text, checked) {
+        var ico = $('<span class="catsel-ico"></span>').text(checked ? '\u2611' : '\u2610');
+        if (!checked) ico.addClass('muted');
+        return $('<div class="catsel-row"></div>').append(ico).append($('<span></span>').text(text));
+    }
+
+    function initCatsel($sel) {
+        $sel.select2({
+            width: '100%',
+            placeholder: 'Seleccionar / buscar...',
+            allowClear: true,
+            templateResult: function (state) {
+                if (!state.id) return $('<span class="catsel-ph"></span>').text(state.text || '');
+                return catselRow(state.text, String($sel.val()) === String(state.id));
+            },
+            templateSelection: function (state) {
+                if (!state.id) return $('<span class="catsel-ph"></span>').text(state.text || '');
+                return catselRow(state.text, true);
+            }
+        });
+        var pending = $sel.data('pending');
+        if (pending !== undefined && pending !== null && pending !== '') {
+            $sel.val(pending).trigger('change');
+        }
+        $sel.removeData('pending');
     }
 
     function buildModalFields() {
@@ -70,7 +135,9 @@ $(document).ready(function () {
         Object.keys(selectsConfig).forEach(function (colName) {
             var url = selectsConfig[colName];
             $.get(url, function (html) {
-                $('#m_' + colName).html(html);
+                var $sel = $('#m_' + colName);
+                $sel.html(html);
+                initCatsel($sel);
             });
         });
     }
@@ -101,7 +168,17 @@ $(document).ready(function () {
         $('#crud_id').val(row[meta.pk] || row.id || '');
         meta.columns.forEach(function (c) {
             if (!c.editable || c.is_pk) return;
-            $('#m_' + c.name).val(row[c.name] == null ? '' : row[c.name]);
+            var val = row[c.name] == null ? '' : row[c.name];
+            if (selectsConfig[c.name]) {
+                var $sel = $('#m_' + c.name);
+                if ($sel.hasClass('select2-hidden-accessible')) {
+                    $sel.val(val).trigger('change');
+                } else {
+                    $sel.data('pending', val);
+                }
+            } else {
+                $('#m_' + c.name).val(val);
+            }
         });
     }
 
@@ -109,12 +186,54 @@ $(document).ready(function () {
         $('#crud_id').val('');
         meta.columns.forEach(function (c) {
             if (!c.editable || c.is_pk) return;
-            $('#m_' + c.name).val('');
+            if (selectsConfig[c.name]) {
+                var $sel = $('#m_' + c.name);
+                $sel.removeData('pending');
+                if ($sel.hasClass('select2-hidden-accessible')) {
+                    $sel.val(null).trigger('change');
+                }
+            } else {
+                $('#m_' + c.name).val('');
+            }
+        });
+    }
+
+    function rowIdOf(row) {
+        return row != null && meta && meta.pk != null && row[meta.pk] !== undefined ? row[meta.pk] : (row && row.id);
+    }
+
+    function updateBulkUI() {
+        var count = Object.keys(selectedIds).length;
+        var $count = $('#bulkCount');
+        if ($count.length) $count.text(count + ' seleccionado' + (count === 1 ? '' : 's'));
+    }
+
+    function applySelectionHighlight() {
+        $('#catalogTable .gh-row-select').each(function () {
+            var row = JSON.parse(decodeURIComponent($(this).attr('data-row') || '%7B%7D'));
+            var id = rowIdOf(row);
+            $(this).closest('tr').toggleClass('crud-row-selected', id != null && !!selectedIds[id]);
         });
     }
 
     function initTable() {
-        var columns = meta.columns.map(function (c) {
+        var columns = [];
+        if (usesBulk) {
+            urls.bulk = '../ajax/' + endpointBase + '_bulk.php';
+            columns.push({
+                data: null,
+                orderable: false,
+                className: 'text-center',
+                defaultContent: '',
+                render: function (data, type, row) {
+                    var id = rowIdOf(row);
+                    var rowJson = encodeURIComponent(JSON.stringify(row));
+                    var checked = id != null && !!selectedIds[id] ? ' checked' : '';
+                    return '<input type="checkbox" class="gh-row-select" data-row="' + rowJson + '"' + checked + '>';
+                }
+            });
+        }
+        var metaColumns = meta.columns.map(function (c) {
             var colDef = { data: c.name, defaultContent: '' };
             if (displayConfig[c.name]) {
                 colDef.render = function (data, type, row) {
@@ -123,7 +242,7 @@ $(document).ready(function () {
             }
             return colDef;
         });
-
+        columns = columns.concat(metaColumns);
         columns.push({
             data: null,
             orderable: false,
@@ -134,6 +253,7 @@ $(document).ready(function () {
         });
 
         var head = '<tr>';
+        if (usesBulk) head += '<th class="text-center" style="width:35px;"><input type="checkbox" id="selectAllCells" title="Seleccionar todos visibles"></th>';
         meta.columns.forEach(function (c) { head += '<th>' + escHtml(c.name) + '</th>'; });
         head += '<th>Acciones</th></tr>';
         $('#catalogTable thead').html(head);
@@ -147,6 +267,13 @@ $(document).ready(function () {
                 }
             },
             columns: columns
+        });
+
+        dt.on('draw', function () {
+            if (usesBulk) {
+                $('#selectAllCells').prop('checked', false);
+                applySelectionHighlight();
+            }
         });
 
         $('#catalogTable').on('click', '.btn-edit-c', function () {
@@ -171,9 +298,71 @@ $(document).ready(function () {
         });
     }
 
+    if (usesBulk) {
+        $('#catalogTable').on('click', '.gh-row-select', function () {
+            var row = JSON.parse(decodeURIComponent($(this).attr('data-row') || '%7B%7D'));
+            var id = rowIdOf(row);
+            if (id == null) return;
+            if ($(this).prop('checked')) selectedIds[id] = true;
+            else delete selectedIds[id];
+            updateBulkUI();
+        });
+
+        $('#catalogTable').on('click', '#selectAllCells', function () {
+            var checked = $(this).prop('checked');
+            $('#catalogTable .gh-row-select').each(function () {
+                var row = JSON.parse(decodeURIComponent($(this).attr('data-row') || '%7B%7D'));
+                var id = rowIdOf(row);
+                $(this).prop('checked', checked);
+                if (id != null) {
+                    if (checked) selectedIds[id] = true;
+                    else delete selectedIds[id];
+                }
+            });
+            updateBulkUI();
+            applySelectionHighlight();
+        });
+
+        $('#btnApplyLongitud').on('click', function () {
+            var ids = Object.keys(selectedIds);
+            if (!ids.length) {
+                alert('No hay registros seleccionados');
+                return;
+            }
+            var val = $('#bulkLongitud').val();
+            if (val === '' || isNaN(val)) {
+                alert('Ingrese un valor de ' + bulkField);
+                return;
+            }
+            var num = Math.round(parseFloat(val) * 100) / 100;
+            if (num < 0) {
+                alert('El valor no puede ser negativo');
+                return;
+            }
+            $.post(urls.bulk, { ids: ids, [bulkField]: num }, function (res) {
+                if (res && res.success) {
+                    alert((res.message || '') + ' aplicado a ' + res.affected + ' registro(s)');
+                    selectedIds = {};
+                    $('#bulkLongitud').val('');
+                    if (dt) dt.ajax.reload(null, false);
+                } else {
+                    alert((res && res.message) ? res.message : 'Error al aplicar');
+                }
+            }, 'json').fail(function (xhr) {
+                alert('Error de petición: ' + (xhr && xhr.responseText ? xhr.responseText : 'sin respuesta'));
+            });
+        });
+    }
+
     $('#btnCrudFilter').on('click', function () { if (dt) dt.ajax.reload(); });
     $('#btnCrudClear').on('click', function () {
-        $('.f-col').val('');
+        $('.f-col').each(function () {
+            if ($(this).hasClass('select2-hidden-accessible')) {
+                $(this).val('').trigger('change');
+            } else {
+                $(this).val('');
+            }
+        });
         if (dt) dt.ajax.reload();
     });
     $('#btnCrudNew').on('click', function () {

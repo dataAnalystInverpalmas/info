@@ -113,14 +113,22 @@ class Application {
 
     public static function getSupplies(string $where): array {
         $conexion = Database::getConnection();
-        $sql = "SELECT a.aplicar as aplicacion, s.insumo, s.medida,
-                round(sum(p.plantas)/960,1) * s.dosis as cantidad
+        $sql = "SELECT p.finca,
+                a.aplicar as aplicacion,
+                su.insumo, su.medida, su.dosis,
+                round(sum(p.plantas)/960,1) as ncamas,
+                round(round(sum(p.plantas)/960,1) * su.dosis, 2) as cantidad
                 FROM plane AS p
                 INNER JOIN arrangements as a ON a.variedad=p.variedad and a.finca=p.finca
+                INNER JOIN varieties AS v ON v.nombre=p.variedad
+                INNER JOIN seasons AS s ON s.nombre=p.temporada
+                LEFT JOIN (SELECT variedad,temporada_obj,pico FROM program WHERE estado=1 group by 1,2,3) AS pr
+                    ON pr.variedad=p.variedad and pr.temporada_obj=s.nombre
                 INNER JOIN arrangement as aa ON a.aplicar=aa.aplicar and a.tipo=aa.tipo
-                INNER JOIN supplies as s ON s.arrangement_id=aa.id AND s.finca=p.finca
+                INNER JOIN supplies as su ON su.arrangement_id=aa.id AND (su.finca=p.finca OR su.finca='')
                 $where
-                GROUP BY a.aplicar,s.insumo";
+                GROUP BY p.finca, a.aplicar, su.insumo, su.medida, su.dosis
+                ORDER BY p.finca, a.aplicar, su.insumo";
         $result = $conexion->query($sql);
         $data = [];
         if ($result) {

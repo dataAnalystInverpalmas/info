@@ -135,6 +135,7 @@ $directorio = $GLOBALS['src'];
             <a class="dropdown-item" href="index.php?report=crud_supplies">CRUD Supplies</a>
             <a class="dropdown-item" href="index.php?report=crud_varieties">CRUD Varieties</a>
             <a class="dropdown-item" href="index.php?report=crud_seasons">CRUD Seasons</a>
+            <a class="dropdown-item" href="index.php?report=crud_greenhouses">CRUD Greenhouses</a>
             <div class="dropdown-divider"></div>
             <a class="dropdown-item" href="index.php?report=crud_users">CRUD Users</a>
             <a class="dropdown-item" href="index.php?report=crud_roles">CRUD Roles</a>
@@ -196,11 +197,25 @@ $directorio = $GLOBALS['src'];
             <a class="dropdown-item" href="index.php?report=103">Informe de Clavel por picos</a>
             <a class="dropdown-item" href="index.php?report=104">Proyecciones real - quipus - inver</a>
             <a class="dropdown-item" href="index.php?report=110">Causas Nacional</a>
-            <a class="dropdown-item" href="index.php?report=106">Demandas</a>
+            <!--<a class="dropdown-item" href="index.php?report=106">Demandas</a>-->
             <a class="dropdown-item" href="index.php?report=107">Compara Producción</a>
-            <div class="dropdown-divider"></div>
+            <!--<div class="dropdown-divider"></div>
             <a class="dropdown-item" href="index.php?report=109">Proyecciones JL</a>
             <a class="dropdown-item" href="index.php?report=curvas">Curvas Clavel</a>
+          </div>-->
+        </li>
+
+        <!-- Reportes Dropdown -->
+        <li class="nav-item dropdown dropdown-custom">
+          <a class="nav-link dropdown-toggle nav-link-btn" href="#" id="menuReportes" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Reportes
+          </a>
+          <div class="dropdown-menu" aria-labelledby="menuReportes">
+            <a class="dropdown-item" href="index.php?report=reportes_produccion">Reporte Sembrado</a>
+            <a class="dropdown-item" href="index.php?report=reportes_real_vs_teorico">Teórico vs Real Siembras</a>
+            <a class="dropdown-item" href="index.php?report=curvas_clavel_produccion">Curvas Producción Clavel</a>
+            <a class="dropdown-item" href="index.php?report=seguimiento_produccion">Seguimiento de producción</a>
+            <a class="dropdown-item" href="index.php?report=demanda_tika">Demanda Semanal</a>
           </div>
         </li>
 
@@ -253,4 +268,3 @@ $directorio = $GLOBALS['src'];
     </div>
   <?php endif; ?>
 </nav>
-

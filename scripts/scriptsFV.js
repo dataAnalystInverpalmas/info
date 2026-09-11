@@ -40,7 +40,7 @@ $(document).ready(function(){
         showPreviousButton: true,
         toolbarExtraButtons: [
         $('<button></button>').text('Finalizar')
-          .addClass('btn btn-success')
+          .addClass('btn btn-brand-green')
           .on('click', function(){
             var totalTallos = totalTallosFv;
             var talloCausas = bdCausas.reduce(function(sum, c){ return sum + (parseInt(c.cantidad) || 0); }, 0);

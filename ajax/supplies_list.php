@@ -11,6 +11,12 @@ $sql = "SELECT s.*, CONCAT(aa.tipo, ' - ', aa.aplicar) AS arrangement_name
         LEFT JOIN arrangement aa ON s.arrangement_id = aa.id
         WHERE 1=1";
 
+if (isset($_GET['arrangement_name']) && trim((string)$_GET['arrangement_name']) !== '') {
+    $sql .= ' AND CONCAT(aa.tipo, " - ", aa.aplicar) LIKE ?';
+    $types .= 's';
+    $params[] = '%' . trim($_GET['arrangement_name']) . '%';
+}
+
 if (isset($_GET['finca']) && trim((string)$_GET['finca']) !== '') {
     $sql .= ' AND s.finca LIKE ?';
     $types .= 's';

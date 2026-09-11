@@ -117,14 +117,17 @@ class ProyectoController {
 
         $usuario_id = $_SESSION['id'] ?? null;
         $proyectos  = Proyecto::getParaExportarExcel($usuario_id);
-        $tareas     = \App\Models\Tarea::getParaExportarExcel($usuario_id);
+        $tareas     = array_filter(
+            \App\Models\Tarea::getParaExportarExcel($usuario_id),
+            fn($t) => !empty($t->proyecto_id)
+        );
         $riesgos    = \App\Models\ProyectoRiesgo::getParaExportarExcel($usuario_id);
         $solicitudes = \App\Models\SolicitudExtra::getAll($usuario_id);
         $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($plantilla);
 
         self::limpiarFilas($spreadsheet->getSheetByName('Proyectos'), 4, 48, 'R');
         self::limpiarFilas($spreadsheet->getSheetByName('Cronograma'), 4, 32, 'N');
-        self::limpiarFilas($spreadsheet->getSheetByName('Riesgos_Bloqueos'), 4, 3, 'L');
+        self::limpiarFilas($spreadsheet->getSheetByName('Riesgos_Bloqueos'), 4, 32, 'L');
         self::limpiarFilas($spreadsheet->getSheetByName('Solicitudes_Extra'), 4, 76, 'J');
 
         $fila = 4;
@@ -154,6 +157,11 @@ class ProyectoController {
             self::asignarFecha($hoja, 'J' . $fila, $proyecto->fecha_fin ?? null);
             $fila++;
         }
+        self::aplicarEstiloTabla($spreadsheet->getSheetByName('Proyectos'), 4, $fila - 1, 'R');
+        self::corregirFormatoCondicional($spreadsheet->getSheetByName('Proyectos'));
+        if ($fila - 1 >= 4) {
+            $spreadsheet->getSheetByName('Proyectos')->getStyle('K4:K' . ($fila - 1))->getNumberFormat()->setFormatCode('0%');
+        }
 
         $fila = 4;
         foreach ($tareas as $tarea) {
@@ -179,8 +187,14 @@ class ProyectoController {
             self::asignarFecha($hoja, 'H' . $fila, ($tarea->estado ?? '') === 'completada' ? ($tarea->fecha_actualizacion ?? null) : null);
             $fila++;
         }
+        self::aplicarEstiloTabla($spreadsheet->getSheetByName('Cronograma'), 4, $fila - 1, 'N', 131.25);
+        self::corregirFormatoCondicional($spreadsheet->getSheetByName('Cronograma'));
+        if ($fila - 1 >= 4) {
+            $spreadsheet->getSheetByName('Cronograma')->getStyle('I4:I' . ($fila - 1))->getNumberFormat()->setFormatCode('0%');
+        }
 
         self::actualizarResumenDashboard($spreadsheet, count($proyectos));
+        self::corregirFormatoCondicional($spreadsheet->getSheetByName('Dashboard'));
 
         $fila = 4;
         foreach ($riesgos as $r) {
@@ -203,6 +217,8 @@ class ProyectoController {
             self::asignarFecha($hoja, 'J' . $fila, $r->fecha_compromiso ?? null);
             $fila++;
         }
+        self::aplicarEstiloTabla($spreadsheet->getSheetByName('Riesgos_Bloqueos'), 4, $fila - 1, 'L');
+        self::corregirFormatoCondicional($spreadsheet->getSheetByName('Riesgos_Bloqueos'));
 
         $fila = 4;
         foreach ($solicitudes as $s) {
@@ -222,6 +238,8 @@ class ProyectoController {
             self::asignarFecha($hoja, 'A' . $fila, $s->fecha ?? null);
             $fila++;
         }
+        self::aplicarEstiloTabla($spreadsheet->getSheetByName('Solicitudes_Extra'), 4, $fila - 1, 'J');
+        self::corregirFormatoCondicional($spreadsheet->getSheetByName('Solicitudes_Extra'));
 
         while (ob_get_level() > 0) {
             ob_end_clean();
@@ -251,9 +269,83 @@ class ProyectoController {
             return;
         }
 
+        foreach ($hoja->getMergeCells() as $rango) {
+            $piezas = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::splitRange($rango);
+            $celdaInicio = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::coordinateFromString($piezas[0][0]);
+            $celdaFin    = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::coordinateFromString($piezas[0][1]);
+            $filaInicio  = (int)$celdaInicio[1];
+            $filaFin     = (int)$celdaFin[1];
+
+            if ($filaInicio >= $inicio && $filaFin <= $fin) {
+                $hoja->unmergeCells($rango);
+            }
+        }
+
         for ($fila = $inicio; $fila <= $fin; $fila++) {
             for ($columna = 'A'; $columna <= $ultimaColumna; $columna++) {
                 $hoja->setCellValue($columna . $fila, null);
+            }
+        }
+    }
+
+    private static function aplicarEstiloTabla($hoja, int $inicio, int $fin, string $ultimaColumna, ?float $alturaFila = null): void {
+        if (!$hoja || $fin < $inicio) {
+            return;
+        }
+
+        for ($fila = $inicio; $fila <= $fin; $fila++) {
+            $rango = 'A' . $fila . ':' . $ultimaColumna . $fila;
+            $hoja->getStyle($rango)->applyFromArray([
+                'font' => [
+                    'name' => 'Arial',
+                    'size' => 9
+                ],
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => ['rgb' => 'BFBFBF']
+                    ]
+                ],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => (($fila - $inicio) % 2 === 0) ? 'FFFFFFFF' : 'FFF2F2F2']
+                ],
+                'alignment' => [
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                    'wrapText' => true
+                ]
+            ]);
+            if ($alturaFila !== null) {
+                $hoja->getRowDimension($fila)->setRowHeight($alturaFila);
+            }
+        }
+    }
+
+    private static function corregirFormatoCondicional($hoja): void {
+        if (!$hoja) {
+            return;
+        }
+
+        foreach ($hoja->getConditionalStylesCollection() as $reglas) {
+            foreach ($reglas as $regla) {
+                $estilo = $regla->getStyle();
+                if (!$estilo) {
+                    continue;
+                }
+
+                $relleno = $estilo->getFill();
+                $color = $relleno->getEndColor()->getARGB();
+                if (!preg_match('/^FF[0-9A-Fa-f]{6}$/', (string)$color)) {
+                    $color = $relleno->getStartColor()->getARGB();
+                }
+                if (!preg_match('/^FF[0-9A-Fa-f]{6}$/', (string)$color)) {
+                    continue;
+                }
+
+                $relleno->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID);
+                $relleno->getStartColor()->setARGB($color);
+                $relleno->getEndColor()->setARGB($color);
+                $estilo->getFont()->setSize(9);
             }
         }
     }
@@ -266,6 +358,7 @@ class ProyectoController {
         try {
             $valor = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel(new \DateTimeImmutable($fecha));
             $hoja->setCellValue($celda, $valor);
+            $hoja->getStyle($celda)->getNumberFormat()->setFormatCode('dd/mm/yyyy');
         } catch (\Throwable $exception) {
             $hoja->setCellValue($celda, $fecha);
         }

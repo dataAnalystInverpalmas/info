@@ -24,7 +24,7 @@
     var btn = document.createElement('a');
     btn.id = 'pb-print-btn';
     btn.href = 'javascript:void(0);';
-    btn.className = 'btn btn-success btn-sm ml-2';
+    btn.className = 'btn btn-brand-green btn-sm ml-2';
     btn.textContent = 'Imprimir';
     btn.onclick = function() {
         var style = document.createElement('style');

@@ -29,7 +29,7 @@
 				<option value="1">Guarde granel: Si</option>
 				<option value="0">Guarde granel: No</option>
 			  </select>
-			  <br><input id="listar" type="submit" onclick="listar()" class="btn btn-success" value="Consultar">
+			  <br><input id="listar" type="submit" onclick="listar()" class="btn btn-brand-green" value="Consultar">
 			</div>
 
 		</div>

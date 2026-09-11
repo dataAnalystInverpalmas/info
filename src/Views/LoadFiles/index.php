@@ -7,7 +7,7 @@
             <div class="form-group">
               <label for="exampleFormControlFile1">Cargar archivos</label>
               <input type="file" class="form-control" id="archivoId">
-              <input type="button" class="btn btn-primary form-control form-control-lg" value="Subir Archivo" id="boton">
+              <input type="button" class="btn btn-brand-green form-control form-control-lg" value="Subir Archivo" id="boton">
             </div>
           </form>
   

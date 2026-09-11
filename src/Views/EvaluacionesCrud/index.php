@@ -6,7 +6,7 @@
         <!-- ===== Panel de filtros ===== -->
         <div class="col-sm-2">
             <div class="card shadow-sm">
-                <div class="card-header bg-success text-white py-2">
+                <div class="card-header card-header-brand-green py-2">
                     <strong><i class="fas fa-filter"></i> Filtros</strong>
                 </div>
                 <div class="card-body p-2">
@@ -21,7 +21,7 @@
                         <input class="form-control form-control-sm" type="date" id="fecha_fin">
                     </div>
 
-                    <button type="button" onclick="listar()" class="btn btn-success btn-sm btn-block">
+                    <button type="button" onclick="listar()" class="btn btn-brand-green btn-sm btn-block">
                         <i class="fas fa-search"></i> Consultar
                     </button>
 
@@ -34,7 +34,7 @@
         <div class="col-sm-10">
             <div class="row mb-2" id="nuevo">
                 <div class="col-sm-12">
-                    <button id="btnNuevo" type="button" class="btn btn-info">
+                    <button id="btnNuevo" type="button" class="btn btn-brand-green">
                         <i class="material-icons" style="vertical-align:middle">library_add</i> Nueva Evaluación
                     </button>
                 </div>
@@ -88,7 +88,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" id="btnGuardar" class="btn btn-success">Guardar</button>
+                    <button type="submit" id="btnGuardar" class="btn btn-brand-green">Guardar</button>
                 </div>
             </form>
         </div>
@@ -188,7 +188,7 @@
                                         </div>
                                     </div>
                                     <div class="form-row">
-                                        <button type="submit" class="btn btn-lg btn-block btn-success btnAgregarDetalles">Agregar</button>
+                                        <button type="submit" class="btn btn-lg btn-block btn-brand-green btnAgregarDetalles">Agregar</button>
                                     </div>
                                 </div>
                             </div>
@@ -220,7 +220,7 @@
                             <textarea id="texto_comentario" class="form-control" rows="2" placeholder="Escriba su comentario aquí..."></textarea>
                         </div>
                         <div class="col-sm-3 d-flex align-items-center">
-                            <button type="button" class="btn btn-info btn-block btnAgregarComentario">
+                            <button type="button" class="btn btn-brand-green btn-block btnAgregarComentario">
                                 <i class="material-icons" style="vertical-align:middle">add_comment</i> Agregar
                             </button>
                         </div>

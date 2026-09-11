@@ -130,8 +130,8 @@
 
                 <!-- Buttons -->
                 <div class="d-flex gap-2">
-                    <button id="pc_btn_filter" class="btn btn-sm btn-success">Filtrar</button>
-                    <button id="pc_btn_clear_filters" class="btn btn-sm btn-secondary">Limpiar</button>
+                    <button id="pc_btn_filter" class="btn btn-sm btn-brand-green">Filtrar</button>
+                    <button id="pc_btn_clear_filters" class="btn btn-sm btn-outline-secondary">Limpiar</button>
                 </div>
             </div>
         </div>
