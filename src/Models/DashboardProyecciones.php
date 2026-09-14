@@ -23,7 +23,7 @@ class DashboardProyecciones
             $conexion,
             'SELECT '
             . 'COALESCE(SUM(plantas), 0) AS total_plantas, '
-            . 'ROUND(COALESCE(SUM(plantas), 0) / 960, 1) AS total_camas '
+            . 'ROUND(COALESCE(SUM(plantas), 0) / 960, 0) AS total_camas '
             . 'FROM ' . self::qi(self::TABLE_NAME) . ' '
             . $where['sql'],
             $where['types'],
@@ -43,7 +43,7 @@ class DashboardProyecciones
             . 'finca, '
             . "COALESCE(NULLIF(TRIM(producto), ''), 'SIN FLOR') AS flor, "
             . 'COALESCE(SUM(plantas), 0) AS total_plantas, '
-            . 'ROUND(COALESCE(SUM(plantas), 0) / 960, 1) AS camas '
+            . 'ROUND(COALESCE(SUM(plantas), 0) / 960, 0) AS camas '
             . 'FROM ' . self::qi(self::TABLE_NAME) . ' '
             . $where['sql'] . ' '
             . 'GROUP BY finca, flor '
@@ -57,7 +57,7 @@ class DashboardProyecciones
             'SELECT '
             . "COALESCE(NULLIF(TRIM(producto), ''), 'SIN FLOR') AS flor, "
             . 'COALESCE(SUM(plantas), 0) AS total_plantas, '
-            . 'ROUND(COALESCE(SUM(plantas), 0) / 960, 1) AS camas '
+            . 'ROUND(COALESCE(SUM(plantas), 0) / 960, 0) AS camas '
             . 'FROM ' . self::qi(self::TABLE_NAME) . ' '
             . $where['sql'] . ' '
             . 'GROUP BY flor',
@@ -69,14 +69,14 @@ class DashboardProyecciones
             'UPPER(producto) LIKE ? AND UPPER(producto) NOT LIKE ?',
             'ss',
             ['%CLAVEL%', '%MINICLAVEL%'],
-        ]);
+        ], false);
 
         $camasEdadClavelRows = self::fetchAll(
             $conexion,
             'SELECT '
             . 'finca, '
             . 'GREATEST(FLOOR(DATEDIFF(CURRENT_DATE, fecha_siembra) / 7), 0) AS edad_semanas, '
-            . 'ROUND(COALESCE(SUM(plantas), 0) / 960, 1) AS camas '
+            . 'ROUND(COALESCE(SUM(plantas), 0) / 960, 0) AS camas '
             . 'FROM ' . self::qi(self::TABLE_NAME) . ' '
             . $whereSoloClavel['sql'] . ' '
             . 'GROUP BY finca, edad_semanas '
@@ -89,14 +89,14 @@ class DashboardProyecciones
             'UPPER(producto) LIKE ?',
             's',
             ['%MINICLAVEL%'],
-        ]);
+        ], false);
 
         $camasEdadMiniclavelRows = self::fetchAll(
             $conexion,
             'SELECT '
             . 'finca, '
             . 'GREATEST(FLOOR(DATEDIFF(CURRENT_DATE, fecha_siembra) / 7), 0) AS edad_semanas, '
-            . 'ROUND(COALESCE(SUM(plantas), 0) / 960, 1) AS camas '
+            . 'ROUND(COALESCE(SUM(plantas), 0) / 960, 0) AS camas '
             . 'FROM ' . self::qi(self::TABLE_NAME) . ' '
             . $whereMiniclavel['sql'] . ' '
             . 'GROUP BY finca, edad_semanas '
@@ -173,13 +173,13 @@ class DashboardProyecciones
         return trim((string)$value);
     }
 
-    private static function buildWhere($filters, $extraCondition = null)
+    private static function buildWhere($filters, $extraCondition = null, $applyDateRange = true)
     {
         $conditions = ['plantas > 0'];
         $types = '';
         $params = [];
 
-        if (!empty($filters['fecha_desde']) && !empty($filters['fecha_hasta'])) {
+        if ($applyDateRange && !empty($filters['fecha_desde']) && !empty($filters['fecha_hasta'])) {
             $conditions[] = 'fecha_siembra BETWEEN ? AND ?';
             $types .= 'ss';
             $params[] = $filters['fecha_desde'];
@@ -321,8 +321,8 @@ class DashboardProyecciones
             $matrix[$finca][$edad] = $camas;
         }
 
-        $labels = array_map('intval', array_keys($edades));
-        sort($labels, SORT_NUMERIC);
+        $maxEdad = empty($edades) ? 0 : max(array_keys($edades));
+        $labels = range(0, $maxEdad);
 
         $datasets = [];
         foreach (array_keys($fincas) as $finca) {

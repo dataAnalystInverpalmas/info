@@ -33,7 +33,7 @@ $endpoint = isset($_GET['endpoint'])
     ? preg_replace('/[^a-z_]/', '', strtolower((string)$_GET['endpoint']))
     : '';
 
-$allowed = ['plano', 'variedades', 'colores', 'curvas_rosas', 'proyecciones', 'lonas', 'arreglos', 'dates'];
+$allowed = ['plano', 'variedades', 'colores', 'curvas_rosas', 'proyecciones', 'planos_proyeccion', 'lonas', 'arreglos', 'dates'];
 
 if (!in_array($endpoint, $allowed, true)) {
     Response::error(
