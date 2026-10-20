@@ -1,52 +1,45 @@
+<link rel="stylesheet" href="scripts/crud_tables.css?v=2">
 <style>
-    .pr-card {
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
-        padding: 16px;
-    }
-
-    .pr-toolbar {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        align-items: end;
-        margin-bottom: 12px;
-    }
-
-    .pr-toolbar .form-group {
-        min-width: 220px;
-        margin-bottom: 0;
-    }
-
-    .pr-filters {
-        border-bottom: 1px solid #e9ecef;
-        padding-bottom: 12px;
-        margin-bottom: 12px;
-    }
-
-    .pr-filters .form-group {
-        min-width: 200px;
-        margin-bottom: 0;
-    }
-
     #tablaPlanoReemplazos td,
     #tablaPlanoReemplazos th {
         vertical-align: middle;
     }
+    .pr-filter-grid {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+    .pr-filter-grid .form-group {
+        min-width: 180px;
+        flex: 1 1 180px;
+        margin-bottom: 0;
+    }
 </style>
 
-<div class="container-fluid" style="padding-top:20px;">
-    <div class="pr-card">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="m-0">Plano Consulta</h4>
-            <small class="text-muted">Siembras</small>
+<div class="container-fluid" style="padding-top:6px;">
+    <!-- Page Header Banner -->
+    <div class="crud-page-header">
+        <div class="crud-header-left">
+            <div class="crud-header-icon">
+                <span class="material-icons">find_replace</span>
+            </div>
+            <div>
+                <h4 class="crud-page-title">Plano de Reemplazos</h4>
+                <div class="crud-page-subtitle">
+                    <span class="crud-page-badge">Siembras</span>
+                    <span class="text-muted d-none d-sm-inline">• Consulta georreferenciada de reemplazos y variedades sustitutas</span>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <div class="pr-filters">
-            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: end;">
+    <!-- Filtros Card -->
+    <div class="card shadow-sm border-0 mb-3" style="border-radius: 12px;">
+        <div class="card-body p-3">
+            <div class="pr-filter-grid">
                 <div class="form-group">
-                    <label class="small text-muted mb-1" for="pr_filter_finca">Filtrar por Finca</label>
+                    <label class="small font-weight-bold text-muted mb-1" for="pr_filter_finca">Finca</label>
                     <select id="pr_filter_finca" class="form-control form-control-sm">
                         <option value="">-- Todas --</option>
                         <?php if (!empty($fincas)): ?>
@@ -60,7 +53,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="small text-muted mb-1" for="pr_filter_bloque">Filtrar por Bloque</label>
+                    <label class="small font-weight-bold text-muted mb-1" for="pr_filter_bloque">Bloque</label>
                     <select id="pr_filter_bloque" class="form-control form-control-sm">
                         <option value="">-- Todos --</option>
                         <?php if (!empty($bloques)): ?>
@@ -74,7 +67,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="small text-muted mb-1" for="pr_filter_tabla">Filtrar por Tabla</label>
+                    <label class="small font-weight-bold text-muted mb-1" for="pr_filter_tabla">Tabla</label>
                     <select id="pr_filter_tabla" class="form-control form-control-sm">
                         <option value="">-- Todas --</option>
                         <?php if (!empty($tablas)): ?>
@@ -88,7 +81,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="small text-muted mb-1" for="pr_filter_nave">Filtrar por Nave</label>
+                    <label class="small font-weight-bold text-muted mb-1" for="pr_filter_nave">Nave</label>
                     <select id="pr_filter_nave" class="form-control form-control-sm">
                         <option value="">-- Todas --</option>
                         <?php if (!empty($naves)): ?>
@@ -102,13 +95,7 @@
                 </div>
 
                 <div class="form-group">
-                    <button id="pr_btn_clear_filters" class="btn btn-outline-secondary btn-sm" title="Limpiar filtros">
-                        <i class="fas fa-times"></i> Limpiar
-                    </button>
-                </div>
-
-                <div class="form-group">
-                    <label class="small text-muted mb-1" for="pr_filter_tipo_siembra">Filtrar por Tipo Siembra</label>
+                    <label class="small font-weight-bold text-muted mb-1" for="pr_filter_tipo_siembra">Tipo Siembra</label>
                     <select id="pr_filter_tipo_siembra" class="form-control form-control-sm">
                         <option value="">-- Todos --</option>
                         <?php if (!empty($tiposSiembra)): ?>
@@ -122,7 +109,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="small text-muted mb-1" for="pr_filter_variedad">Filtrar por Variedad</label>
+                    <label class="small font-weight-bold text-muted mb-1" for="pr_filter_variedad">Variedad</label>
                     <select id="pr_filter_variedad" class="form-control form-control-sm">
                         <option value="">-- Todas --</option>
                         <?php if (!empty($variedades)): ?>
@@ -136,7 +123,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="small text-muted mb-1" for="pr_filter_cosecha">Filtrar por Cosecha</label>
+                    <label class="small font-weight-bold text-muted mb-1" for="pr_filter_cosecha">Cosecha</label>
                     <select id="pr_filter_cosecha" class="form-control form-control-sm">
                         <option value="">-- Todas --</option>
                         <?php if (!empty($cosechas)): ?>
@@ -150,7 +137,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="small text-muted mb-1" for="pr_filter_semana_siembra">Filtrar por Semana Siembra</label>
+                    <label class="small font-weight-bold text-muted mb-1" for="pr_filter_semana_siembra">Semana Siembra</label>
                     <select id="pr_filter_semana_siembra" class="form-control form-control-sm">
                         <option value="">-- Todas --</option>
                         <?php if (!empty($semanasSiembra)): ?>
@@ -162,9 +149,18 @@
                         <?php endif; ?>
                     </select>
                 </div>
+
+                <div class="form-group" style="flex: 0 0 auto; min-width: auto;">
+                    <button id="pr_btn_clear_filters" class="btn btn-outline-brand-green btn-sm d-flex align-items-center justify-content-center" style="height: 31px;" title="Limpiar filtros">
+                        <span class="material-icons mr-1" style="font-size: 1rem;">backspace</span> Limpiar
+                    </button>
+                </div>
             </div>
         </div>
+    </div>
 
+    <!-- Tabla Card -->
+    <div class="crud-table-card">
         <div class="table-responsive">
             <table id="tablaPlanoReemplazos" class="table table-striped table-bordered display compact" style="width:100%">
                 <thead>
@@ -188,8 +184,7 @@
                 <tbody>
                     <?php if (!empty($rows)): ?>
                         <?php foreach ($rows as $row): ?>
-                            <tr
-                            >
+                            <tr>
                                 <td><?php echo htmlspecialchars((string)($row['finca'] ?? '')); ?></td>
                                 <td><?php echo htmlspecialchars((string)($row['bloque'] ?? '')); ?></td>
                                 <td><?php echo htmlspecialchars((string)($row['tabla'] ?? '')); ?></td>

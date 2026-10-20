@@ -44,7 +44,7 @@ require __DIR__ . '/../Shared/gestion_header.php';
                         </div>
                         <?php if ($gestionProyectoFiltro !== ''): ?>
                             <div class="small text-muted mt-2">Contexto activo: <strong><?php echo htmlspecialchars($gestionProyectoFiltro); ?></strong></div>
-                            <a class="btn btn-sm btn-outline-secondary w-100 mt-2" href="index.php?report=202">Limpiar filtro</a>
+                            <a class="btn btn-sm btn-outline-secondary w-100 mt-2" href="index.php?report=bitacora">Limpiar filtro</a>
                         <?php endif; ?>
                     </div>
                 </div>

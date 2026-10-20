@@ -21,14 +21,19 @@ declare(strict_types=1);
  *       "variedad": "2048",
  *       "cosecha": "SE2638",
  *       "nvari": "FARIDA",
- *       "fec_siem": "2026-03-11",   // YYYY-MM-DD
- *       "rev": 0,
- *       "amort": 1,
- *       "proyecta_quipus": 0.88
+ *       "fec_siem": "2026-03-11",   // YYYY-MM-DD, opcional (vacio -> NULL)
+ *       "rev": 0,                  // opcional (vacio -> NULL)
+ *       "amort": 1,                // opcional (vacio -> NULL)
+ *       "proyecta_quipus": 0.88    // opcional (vacio -> NULL)
  *     },
  *     ...
  *   ]
  * }
+ *
+ * bloque, variedad, cosecha y nvari son obligatorios (identifican la fila).
+ * fec_siem, rev, amort y proyecta_quipus son opcionales: si la celda de
+ * origen viene vacia (comun en filas sin fecha de siembra o sin proyeccion
+ * calculada todavia), se guardan como NULL en vez de rechazar todo el lote.
  *
  * Respuesta: {"status":"ok","finca":"002","inserted":574}
  */
@@ -61,7 +66,7 @@ Auth::verify();
 
 const FINCAS_VALIDAS = ['001', '002'];
 const MAX_ROWS = 5000;
-const REQUIRED_ROW_FIELDS = ['bloque', 'variedad', 'cosecha', 'nvari', 'fec_siem', 'rev', 'amort', 'proyecta_quipus'];
+const REQUIRED_ROW_FIELDS = ['bloque', 'variedad', 'cosecha', 'nvari'];
 
 $raw = file_get_contents('php://input');
 $payload = json_decode($raw, true);
@@ -83,6 +88,17 @@ if (count($rows) > MAX_ROWS) {
     Response::error('Demasiadas filas en un solo envio (maximo ' . MAX_ROWS . ')', 400);
 }
 
+// null si el campo no viene, viene null o vacio; si viene, debe ser numerico.
+$numOrNull = static function ($value, string $field, int $i): ?float {
+    if ($value === null || $value === '') {
+        return null;
+    }
+    if (!is_numeric($value)) {
+        Response::error("Valor numerico invalido en el campo '$field' de la fila $i: " . json_encode($value), 400);
+    }
+    return (float)$value;
+};
+
 $clean = [];
 foreach ($rows as $i => $row) {
     if (!is_array($row)) {
@@ -94,8 +110,8 @@ foreach ($rows as $i => $row) {
         }
     }
 
-    $fecSiem = (string)$row['fec_siem'];
-    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecSiem)) {
+    $fecSiem = isset($row['fec_siem']) ? trim((string)$row['fec_siem']) : '';
+    if ($fecSiem !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecSiem)) {
         Response::error("fec_siem invalida en la fila $i (formato esperado YYYY-MM-DD): '$fecSiem'", 400);
     }
 
@@ -104,10 +120,10 @@ foreach ($rows as $i => $row) {
         'variedad'        => (string)$row['variedad'],
         'cosecha'         => (string)$row['cosecha'],
         'nvari'           => (string)$row['nvari'],
-        'fec_siem'        => $fecSiem,
-        'rev'             => (float)$row['rev'],
-        'amort'           => (float)$row['amort'],
-        'proyecta_quipus' => (float)$row['proyecta_quipus'],
+        'fec_siem'        => $fecSiem !== '' ? $fecSiem : null,
+        'rev'             => $numOrNull($row['rev'] ?? null, 'rev', $i),
+        'amort'           => $numOrNull($row['amort'] ?? null, 'amort', $i),
+        'proyecta_quipus' => $numOrNull($row['proyecta_quipus'] ?? null, 'proyecta_quipus', $i),
     ];
 }
 
@@ -160,7 +176,9 @@ try {
         "UPDATE stg_plano_proyeccion SET estado = 'historico' WHERE finca = ? AND estado = 'activo'"
     );
     $marcarHistorico->bind_param('s', $finca);
-    $marcarHistorico->execute();
+    if (!$marcarHistorico->execute()) {
+        throw new RuntimeException('No se pudo marcar el lote anterior como historico: ' . $marcarHistorico->error);
+    }
     $marcarHistorico->close();
 
     $ins = $conexion->prepare(
@@ -168,7 +186,8 @@ try {
             (finca, bloque, variedad, cosecha, nvari, fec_siem, rev, amort, proyecta_quipus, estado)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'activo')"
     );
-    foreach ($clean as $row) {
+    $insertadas = 0;
+    foreach ($clean as $i => $row) {
         $ins->bind_param(
             'ssssssddd',
             $finca,
@@ -181,9 +200,16 @@ try {
             $row['amort'],
             $row['proyecta_quipus']
         );
-        $ins->execute();
+        if (!$ins->execute()) {
+            throw new RuntimeException("Fallo al insertar la fila $i (bloque {$row['bloque']}, variedad {$row['variedad']}): " . $ins->error);
+        }
+        $insertadas += $ins->affected_rows;
     }
     $ins->close();
+
+    if ($insertadas !== count($clean)) {
+        throw new RuntimeException("Se esperaban " . count($clean) . " filas insertadas pero solo se confirmaron $insertadas");
+    }
 
     $conexion->commit();
 } catch (Throwable $e) {
@@ -191,4 +217,4 @@ try {
     Response::error('Error guardando el plano: ' . $e->getMessage(), 500);
 }
 
-Response::json(['finca' => $finca, 'inserted' => count($clean)], [], count($clean), 1, count($clean));
+Response::json(['finca' => $finca, 'inserted' => $insertadas], [], $insertadas, 1, $insertadas);

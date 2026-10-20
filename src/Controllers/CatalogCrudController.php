@@ -13,14 +13,14 @@ class CatalogCrudController {
             'filters'    => $filters,
             'bulkField'  => $bulkField,
         ]);
-        require_once __DIR__ . '/../Views/Crud/catalog.php';
+        require __DIR__ . '/../Views/Crud/catalog.php';
     }
 
     public function arrangement() {
-        require_once __DIR__ . '/../Views/Crud/arrangement.php';
+        require __DIR__ . '/../Views/Crud/arrangement.php';
     }
 
     public function arrangements() {
-        require_once __DIR__ . '/../Views/Crud/arrangements.php';
+        require __DIR__ . '/../Views/Crud/arrangements.php';
     }
 }

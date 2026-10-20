@@ -93,66 +93,105 @@ $bancos = $conexion->query($sqlSUM);
 $bancos_t = $conexion->query($sqlSUM_t);
 ?>
 
-<div class="card-header d-print-none">
-  <form class="form-inline" action="home.php?menu=tables&report=6" method="post" enctype="multipart/form-data">
-    <div class="form-group mb-2">
-      <select name="xprograma" class="form-control" data-live-search="true">
-        <option value="">Año Programa</option>
-        <?php
-        while ($f = $COM->fetch_object()) {
-          if ($f->programa == $programa) {
-            echo "<option value='{$f->programa}' selected='selected'>{$f->programa}</option>";
-          } else {
-            echo "<option value='{$f->programa}'>{$f->programa}</option>";
-          }
-        }
-        ?>
-      </select>
-      <select name="xproducto" class="form-control" data-live-search="true">
-        <option value="">Producto</option>
-        <?php
-        while ($f = $COM2->fetch_object()) {
-          if ($f->producto == $producto) {
-            echo "<option value='{$f->producto}' selected='selected'>{$f->producto}</option>";
-          } else {
-            echo "<option value='{$f->producto}'>{$f->producto}</option>";
-          }
-        }
-        ?>
-      </select>
-      <select name="xtemporada" class="form-control" data-live-search="true">
-        <option value="">Temporada</option>
-        <?php
-        while ($f = $COM3->fetch_object()) {
-          if ($f->temporada_obj == $temporada) {
-            echo "<option value='{$f->temporada_obj}' selected='selected'>{$f->temporada_obj}</option>";
-          } else {
-            echo "<option value='{$f->temporada_obj}'>{$f->temporada_obj}</option>";
-          }
-        }
-        ?>
-      </select>
-      <select name="xfinca" class="form-control" data-live-search="true">
-        <option value="">Finca</option>
-        <?php
-        while ($f = $COM4->fetch_object()) {
-          if ($f->finca == $finca) {
-            echo "<option value='{$f->finca}' selected='selected'>{$f->finca}</option>";
-          } else {
-            echo "<option value='{$f->finca}'>{$f->finca}</option>";
-          }
-        }
-        ?>
-      </select>
+<link rel="stylesheet" href="scripts/crud_tables.css?v=2">
+
+<div class="container-fluid" style="padding-top:6px;">
+  <!-- Page Header Banner (Hidden on Print) -->
+  <div class="crud-page-header d-print-none">
+    <div class="crud-header-left">
+      <div class="crud-header-icon">
+        <span class="material-icons">print</span>
+      </div>
+      <div>
+        <h4 class="crud-page-title">Programa de Siembras - Imprimir</h4>
+        <div class="crud-page-subtitle">
+          <span class="crud-page-badge">Siembras</span>
+          <span class="text-muted d-none d-sm-inline">• Generación de formato impreso horizontal de siembras</span>
+        </div>
+      </div>
     </div>
-    <div class="form-group mx-sm-3 mb-2">
-      <button name="buscar" type="submit" class="btn btn-brand-green mb-2">Buscar</button>
-    </div>
-    <div class="form-group mx-sm-3 mb-2">
-      <button name="Print" type="submit" class="btn btn-outline-brand-green mb-2" onclick="imprime();">Imprimir</button>
-    </div>
-  </form>
-</div>
+  </div>
+
+  <!-- Barra de Filtros (Hidden on Print) -->
+  <div class="crud-print-toolbar d-print-none mb-4">
+    <form action="home.php?menu=tables&report=imprimir_siembras" method="post" enctype="multipart/form-data">
+      <div class="form-row align-items-end">
+        <div class="form-group col-md-2 col-sm-6 mb-2">
+          <label class="small font-weight-bold text-muted mb-1">Año Programa</label>
+          <select name="xprograma" class="form-control form-control-sm" data-live-search="true">
+            <option value="">Todos</option>
+            <?php
+            while ($f = $COM->fetch_object()) {
+              if ($f->programa == $programa) {
+                echo "<option value='{$f->programa}' selected='selected'>{$f->programa}</option>";
+              } else {
+                echo "<option value='{$f->programa}'>{$f->programa}</option>";
+              }
+            }
+            ?>
+          </select>
+        </div>
+
+        <div class="form-group col-md-2 col-sm-6 mb-2">
+          <label class="small font-weight-bold text-muted mb-1">Producto</label>
+          <select name="xproducto" class="form-control form-control-sm" data-live-search="true">
+            <option value="">Todos</option>
+            <?php
+            while ($f = $COM2->fetch_object()) {
+              if ($f->producto == $producto) {
+                echo "<option value='{$f->producto}' selected='selected'>{$f->producto}</option>";
+              } else {
+                echo "<option value='{$f->producto}'>{$f->producto}</option>";
+              }
+            }
+            ?>
+          </select>
+        </div>
+
+        <div class="form-group col-md-3 col-sm-6 mb-2">
+          <label class="small font-weight-bold text-muted mb-1">Temporada</label>
+          <select name="xtemporada" class="form-control form-control-sm" data-live-search="true">
+            <option value="">Todas</option>
+            <?php
+            while ($f = $COM3->fetch_object()) {
+              if ($f->temporada_obj == $temporada) {
+                echo "<option value='{$f->temporada_obj}' selected='selected'>{$f->temporada_obj}</option>";
+              } else {
+                echo "<option value='{$f->temporada_obj}'>{$f->temporada_obj}</option>";
+              }
+            }
+            ?>
+          </select>
+        </div>
+
+        <div class="form-group col-md-2 col-sm-6 mb-2">
+          <label class="small font-weight-bold text-muted mb-1">Finca</label>
+          <select name="xfinca" class="form-control form-control-sm" data-live-search="true">
+            <option value="">Todas</option>
+            <?php
+            while ($f = $COM4->fetch_object()) {
+              if ($f->finca == $finca) {
+                echo "<option value='{$f->finca}' selected='selected'>{$f->finca}</option>";
+              } else {
+                echo "<option value='{$f->finca}'>{$f->finca}</option>";
+              }
+            }
+            ?>
+          </select>
+        </div>
+
+        <div class="form-group col-md-3 col-sm-12 mb-2 d-flex">
+          <button name="buscar" type="submit" class="btn btn-brand-green btn-sm flex-fill mr-2 d-flex align-items-center justify-content-center" style="height: 31px;">
+            <span class="material-icons mr-1" style="font-size: 1rem;">search</span> Buscar
+          </button>
+          <button name="Print" type="submit" class="btn btn-outline-brand-green btn-sm flex-fill d-flex align-items-center justify-content-center" onclick="imprime();" style="height: 31px;">
+            <span class="material-icons mr-1" style="font-size: 1rem;">print</span> Imprimir
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
 
 <?php if ($result->num_rows > 0) { ?>
   <div class="landscape2">
@@ -256,6 +295,7 @@ $bancos_t = $conexion->query($sqlSUM_t);
       </div>
   </div>
 <?php } ?>
+</div>
 
 <script>
 function imprime(){

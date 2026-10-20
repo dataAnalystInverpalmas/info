@@ -100,11 +100,13 @@ require __DIR__ . '/../Shared/gestion_header.php';
                     <div class="card-body p-3">
                         <div class="mb-2">
                             <label for="filtroCategoria">Categoría</label>
-                            <select id="filtroCategoria" class="form-control form-control-sm" onchange="filtrarProyectos()">
+                            <select id="filtroCategoria" class="form-control form-control-sm"
+                                onchange="filtrarProyectos()">
                                 <option value="">Todas</option>
                                 <?php if (!empty($categorias)): ?>
                                     <?php foreach ($categorias as $cat): ?>
-                                        <option value="<?php echo htmlspecialchars($cat); ?>"><?php echo htmlspecialchars($cat); ?></option>
+                                        <option value="<?php echo htmlspecialchars($cat); ?>">
+                                            <?php echo htmlspecialchars($cat); ?></option>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
                             </select>
@@ -117,7 +119,7 @@ require __DIR__ . '/../Shared/gestion_header.php';
                 <a class="btn btn-outline-secondary btn-sm w-100 mb-2" href="ajax/proyectos.php?accion=exportar_excel">
                     <span class="material-icons" style="font-size:1rem;">file_download</span> Exportar Excel
                 </a>
-                <a class="btn btn-outline-secondary btn-sm w-100" href="index.php?report=206">
+                <a class="btn btn-outline-secondary btn-sm w-100" href="index.php?report=solicitudes_extra">
                     <span class="material-icons" style="font-size:1rem;">assignment_late</span> Solicitudes
                 </a>
             </div>
@@ -125,57 +127,72 @@ require __DIR__ . '/../Shared/gestion_header.php';
 
         <div class="col-md-10 col-lg-10">
             <div class="table-responsive">
-        <table id="tablaProyectos" class="table display compact" style="width:100%">
-            <thead>
-                <tr>
-                    <td>Categoría</td>
-                    <td>Nombre</td>
-                    <td>% Avance</td>
-                    <td>Responsable</td>
-                    <td>Prioridad</td>
-                    <td>Estado</td>
-                    <td>Inicio</td>
-                    <td>Fin</td>
-                    <td>Acciones</td>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (!empty($proyectos)): ?>
-                    <?php foreach ($proyectos as $row): ?>
+                <table id="tablaProyectos" class="table display compact" style="width:100%">
+                    <thead>
                         <tr>
-                            <td><?php echo htmlspecialchars($row->categoria ?? ''); ?></td>
-                            <td><?php echo htmlspecialchars($row->nombre); ?></td>
-                            <td>
-                                <?php $avanceProyecto = (int)($row->avance_proyecto ?? 0); ?>
-                                <div class="progress" style="height: 8px; min-width: 110px;">
-                                    <div class="progress-bar bg-info" role="progressbar" style="width: <?php echo $avanceProyecto; ?>%;" aria-valuenow="<?php echo $avanceProyecto; ?>" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                                <small class="text-muted"><?php echo $avanceProyecto; ?>%</small>
-                            </td>
-                            <td><?php echo htmlspecialchars($row->responsable_proyecto ?? ''); ?></td>
-                            <td><?php
-                                $p = $row->prioridad ?? 'media';
-                                $pb = ($p === 'urgente') ? 'danger' : (($p === 'alta') ? 'warning' : (($p === 'media') ? 'info' : 'light'));
-                                echo '<span class="badge badge-' . $pb . '">●</span> ' . htmlspecialchars($p);
-                            ?></td>
-                            <td><?php echo htmlspecialchars($row->estado); ?></td>
-                            <td><?php echo htmlspecialchars($row->fecha_inicio ?? '-'); ?></td>
-                            <td><?php echo htmlspecialchars($row->fecha_fin ?? '-'); ?></td>
-                            <td>
-                                <div class="action-icons">
-                                    <a class="action-icon-btn" data-variant="view" title="Ver tareas del proyecto" href="index.php?report=201&proyecto=<?php echo rawurlencode($row->nombre); ?>"><span class="material-icons">list_alt</span></a>
-                                    <button class="action-icon-btn" data-variant="edit" title="Editar proyecto" onclick="editarProyecto(<?php echo (int)$row->id; ?>)"><span class="material-icons">edit</span></button>
-                                    <button class="action-icon-btn" data-variant="notes" title="Notas del proyecto" onclick='abrirNotasProyecto(<?php echo (int)$row->id; ?>, <?php echo json_encode($row->nombre, JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'><span class="material-icons">notes</span></button>
-                                    <button class="action-icon-btn" data-variant="logros" title="Logros" onclick='abrirLogrosProyecto(<?php echo (int)$row->id; ?>, <?php echo json_encode($row->nombre, JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'><span class="material-icons">flag</span></button>
-                                    <button class="action-icon-btn" data-variant="riesgos" title="Riesgos" onclick='abrirRiesgosProyecto(<?php echo (int)$row->id; ?>, <?php echo json_encode($row->nombre, JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'><span class="material-icons">warning</span></button>
-                                    <button class="action-icon-btn" data-variant="danger" title="Eliminar proyecto" onclick="eliminarProyecto(<?php echo (int)$row->id; ?>)"><span class="material-icons">delete</span></button>
-                                </div>
-                            </td>
+                            <td>Categoría</td>
+                            <td>Nombre</td>
+                            <td>% Avance</td>
+                            <td>Responsable</td>
+                            <td>Prioridad</td>
+                            <td>Estado</td>
+                            <td>Inicio</td>
+                            <td>Fin</td>
+                            <td>Acciones</td>
                         </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
+                    </thead>
+                    <tbody>
+                        <?php if (!empty($proyectos)): ?>
+                            <?php foreach ($proyectos as $row): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($row->categoria ?? ''); ?></td>
+                                    <td><?php echo htmlspecialchars($row->nombre); ?></td>
+                                    <td>
+                                        <?php $avanceProyecto = (int) ($row->avance_proyecto ?? 0); ?>
+                                        <div class="progress" style="height: 8px; min-width: 110px;">
+                                            <div class="progress-bar bg-info" role="progressbar"
+                                                style="width: <?php echo $avanceProyecto; ?>%;"
+                                                aria-valuenow="<?php echo $avanceProyecto; ?>" aria-valuemin="0"
+                                                aria-valuemax="100"></div>
+                                        </div>
+                                        <small class="text-muted"><?php echo $avanceProyecto; ?>%</small>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($row->responsable_proyecto ?? ''); ?></td>
+                                    <td><?php
+                                    $p = $row->prioridad ?? 'media';
+                                    $pb = ($p === 'urgente') ? 'danger' : (($p === 'alta') ? 'warning' : (($p === 'media') ? 'info' : 'light'));
+                                    echo '<span class="badge badge-' . $pb . '">●</span> ' . htmlspecialchars($p);
+                                    ?></td>
+                                    <td><?php echo htmlspecialchars($row->estado); ?></td>
+                                    <td><?php echo htmlspecialchars($row->fecha_inicio ?? '-'); ?></td>
+                                    <td><?php echo htmlspecialchars($row->fecha_fin ?? '-'); ?></td>
+                                    <td>
+                                        <div class="action-icons">
+                                            <a class="action-icon-btn" data-variant="view" title="Ver tareas del proyecto"
+                                                href="index.php?report=tareas&proyecto=<?php echo rawurlencode($row->nombre); ?>"><span
+                                                    class="material-icons">list_alt</span></a>
+                                            <button class="action-icon-btn" data-variant="edit" title="Editar proyecto"
+                                                onclick="editarProyecto(<?php echo (int) $row->id; ?>)"><span
+                                                    class="material-icons">edit</span></button>
+                                            <button class="action-icon-btn" data-variant="notes" title="Notas del proyecto"
+                                                onclick='abrirNotasProyecto(<?php echo (int) $row->id; ?>, <?php echo json_encode($row->nombre, JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'><span
+                                                    class="material-icons">notes</span></button>
+                                            <button class="action-icon-btn" data-variant="logros" title="Logros"
+                                                onclick='abrirLogrosProyecto(<?php echo (int) $row->id; ?>, <?php echo json_encode($row->nombre, JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'><span
+                                                    class="material-icons">flag</span></button>
+                                            <button class="action-icon-btn" data-variant="riesgos" title="Riesgos"
+                                                onclick='abrirRiesgosProyecto(<?php echo (int) $row->id; ?>, <?php echo json_encode($row->nombre, JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'><span
+                                                    class="material-icons">warning</span></button>
+                                            <button class="action-icon-btn" data-variant="danger" title="Eliminar proyecto"
+                                                onclick="eliminarProyecto(<?php echo (int) $row->id; ?>)"><span
+                                                    class="material-icons">delete</span></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -195,24 +212,27 @@ require __DIR__ . '/../Shared/gestion_header.php';
                 <div class="row">
                     <div class="col-md-6">
                         <label class="small text-muted mb-0">Categoría</label>
-                        <input type="text" id="pCategoria" class="form-control mb-2" placeholder="Ej: Tika, Estadística" list="listaCategorias">
+                        <input type="text" id="pCategoria" class="form-control mb-2" placeholder="Ej: Tika, Estadística"
+                            list="listaCategorias">
                         <datalist id="listaCategorias">
                             <?php if (!empty($categorias)): ?>
                                 <?php foreach ($categorias as $cat): ?>
                                     <option value="<?php echo htmlspecialchars($cat); ?>">
-                                <?php endforeach; ?>
-                            <?php endif; ?>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                         </datalist>
                     </div>
                     <div class="col-md-6">
                         <label class="small text-muted mb-0">Tipo</label>
-                        <input type="text" id="pTipo" class="form-control mb-2" placeholder="Proyecto, Mantenimiento...">
+                        <input type="text" id="pTipo" class="form-control mb-2"
+                            placeholder="Proyecto, Mantenimiento...">
                     </div>
                 </div>
                 <label class="small text-muted mb-0">Nombre *</label>
                 <input type="text" id="pNombre" class="form-control mb-2" placeholder="Nombre del proyecto">
                 <label class="small text-muted mb-0">Descripción / objetivo</label>
-                <textarea id="pDesc" class="form-control mb-2" rows="4" placeholder="¿Qué se busca lograr y por qué?"></textarea>
+                <textarea id="pDesc" class="form-control mb-2" rows="4"
+                    placeholder="¿Qué se busca lograr y por qué?"></textarea>
                 <div class="row">
                     <div class="col-md-6">
                         <label class="small text-muted mb-0">Responsable</label>
@@ -226,7 +246,12 @@ require __DIR__ . '/../Shared/gestion_header.php';
                 <div class="row">
                     <div class="col-md-4">
                         <label class="small text-muted mb-0">Prioridad</label>
-                        <select id="pPrioridad" class="form-control mb-2"><option value="baja">Baja</option><option value="media">Media</option><option value="alta">Alta</option><option value="urgente">Urgente</option></select>
+                        <select id="pPrioridad" class="form-control mb-2">
+                            <option value="baja">Baja</option>
+                            <option value="media">Media</option>
+                            <option value="alta">Alta</option>
+                            <option value="urgente">Urgente</option>
+                        </select>
                     </div>
                     <div class="col-md-4">
                         <label class="small text-muted mb-0">Estado</label>
@@ -255,7 +280,8 @@ require __DIR__ . '/../Shared/gestion_header.php';
                 <label class="small text-muted mb-0">Link de evidencias</label>
                 <input type="url" id="pEvidencias" class="form-control mb-3">
                 <div class="border-top pt-2">
-                    <a data-toggle="collapse" href="#seccionPeriodo" class="small text-muted d-block mb-2" style="cursor:pointer">
+                    <a data-toggle="collapse" href="#seccionPeriodo" class="small text-muted d-block mb-2"
+                        style="cursor:pointer">
                         ▸ Actualización del periodo <span class="text-info">(entregable, riesgo, hito, criterio)</span>
                     </a>
                     <div class="collapse" id="seccionPeriodo">
@@ -296,7 +322,8 @@ require __DIR__ . '/../Shared/gestion_header.php';
                     Guarda aquí decisiones, opiniones o cambios relevantes sin convertirlos en tarea.
                 </div>
                 <label class="small text-muted mb-0">Nueva nota</label>
-                <textarea id="notaDescripcion" class="form-control mb-2" rows="4" placeholder="Escribe la anotación del proyecto"></textarea>
+                <textarea id="notaDescripcion" class="form-control mb-2" rows="4"
+                    placeholder="Escribe la anotación del proyecto"></textarea>
                 <div class="text-right mb-3">
                     <button class="btn btn-sm btn-primary" onclick="guardarNotaProyecto()">Guardar nota</button>
                 </div>
@@ -321,12 +348,14 @@ require __DIR__ . '/../Shared/gestion_header.php';
                 <input type="hidden" id="logroId">
 
                 <label class="small text-muted mb-0">Descripcion del logro</label>
-                <textarea id="logroDescripcion" class="form-control mb-2" rows="3" placeholder="Que se logro en el proyecto"></textarea>
+                <textarea id="logroDescripcion" class="form-control mb-2" rows="3"
+                    placeholder="Que se logro en el proyecto"></textarea>
 
                 <div class="row">
                     <div class="col-md-5">
                         <label class="small text-muted mb-0">Impacto</label>
-                        <input type="text" id="logroImpacto" class="form-control mb-2" placeholder="Impacto o resultado">
+                        <input type="text" id="logroImpacto" class="form-control mb-2"
+                            placeholder="Impacto o resultado">
                     </div>
                     <div class="col-md-3">
                         <label class="small text-muted mb-0">Fecha</label>
@@ -366,7 +395,8 @@ require __DIR__ . '/../Shared/gestion_header.php';
                 <input type="hidden" id="riesgoId">
 
                 <label class="small text-muted mb-0">Descripcion del riesgo</label>
-                <textarea id="riesgoDescripcion" class="form-control mb-2" rows="3" placeholder="Riesgo o tema pendiente"></textarea>
+                <textarea id="riesgoDescripcion" class="form-control mb-2" rows="3"
+                    placeholder="Riesgo o tema pendiente"></textarea>
 
                 <div class="row">
                     <div class="col-md-4">
@@ -401,7 +431,8 @@ require __DIR__ . '/../Shared/gestion_header.php';
                 <div class="row">
                     <div class="col-md-6">
                         <label class="small text-muted mb-0">Responsable</label>
-                        <input type="text" id="riesgoResponsable" class="form-control mb-2" placeholder="Responsable del seguimiento">
+                        <input type="text" id="riesgoResponsable" class="form-control mb-2"
+                            placeholder="Responsable del seguimiento">
                     </div>
                     <div class="col-md-6">
                         <label class="small text-muted mb-0">Fecha compromiso</label>
@@ -410,7 +441,8 @@ require __DIR__ . '/../Shared/gestion_header.php';
                 </div>
 
                 <label class="small text-muted mb-0">Plan de mitigacion</label>
-                <textarea id="riesgoPlan" class="form-control mb-2" rows="3" placeholder="Acciones para mitigar"></textarea>
+                <textarea id="riesgoPlan" class="form-control mb-2" rows="3"
+                    placeholder="Acciones para mitigar"></textarea>
 
                 <div class="text-right mb-3">
                     <button class="btn btn-sm btn-primary" onclick="guardarRiesgoProyecto()">Guardar riesgo</button>

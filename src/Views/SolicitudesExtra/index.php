@@ -18,7 +18,8 @@ require __DIR__ . '/../Shared/gestion_header.php';
                     <div class="card-body p-2">
                         <div class="mb-2">
                             <label>Solicitante</label>
-                            <input type="text" id="fSolicitante" class="form-control form-control-sm" placeholder="Buscar...">
+                            <input type="text" id="fSolicitante" class="form-control form-control-sm"
+                                placeholder="Buscar...">
                         </div>
                         <div class="mb-2">
                             <label>Tipo</label>
@@ -57,7 +58,19 @@ require __DIR__ . '/../Shared/gestion_header.php';
         <div class="col-md-10 col-lg-10">
             <div class="table-responsive">
                 <table id="tablaSolicitudes" class="table display compact" style="width:100%">
-                    <thead><tr><td>Fecha</td><td>Solicitante</td><td>Área</td><td>Solicitud</td><td>Tipo</td><td>Horas</td><td>Responsable</td><td>Estado</td><td>Acciones</td></tr></thead>
+                    <thead>
+                        <tr>
+                            <td>Fecha</td>
+                            <td>Solicitante</td>
+                            <td>Área</td>
+                            <td>Solicitud</td>
+                            <td>Tipo</td>
+                            <td>Horas</td>
+                            <td>Responsable</td>
+                            <td>Estado</td>
+                            <td>Acciones</td>
+                        </tr>
+                    </thead>
                     <tbody>
                         <?php foreach ($solicitudes as $solicitud): ?>
                             <tr>
@@ -71,12 +84,15 @@ require __DIR__ . '/../Shared/gestion_header.php';
                                 <td><?php echo htmlspecialchars($solicitud->estado); ?></td>
                                 <td>
                                     <?php if (empty($solicitud->tarea_origen_id) && empty($solicitud->tarea_convertida_id)): ?>
-                                        <button class="btn btn-xs btn-success" title="Convertir en tarea Kanban" onclick="convertirEnTarea(<?php echo (int)$solicitud->id; ?>)">Kanban</button>
+                                        <button class="btn btn-xs btn-success" title="Convertir en tarea Kanban"
+                                            onclick="convertirEnTarea(<?php echo (int) $solicitud->id; ?>)">Kanban</button>
                                     <?php else: ?>
                                         <span class="badge badge-info">En Kanban</span>
                                     <?php endif; ?>
-                                    <button class="btn btn-xs btn-warning" onclick='editarSolicitud(<?php echo json_encode($solicitud, JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'>✏</button>
-                                    <button class="btn btn-xs btn-danger" onclick="eliminarSolicitud(<?php echo (int)$solicitud->id; ?>)">🗑</button>
+                                    <button class="btn btn-xs btn-warning"
+                                        onclick='editarSolicitud(<?php echo json_encode($solicitud, JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'>✏</button>
+                                    <button class="btn btn-xs btn-danger"
+                                        onclick="eliminarSolicitud(<?php echo (int) $solicitud->id; ?>)">🗑</button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -88,18 +104,50 @@ require __DIR__ . '/../Shared/gestion_header.php';
 </div>
 
 <div class="modal fade" id="modalSolicitud" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document"><div class="modal-content">
-        <div class="modal-header"><h5 class="modal-title">Solicitud operativa</h5><button type="button" class="close" data-dismiss="modal">&times;</button></div>
-        <div class="modal-body">
-            <input type="hidden" id="sId">
-            <div class="row"><div class="col-md-4"><label>Fecha</label><input type="date" id="sFecha" class="form-control"></div><div class="col-md-4"><label>Solicitante</label><input type="text" id="sSolicitante" class="form-control"></div><div class="col-md-4"><label>Área</label><input type="text" id="sArea" class="form-control"></div></div>
-            <div class="row mt-2"><div class="col-md-6"><label>Tipo</label><select id="sTipo" class="form-control"><option value="">Seleccionar...</option><option value="Soporte">Soporte</option><option value="Mantenimiento">Mantenimiento</option><option value="Consulta">Consulta</option><option value="Corrección">Corrección</option><option value="Capacitación">Capacitación</option><option value="Otro">Otro</option></select></div><div class="col-md-3"><label>Horas</label><input type="number" id="sHoras" class="form-control" min="0" step="0.25"></div><div class="col-md-3"><label>Estado</label><select id="sEstado" class="form-control"><option value="pendiente">Pendiente</option><option value="en_progreso">En progreso</option><option value="completada">Completada</option><option value="cancelada">Cancelada</option></select></div></div>
-            <label class="mt-2">Descripción *</label><textarea id="sDescripcion" class="form-control" rows="4"></textarea>
-            <label class="mt-2">Responsable</label><input type="text" id="sResponsable" class="form-control">
-            <label class="mt-2">Observaciones</label><textarea id="sObservaciones" class="form-control" rows="3"></textarea>
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Solicitud operativa</h5><button type="button" class="close"
+                    data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="sId">
+                <div class="row">
+                    <div class="col-md-4"><label>Fecha</label><input type="date" id="sFecha" class="form-control"></div>
+                    <div class="col-md-4"><label>Solicitante</label><input type="text" id="sSolicitante"
+                            class="form-control"></div>
+                    <div class="col-md-4"><label>Área</label><input type="text" id="sArea" class="form-control"></div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-6"><label>Tipo</label><select id="sTipo" class="form-control">
+                            <option value="">Seleccionar...</option>
+                            <option value="Soporte">Soporte</option>
+                            <option value="Mantenimiento">Mantenimiento</option>
+                            <option value="Consulta">Consulta</option>
+                            <option value="Corrección">Corrección</option>
+                            <option value="Capacitación">Capacitación</option>
+                            <option value="Otro">Otro</option>
+                        </select></div>
+                    <div class="col-md-3"><label>Horas</label><input type="number" id="sHoras" class="form-control"
+                            min="0" step="0.25"></div>
+                    <div class="col-md-3"><label>Estado</label><select id="sEstado" class="form-control">
+                            <option value="pendiente">Pendiente</option>
+                            <option value="en_progreso">En progreso</option>
+                            <option value="completada">Completada</option>
+                            <option value="cancelada">Cancelada</option>
+                        </select></div>
+                </div>
+                <label class="mt-2">Descripción *</label><textarea id="sDescripcion" class="form-control"
+                    rows="4"></textarea>
+                <label class="mt-2">Responsable</label><input type="text" id="sResponsable" class="form-control">
+                <label class="mt-2">Observaciones</label><textarea id="sObservaciones" class="form-control"
+                    rows="3"></textarea>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary"
+                    data-dismiss="modal">Cancelar</button><button type="button" class="btn btn-primary"
+                    onclick="guardarSolicitud()">Guardar</button></div>
         </div>
-        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button><button type="button" class="btn btn-primary" onclick="guardarSolicitud()">Guardar</button></div>
-    </div></div>
+    </div>
 </div>
 
 <script>

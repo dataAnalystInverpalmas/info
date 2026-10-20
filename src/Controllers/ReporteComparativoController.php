@@ -18,7 +18,7 @@ class ReporteComparativoController {
 
     public function index() {
         $filtrosOpciones = ReporteSiembraComparativa::opcionesFiltro();
-        $rangoFechasDefault = FechasReporte::rangoDesdeInicioAnoHastaDomingoAnterior();
+        $rangoSemanasDefault = FechasReporte::rangoSemanasDesdeInicioAnoHastaSemanaAnterior();
         require_once __DIR__ . '/../Views/ReporteComparativo/index.php';
     }
 
@@ -32,8 +32,9 @@ class ReporteComparativoController {
             'tipo_siembra' => $get['tipo_siembra'] ?? [],
             'programa' => $get['programa'] ?? [],
             'color' => $get['color'] ?? [],
-            'desde' => $get['desde'] ?? '',
-            'hasta' => $get['hasta'] ?? '',
+            // Desde/hasta llegan como semana ISO yyww; se traducen al lunes/domingo de esa semana.
+            'desde' => FechasReporte::semanaYywwAFecha((string)($get['desde'] ?? '')),
+            'hasta' => FechasReporte::semanaYywwAFecha((string)($get['hasta'] ?? ''), true),
         ];
     }
 

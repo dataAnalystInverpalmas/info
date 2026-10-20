@@ -7,31 +7,31 @@ $gestionQuickActions = is_array($gestionQuickActions ?? null) ? $gestionQuickAct
 $gestionSections = [
     'panel' => [
         'label' => 'Panel',
-        'href' => 'index.php?report=205',
+        'href' => 'index.php?report=gestion_dashboard',
         'icon' => 'space_dashboard',
         'description' => 'Vista general y atajos'
     ],
     'proyectos' => [
         'label' => 'Proyectos',
-        'href' => 'index.php?report=200',
+        'href' => 'index.php?report=proyectos',
         'icon' => 'folder_open',
         'description' => 'Portafolio y avance'
     ],
     'tareas' => [
         'label' => 'Tareas',
-        'href' => 'index.php?report=201',
+        'href' => 'index.php?report=tareas',
         'icon' => 'task_alt',
         'description' => 'Ejecución operativa'
     ],
     'kanban' => [
         'label' => 'Kanban',
-        'href' => 'index.php?report=203',
+        'href' => 'index.php?report=kanban',
         'icon' => 'view_kanban',
         'description' => 'Flujo por estado'
     ],
     'bitacora' => [
         'label' => 'Bitácora',
-        'href' => 'index.php?report=202',
+        'href' => 'index.php?report=bitacora',
         'icon' => 'history_edu',
         'description' => 'Seguimiento y cambios'
     ],

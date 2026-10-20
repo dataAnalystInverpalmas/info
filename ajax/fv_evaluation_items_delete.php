@@ -1,0 +1,3 @@
+<?php
+require_once __DIR__ . '/_crud_dynamic_common.php';
+crud_delete_endpoint('fv_evaluation_items');

@@ -3,10 +3,10 @@ $(document).ready(function () {
     /* ---------------------------------------------------------------
        Fechas por defecto (01-enero del año actual → hoy)
     --------------------------------------------------------------- */
-    var hoy  = new Date();
-    var mes  = String(hoy.getMonth() + 1).padStart(2, '0');
-    var dia  = String(hoy.getDate()).padStart(2, '0');
-    var ano  = hoy.getFullYear();
+    var hoy = new Date();
+    var mes = String(hoy.getMonth() + 1).padStart(2, '0');
+    var dia = String(hoy.getDate()).padStart(2, '0');
+    var ano = hoy.getFullYear();
     $('#emv_fecha_ini').val(ano + '-01-01');
     $('#emv_fecha_fin').val(ano + '-' + mes + '-' + dia);
     $('#emv_rep_fecha_ini').val(ano + '-01-01');
@@ -53,15 +53,15 @@ $(document).ready(function () {
     var todasVariedades = [];
 
     function aplicarFiltroVariedad() {
-        var flor  = $('#det_filtro_flor').val().toLowerCase();
+        var flor = $('#det_filtro_flor').val().toLowerCase();
         var texto = $('#det_variedad_busca').val().toLowerCase();
-        var $sel  = $('#det_variedad');
+        var $sel = $('#det_variedad');
         var valorActual = $sel.val();
         $sel.empty().append('<option value="">— seleccione —</option>');
         $.each(todasVariedades, function (i, item) {
-            var coincideFlor  = !flor  || (item.codflor  || '').toLowerCase() === flor;
+            var coincideFlor = !flor || (item.codflor || '').toLowerCase() === flor;
             var coincideTexto = !texto || item.nombre.toLowerCase().indexOf(texto) !== -1
-                                       || (item.codigo || '').toLowerCase().indexOf(texto) !== -1;
+                || (item.codigo || '').toLowerCase().indexOf(texto) !== -1;
             if (coincideFlor && coincideTexto) {
                 $sel.append($('<option>').val(item.codigo).text(item.nombre));
             }
@@ -92,7 +92,7 @@ $(document).ready(function () {
     }, 'json');
 
     $(document).on('change', '#det_filtro_flor', aplicarFiltroVariedad);
-    $(document).on('input',  '#det_variedad_busca', aplicarFiltroVariedad);
+    $(document).on('input', '#det_variedad_busca', aplicarFiltroVariedad);
     $(document).on('change', '#det_variedad', function () {
         $(this).removeClass('is-invalid is-valid');
     });
@@ -117,26 +117,26 @@ $(document).ready(function () {
             dataSrc: ''
         },
         columns: [
-            { data: 'id',        title: 'Id' },
-            { data: 'fecha',     title: 'Fecha' },
-            { data: 'maquila',   title: 'Maquila' },
+            { data: 'id', title: 'Id' },
+            { data: 'fecha', title: 'Fecha' },
+            { data: 'maquila', title: 'Maquila' },
             { data: 'proveedor', title: 'Proveedor' },
-            { data: 'remision',  title: 'Remisión' },
-            { data: 'destino',   title: 'Destino' },
-            { data: 'material',  title: 'Material' },
+            { data: 'remision', title: 'Remisión' },
+            { data: 'destino', title: 'Destino' },
+            { data: 'material', title: 'Material' },
             {
                 data: null,
                 title: 'Acciones',
                 orderable: false,
                 render: function (d, t, row) {
                     return '<button class="btn btn-sm btn-info btnEmvDetalles mr-1" data-id="' + row.id + '" title="Detalles">'
-                         + '<i class="material-icons" style="font-size:16px;vertical-align:middle">list_alt</i></button>'
-                         + '<button class="btn btn-sm btn-warning btnEmvEditar mr-1" data-id="' + row.id + '" title="Editar">'
-                         + '<i class="material-icons" style="font-size:16px;vertical-align:middle">edit</i></button>'
-                         + '<button class="btn btn-sm btn-secondary btnEmvImprimir mr-1" data-id="' + row.id + '" title="Imprimir">'
-                         + '<i class="material-icons" style="font-size:16px;vertical-align:middle">print</i></button>'
-                         + '<button class="btn btn-sm btn-danger btnEmvBorrar" data-id="' + row.id + '" title="Borrar">'
-                         + '<i class="material-icons" style="font-size:16px;vertical-align:middle">delete</i></button>';
+                        + '<i class="material-icons" style="font-size:16px;vertical-align:middle">list_alt</i></button>'
+                        + '<button class="btn btn-sm btn-warning btnEmvEditar mr-1" data-id="' + row.id + '" title="Editar">'
+                        + '<i class="material-icons" style="font-size:16px;vertical-align:middle">edit</i></button>'
+                        + '<button class="btn btn-sm btn-secondary btnEmvImprimir mr-1" data-id="' + row.id + '" title="Imprimir">'
+                        + '<i class="material-icons" style="font-size:16px;vertical-align:middle">print</i></button>'
+                        + '<button class="btn btn-sm btn-danger btnEmvBorrar" data-id="' + row.id + '" title="Borrar">'
+                        + '<i class="material-icons" style="font-size:16px;vertical-align:middle">delete</i></button>';
                 }
             }
         ]
@@ -243,14 +243,14 @@ $(document).ready(function () {
             type: 'POST',
             dataType: 'json',
             data: {
-                opcion:     opcionEmv,
-                id:         $('#emv_id').val(),
-                fecha:      $('#emv_fecha').val(),
-                maquila:    $('#emv_maquila').val(),
-                proveedor:  $('#emv_proveedor').val(),
-                remision:   $('#emv_remision').val(),
-                destino:    $('#emv_destino').val(),
-                material:   $('#emv_material').val()
+                opcion: opcionEmv,
+                id: $('#emv_id').val(),
+                fecha: $('#emv_fecha').val(),
+                maquila: $('#emv_maquila').val(),
+                proveedor: $('#emv_proveedor').val(),
+                remision: $('#emv_remision').val(),
+                destino: $('#emv_destino').val(),
+                material: $('#emv_material').val()
             },
             success: function (data) {
                 tableEmv.ajax.reload(null, false);
@@ -281,7 +281,7 @@ $(document).ready(function () {
     /* Editar */
     $(document).on('click', '.btnEmvEditar', function () {
         opcionEmv = '2';
-        var tr  = $(this).closest('tr');
+        var tr = $(this).closest('tr');
         var row = tableEmv.row(tr).data();
         $('#emv_id').val(row.id);
         $('#emv_fecha').val(row.fecha);
@@ -343,14 +343,14 @@ $(document).ready(function () {
         var html = '';
         $.each(detalles, function (_, d) {
             html += '<tr>'
-                 + '<td>' + emvEscaparHtml(d.variedad || '') + '</td>'
-                 + '<td class="num">' + emvNumero(d.cantidad_recibida) + '</td>'
-                 + '<td class="num">' + emvNumero(d.facturado) + '</td>'
-                  + '<td class="num">' + emvNumero(d.excedente) + '</td>'
-                 + '<td class="num">' + emvNumero(d.obsequio) + '</td>'
-                 + '<td class="num">' + emvNumero(d.adicional) + '</td>'
-                 + '<td>' + (String(d.raiz) === '1' ? 'Si' : 'No') + '</td>'
-                 + '</tr>';
+                + '<td>' + emvEscaparHtml(d.variedad || '') + '</td>'
+                + '<td class="num">' + emvNumero(d.cantidad_recibida) + '</td>'
+                + '<td class="num">' + emvNumero(d.facturado) + '</td>'
+                + '<td class="num">' + emvNumero(d.excedente) + '</td>'
+                + '<td class="num">' + emvNumero(d.obsequio) + '</td>'
+                + '<td class="num">' + emvNumero(d.adicional) + '</td>'
+                + '<td>' + (String(d.raiz) === '1' ? 'Si' : 'No') + '</td>'
+                + '</tr>';
         });
         return html;
     }
@@ -503,14 +503,14 @@ $(document).ready(function () {
                     dataSrc: ''
                 },
                 columns: [
-                    { data: 'id',                title: 'Id' },
-                    { data: 'variedad',          title: 'Variedad' },
+                    { data: 'id', title: 'Id' },
+                    { data: 'variedad', title: 'Variedad' },
                     { data: 'cantidad_recibida', title: 'Cant. Recibida' },
-                    { data: 'facturado',         title: 'Facturado' },
-                    { data: 'reposicion',        title: 'Reposición' },
-                    { data: 'excedente',         title: 'Excedente' },
-                    { data: 'obsequio',          title: 'Obsequio' },
-                    { data: 'adicional',         title: 'Adicional' },
+                    { data: 'facturado', title: 'Facturado' },
+                    { data: 'reposicion', title: 'Reposición' },
+                    { data: 'excedente', title: 'Excedente' },
+                    { data: 'obsequio', title: 'Obsequio' },
+                    { data: 'adicional', title: 'Adicional' },
                     {
                         data: 'raiz', title: 'Raíz',
                         render: function (v) { return v == 1 ? 'Con raíz' : 'Sin raíz'; }
@@ -520,7 +520,7 @@ $(document).ready(function () {
                         data: null, title: 'Acción', orderable: false,
                         render: function (d, t, row) {
                             return '<button class="btn btn-sm btn-danger btnEmvBorrarDet" data-id="' + row.id + '" title="Eliminar">'
-                                 + '<i class="material-icons" style="font-size:16px;vertical-align:middle">delete</i></button>';
+                                + '<i class="material-icons" style="font-size:16px;vertical-align:middle">delete</i></button>';
                         }
                     }
                 ]
@@ -534,11 +534,11 @@ $(document).ready(function () {
        Auto-cálculo de cantidad_recibida
     --------------------------------------------------------------- */
     function calcularTotal() {
-        var total = (parseInt($('#det_facturado').val())  || 0)
-                  + (parseInt($('#det_reposicion').val()) || 0)
-                  + (parseInt($('#det_excedente').val())  || 0)
-                  + (parseInt($('#det_obsequio').val())   || 0)
-                  + (parseInt($('#det_adicional').val())  || 0);
+        var total = (parseInt($('#det_facturado').val()) || 0)
+            + (parseInt($('#det_reposicion').val()) || 0)
+            + (parseInt($('#det_excedente').val()) || 0)
+            + (parseInt($('#det_obsequio').val()) || 0)
+            + (parseInt($('#det_adicional').val()) || 0);
         $('#det_cantidad_recibida').val(total);
     }
 
@@ -559,13 +559,13 @@ $(document).ready(function () {
     $('#formEmvDetalle').on('submit', function (e) {
         e.preventDefault();
 
-        var facturado  = parseInt($('#det_facturado').val())  || 0;
+        var facturado = parseInt($('#det_facturado').val()) || 0;
         var reposicion = parseInt($('#det_reposicion').val()) || 0;
-        var excedente  = parseInt($('#det_excedente').val())  || 0;
-        var obsequio   = parseInt($('#det_obsequio').val())   || 0;
-        var adicional  = parseInt($('#det_adicional').val())  || 0;
-        var suma       = facturado + reposicion + excedente + obsequio + adicional;
-        var recibida   = parseInt($('#det_cantidad_recibida').val()) || 0;
+        var excedente = parseInt($('#det_excedente').val()) || 0;
+        var obsequio = parseInt($('#det_obsequio').val()) || 0;
+        var adicional = parseInt($('#det_adicional').val()) || 0;
+        var suma = facturado + reposicion + excedente + obsequio + adicional;
+        var recibida = parseInt($('#det_cantidad_recibida').val()) || 0;
 
         if (recibida !== suma) {
             alert('La cantidad recibida (' + recibida + ') no coincide con la suma (' + suma + ').\n'
@@ -574,7 +574,7 @@ $(document).ready(function () {
         }
 
         var codigoVariedad = $('#det_variedad').val();
-        var variedadValida  = codigoVariedad !== '' &&
+        var variedadValida = codigoVariedad !== '' &&
             todasVariedades.some(function (v) { return v.codigo === codigoVariedad; });
 
         if (!variedadValida) {
@@ -588,15 +588,15 @@ $(document).ready(function () {
             type: 'POST',
             dataType: 'json',
             data: {
-                opcion:     '7',
+                opcion: '7',
                 entrada_id: $('#det_entrada_id').val(),
-                variedad:   codigoVariedad,
-                facturado:  facturado,
+                variedad: codigoVariedad,
+                facturado: facturado,
                 reposicion: reposicion,
-                excedente:  excedente,
-                obsequio:   obsequio,
-                adicional:  adicional,
-                raiz:       $('#det_raiz').is(':checked') ? 1 : 0,
+                excedente: excedente,
+                obsequio: obsequio,
+                adicional: adicional,
+                raiz: $('#det_raiz').is(':checked') ? 1 : 0,
                 observacion: $('#det_observacion').val()
             },
             success: function () {

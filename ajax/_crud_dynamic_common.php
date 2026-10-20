@@ -1,5 +1,19 @@
 <?php
 
+function crud_get_conexion()
+{
+    global $conexion;
+    if (isset($conexion) && $conexion instanceof \mysqli) {
+        return $conexion;
+    }
+    if (isset($GLOBALS['conexion']) && $GLOBALS['conexion'] instanceof \mysqli) {
+        return $GLOBALS['conexion'];
+    }
+    require_once dirname(__DIR__) . '/funciones/conexion.php';
+    global $conexion;
+    return $conexion ?? ($GLOBALS['conexion'] ?? null);
+}
+
 function crud_json($payload)
 {
     echo json_encode($payload);
@@ -99,7 +113,14 @@ function crud_normalize_value($raw, $colMeta)
 
 function crud_selectable_columns($meta)
 {
-    return array_keys($meta['columns']);
+    $cols = array_keys($meta['columns']);
+    // NUNCA exponer la columna de contraseña en listados ni consultas
+    if ($meta['table'] === 'users') {
+        $cols = array_values(array_filter($cols, function ($col) {
+            return $col !== 'password';
+        }));
+    }
+    return $cols;
 }
 
 function crud_editable_columns($meta)
@@ -120,8 +141,15 @@ function crud_editable_columns($meta)
 
 function crud_create_endpoint($table)
 {
-    include(__DIR__ . '/../funciones/conexion.php');
+    $conexion = crud_get_conexion();
     header('Content-Type: application/json; charset=utf-8');
+
+    // Validación de seguridad para tablas críticas
+    if ($table === 'users' || $table === 'roles') {
+        \App\Helpers\Auth::requireAdmin();
+    } else {
+        \App\Helpers\Auth::requireAuth();
+    }
 
     list($meta, $err) = crud_get_table_meta($conexion, $table);
     if ($err) {
@@ -137,7 +165,18 @@ function crud_create_endpoint($table)
         if (!array_key_exists($col, $_POST)) {
             continue;
         }
-        $val = crud_normalize_value($_POST[$col], $meta['columns'][$col]);
+        $raw = $_POST[$col];
+
+        // Hashear contraseña si es creación de usuario
+        if ($table === 'users' && $col === 'password') {
+            if (trim((string)$raw) === '') {
+                continue; // no insertar contraseña vacía
+            }
+            $val = password_hash(trim((string)$raw), PASSWORD_DEFAULT);
+        } else {
+            $val = crud_normalize_value($raw, $meta['columns'][$col]);
+        }
+
         $cols[] = $col;
         $types .= crud_bind_type_for($meta['columns'][$col]['data_type']);
         $params[] = $val;
@@ -159,13 +198,22 @@ function crud_create_endpoint($table)
     if ($ok) {
         crud_json(['success' => true, 'id' => $conexion->insert_id]);
     }
+    if ($conexion->errno === 1062 || $stmt->errno === 1062) {
+        crud_json(['success' => false, 'message' => 'El nombre de usuario o correo ya existe. Por favor elija uno diferente.']);
+    }
     crud_json(['success' => false, 'message' => $stmt->error]);
 }
 
 function crud_list_endpoint($table)
 {
-    include(__DIR__ . '/../funciones/conexion.php');
+    $conexion = crud_get_conexion();
     header('Content-Type: application/json; charset=utf-8');
+
+    if ($table === 'users' || $table === 'roles') {
+        \App\Helpers\Auth::requireAdmin();
+    } else {
+        \App\Helpers\Auth::requireAuth();
+    }
 
     list($meta, $err) = crud_get_table_meta($conexion, $table);
     if ($err) {
@@ -220,8 +268,14 @@ function crud_list_endpoint($table)
 
 function crud_get_endpoint($table)
 {
-    include(__DIR__ . '/../funciones/conexion.php');
+    $conexion = crud_get_conexion();
     header('Content-Type: application/json; charset=utf-8');
+
+    if ($table === 'users' || $table === 'roles') {
+        \App\Helpers\Auth::requireAdmin();
+    } else {
+        \App\Helpers\Auth::requireAuth();
+    }
 
     list($meta, $err) = crud_get_table_meta($conexion, $table);
     if ($err) {
@@ -272,8 +326,14 @@ function crud_get_endpoint($table)
 
 function crud_update_endpoint($table)
 {
-    include(__DIR__ . '/../funciones/conexion.php');
+    $conexion = crud_get_conexion();
     header('Content-Type: application/json; charset=utf-8');
+
+    if ($table === 'users' || $table === 'roles') {
+        \App\Helpers\Auth::requireAdmin();
+    } else {
+        \App\Helpers\Auth::requireAuth();
+    }
 
     list($meta, $err) = crud_get_table_meta($conexion, $table);
     if ($err) {
@@ -294,9 +354,23 @@ function crud_update_endpoint($table)
         if ($meta['pk'] && $col === $meta['pk']) {
             continue;
         }
+
+        $raw = $_POST[$col];
+
+        // Manejo especial de contraseña en usuarios
+        if ($table === 'users' && $col === 'password') {
+            // Si viene vacío en un update, NO sobreescribir la contraseña existente
+            if (trim((string)$raw) === '') {
+                continue;
+            }
+            $val = password_hash(trim((string)$raw), PASSWORD_DEFAULT);
+        } else {
+            $val = crud_normalize_value($raw, $meta['columns'][$col]);
+        }
+
         $setParts[] = $col . ' = ?';
         $types .= crud_bind_type_for($meta['columns'][$col]['data_type']);
-        $params[] = crud_normalize_value($_POST[$col], $meta['columns'][$col]);
+        $params[] = $val;
     }
 
     if (empty($setParts)) {
@@ -335,13 +409,26 @@ function crud_update_endpoint($table)
     if ($ok) {
         crud_json(['success' => true]);
     }
+    if ($conexion->errno === 1062 || $stmt->errno === 1062) {
+        crud_json(['success' => false, 'message' => 'El nombre de usuario o correo ya existe. Por favor elija uno diferente.']);
+    }
     crud_json(['success' => false, 'message' => $stmt->error]);
 }
 
 function crud_delete_endpoint($table)
 {
-    include(__DIR__ . '/../funciones/conexion.php');
+    $conexion = crud_get_conexion();
     header('Content-Type: application/json; charset=utf-8');
+
+    if ($table === 'users' || $table === 'roles') {
+        \App\Helpers\Auth::requireAdmin();
+    } else {
+        \App\Helpers\Auth::requireAuth();
+    }
+
+    if ($table === 'users' && isset($_POST['id']) && (int)$_POST['id'] === \App\Helpers\Auth::id()) {
+        crud_json(['success' => false, 'message' => 'No puede eliminar su propia cuenta de usuario en sesión']);
+    }
 
     list($meta, $err) = crud_get_table_meta($conexion, $table);
     if ($err) {

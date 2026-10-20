@@ -4,7 +4,8 @@ require_once dirname(__DIR__) . '/funciones/conexion.php';
 header('Content-Type: application/json; charset=utf-8');
 
 $table = trim($_GET['table'] ?? '');
-$allowed = ['breeders', 'users', 'roles', 'supplies', 'varieties', 'seasons', 'greenhouses'];
+$allowed = ['breeders', 'users', 'roles', 'supplies', 'varieties', 'seasons', 'greenhouses',
+    'fv_kinds', 'fv_origens', 'fv_causes_items', 'fv_evaluation_items'];
 if (!in_array($table, $allowed, true)) {
     echo json_encode(['success' => false, 'message' => 'Tabla no permitida']);
     exit;

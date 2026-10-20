@@ -1,37 +1,42 @@
 .bolded {
-  font-weight:bold;
+  font-weight: bold;
 }
+
 .scrollable-menu {
   height: auto;
   max-height: 200px;
   overflow-x: hidden;
 }
-.navbar-inverse
-{
-    background:#00796B;
-    border-bottom-color: #004D40;
-}
-.navbar-inverse .navbar-nav>li>a,.navbar-inverse .navbar-brand,.navbar-inverse .navbar-nav>.dropdown>a .caret
-{
-    color: #fff;
-}
-.navbar-inverse .navbar-nav>.open>a, .navbar-inverse .navbar-nav>.open>a:hover, .navbar-inverse .navbar-nav>.open>a:focus,
-.navbar-nav>li>.dropdown-menu
-{
-    background:#4DB6AC;
-}
-.nav-pills>li>a
-{
-    color: #303F9F;
+
+.navbar-inverse {
+  background: #00796B;
+  border-bottom-color: #004D40;
 }
 
-.nav>li>a:hover, .nav>li>a:focus
-{
-    background-color: #EEEEEE;
+.navbar-inverse .navbar-nav>li>a,
+.navbar-inverse .navbar-brand,
+.navbar-inverse .navbar-nav>.dropdown>a .caret {
+  color: #fff;
+}
+
+.navbar-inverse .navbar-nav>.open>a,
+.navbar-inverse .navbar-nav>.open>a:hover,
+.navbar-inverse .navbar-nav>.open>a:focus,
+.navbar-nav>li>.dropdown-menu {
+  background: #4DB6AC;
+}
+
+.nav-pills>li>a {
+  color: #303F9F;
+}
+
+.nav>li>a:hover,
+.nav>li>a:focus {
+  background-color: #EEEEEE;
 }
 
 .pink {
-    background-color: pink !important;
+  background-color: pink !important;
 }
 
 /* ============================================================
@@ -43,39 +48,39 @@
    Reportes y Gestión PM (#00796B).
    ============================================================ */
 .btn-brand-green {
-    background-color: #00796B !important;
-    border: 1px solid #00796B !important;
-    color: #ffffff !important;
+  background-color: #00796B !important;
+  border: 1px solid #00796B !important;
+  color: #ffffff !important;
 }
 
 .btn-brand-green:hover,
 .btn-brand-green:focus,
 .btn-brand-green:active {
-    background-color: #004D40 !important;
-    border-color: #004D40 !important;
-    color: #ffffff !important;
+  background-color: #004D40 !important;
+  border-color: #004D40 !important;
+  color: #ffffff !important;
 }
 
 .btn-brand-green:focus {
-    box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.25) !important;
+  box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.25) !important;
 }
 
 .btn-outline-brand-green {
-    color: #00796B !important;
-    border: 1px solid #00796B !important;
-    background-color: transparent !important;
+  color: #00796B !important;
+  border: 1px solid #00796B !important;
+  background-color: transparent !important;
 }
 
 .btn-outline-brand-green:hover,
 .btn-outline-brand-green:focus {
-    background-color: #00796B !important;
-    color: #ffffff !important;
+  background-color: #00796B !important;
+  color: #ffffff !important;
 }
 
 /* Cabecera de tarjeta de marca, para paneles de filtros que no
    usan el sidebar colapsable (.filtro-sidebar / .crud-filtro-sidebar) */
 .card-header-brand-green {
-    background-color: #00796B !important;
-    border-color: #00796B !important;
-    color: #ffffff !important;
+  background-color: #00796B !important;
+  border-color: #00796B !important;
+  color: #ffffff !important;
 }

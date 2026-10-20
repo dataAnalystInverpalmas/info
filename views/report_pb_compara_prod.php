@@ -1,4 +1,4 @@
 <?php
 include_once('funciones/conexion.php');
 $c = new \App\Controllers\PowerBIController();
-$c->show('Compara Producción', 'https://app.powerbi.com/view?r=eyJrIjoiZDE0MDE5OTItZWMyMC00YTYzLTk3ZTktMDY5MzNkMTNlMTU2IiwidCI6ImIzMTI4MDM5LTFkN2ItNGE0Ny1hYjA2LTE1MmU3MWMzYTg1NyIsImMiOjR9');
+$c->show('Compara Producción', 'https://app.powerbi.com/view?r=eyJrIjoiZTMyNjNhNzYtZTBkOC00NjVmLWE1MjQtOTE0NzJlN2NkNDQ1IiwidCI6IjFmZTU2MjBkLWEwYTktNDU0Yy1iZTdhLTViOWY1MDA4OTQ0NCJ9');

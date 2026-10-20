@@ -49,7 +49,7 @@ $COM4 = $conexion->query($slqCOMBO4);
 ?>
 
 <div class="card-header d-print-none">
-<form class="form-inline" action="home.php?menu=tables&report=8" method="post" enctype="multipart/form-data">
+<form class="form-inline" action="home.php?menu=tables&report=evaluacion_cosechas" method="post" enctype="multipart/form-data">
   <div class="form-group mb-2">
     <select id="producto" name="xproducto" class="form-control" data-live-search="true">
       <option value="">Producto</option>

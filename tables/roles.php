@@ -15,26 +15,21 @@ $nombrearchivo='archivos/tabla_roles.xlsx';
 	$objPHPExcel->setActiveSheetIndex(0);
 	$numRows=$objPHPExcel->setActiveSheetIndex(0)->getHighestRow();
 
-if($_SESSION['role']=='1')	
-	//Our SQL statement. This will empty / truncate the table "plane"
+\App\Helpers\Auth::requireAdmin();
+
 $sqlv = "TRUNCATE TABLE roles";
 $conexion->query($sqlv);
-	
-	for ($i=2;$i<=$numRows;$i++){
-		
-		$dir=$objPHPExcel->getActiveSheet()->getCell('A'.$i)->getCalculatedValue();
-		$users_role=$objPHPExcel->getActiveSheet()->getCell('B'.$i)->getCalculatedValue();
 
-		//$fecha_siembra=date('Y-m-d',$fechai);
-		$sql="INSERT INTO roles(dir,users_role)";
-		$sql=$sql." VALUES ('$dir','$users_role')";
-		$result=$conexion->query($sql);
-		
-		  if (!$result){
-			  echo $sql.$numRows;
-			die ("Query failed");
-		}
-		
+$stmt = $conexion->prepare("INSERT INTO roles (dir, users_role) VALUES (?, ?)");
+for ($i = 2; $i <= $numRows; $i++) {
+    $dir = trim((string)$objPHPExcel->getActiveSheet()->getCell('A' . $i)->getCalculatedValue());
+    $users_role = intval($objPHPExcel->getActiveSheet()->getCell('B' . $i)->getCalculatedValue());
+
+    if ($dir !== '') {
+        $stmt->bind_param("si", $dir, $users_role);
+        $stmt->execute();
     }
-	$conexion->close();
+}
+$stmt->close();
+$conexion->close();
 ?>

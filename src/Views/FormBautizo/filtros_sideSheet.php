@@ -1,13 +1,14 @@
-<div class="offcanvas offcanvas-end custom-offcanvas" tabindex="-1" id="filtroLateral" aria-labelledby="filtroLateralLabel" aria-modal="true" role="dialog">
+<div class="offcanvas offcanvas-end custom-offcanvas" tabindex="-1" id="filtroLateral"
+  aria-labelledby="filtroLateralLabel" aria-modal="true" role="dialog">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title" id="filtroLateralLabel">Filtrar Datos Por:</h5>
     <button type="button" class="btn btn-danger btn-close-custom" data-bs-dismiss="offcanvas" aria-label="Cerrar">
       <i class="bi bi-x"></i>
     </button>
-  </div>    
+  </div>
 
   <div class="offcanvas-body">
-    <form id="formFiltros" method="POST" action="home.php?menu=tables&report=1">
+    <form id="formFiltros" method="POST" action="home.php?menu=tables&report=hoja_bautizo">
 
       <!-- Finca -->
       <div class="mb-3">

@@ -10,10 +10,15 @@ class ApplicationController {
     public function index() {
         $conexion = Database::getConnection();
 
-        $di = Carbon::now();
-        $de = Carbon::now();
-        $dateIni = $di->startOfWeek()->format('Y-m-d');
-        $dateEnd = $de->endOfWeek()->format('Y-m-d');
+        try {
+            $di = Carbon::now();
+            $de = Carbon::now();
+            $dateIni = $di->startOfWeek()->format('Y-m-d');
+            $dateEnd = $de->endOfWeek()->format('Y-m-d');
+        } catch (\Throwable $e) {
+            $dateIni = date('Y-m-d', strtotime('monday this week'));
+            $dateEnd = date('Y-m-d', strtotime('sunday this week'));
+        }
 
         $where = " WHERE p.producto in('CLAVEL','MINICLAVEL','CLAVEL STANDARD','CLAVEL MINIATURA') ";
         $tipo  = '';
@@ -36,24 +41,22 @@ class ApplicationController {
             $where .= " AND a.finca='INVERPALMAS' AND a.tipo='GIBERELINA' AND $expr between '$dateIni' AND '$dateEnd' ";
         }
 
-        $rows        = Application::getMain($where);
-        $rowsByBlock = Application::getByBlock($where);
-        $summary     = Application::getSummary($where);
-        $supplies    = Application::getSupplies($where);
-        $tipos       = Application::getTipos();
-        $fincas      = Application::getFincas();
+        $rows             = Application::getMain($where);
+        $supplies         = Application::getSupplies($where);
+        $materialsByBlock = Application::getMaterialsByBlock($where);
+        $tipos            = Application::getTipos();
+        $fincas           = Application::getFincas();
 
         extract([
-            'rows'        => $rows,
-            'rowsByBlock' => $rowsByBlock,
-            'summary'     => $summary,
-            'supplies'    => $supplies,
-            'tipos'       => $tipos,
-            'fincas'      => $fincas,
-            'dateIni'     => $dateIni,
-            'dateEnd'     => $dateEnd,
-            'tipo'        => $tipo,
-            'finca'       => $finca,
+            'rows'             => $rows,
+            'supplies'         => $supplies,
+            'materialsByBlock' => $materialsByBlock,
+            'tipos'            => $tipos,
+            'fincas'           => $fincas,
+            'dateIni'          => $dateIni,
+            'dateEnd'          => $dateEnd,
+            'tipo'             => $tipo,
+            'finca'            => $finca,
         ]);
 
         require_once __DIR__ . '/../Views/Applications/index.php';

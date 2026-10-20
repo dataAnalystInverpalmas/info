@@ -12,7 +12,12 @@
 <!-- JSZip -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
-<h4>Reporte de Floreros</h4>
+<div class="d-flex align-items-center justify-content-between mb-3">
+	<h4 class="mb-0">Reporte de Floreros</h4>
+	<a href="index.php?report=florero_perfil" class="btn btn-outline-success btn-sm">
+		<i class="material-icons" style="font-size:16px;vertical-align:text-bottom">insights</i> Ver Perfil de Variedades (Nuevo)
+	</a>
+</div>
 
 <div class="container-fluid">
 	<div class="row">

@@ -55,51 +55,87 @@ $slqCOMBO2 = "SELECT fecha_ensarte FROM $tabla where programa=$programa GROUP BY
 $COM2 = $conexion->query($slqCOMBO2);
 ?>
 
-<div class="card-header d-print-none">
-<form class="form-inline" action="home.php?menu=tables&report=7" method="post" enctype="multipart/form-data">
-  <div class="form-group mb-2">
-    <select name="xprograma" class="form-control" data-live-search="true">
-      <option value="">Año Programa</option>
-      <?php
-      while ($f = $COM->fetch_object()) {
-        if ($f->programa == $programa) {
-          echo "<option value='{$f->programa}' selected='selected'>{$f->programa}</option>";
-        } else {
-          echo "<option value='{$f->programa}'>{$f->programa}</option>";
-        }
-      }
-      ?>
-    </select>
-    <select id="tipo" name="tipo" class="form-control" data-live-search="true">
-      <?php if ($tabla == 'program') { ?>
-        <option value="program" selected='selected'>Programa</option>
-        <option value="program_add_pto">Reemplazo</option>
-      <?php } else { ?>
-        <option value="program">Programa</option>
-        <option value="program_add_pto" selected='selected'>Reemplazo</option>
-      <?php } ?>
-    </select>
-  </div>
-  <div class="form-group mb-2">
-    <select name="xfecha" class="form-control" data-live-search="true">
-      <option value="">Fecha Ensarte</option>
-      <?php
-      while ($f = $COM2->fetch_object()) {
-        $fe = new Carbon($f->fecha_ensarte);
-        if ($f->fecha_ensarte == $fecha_ensarte) {
-          echo "<option value='{$f->fecha_ensarte}' selected='selected'>" . $fe->format('Y-W') . "</option>";
-        } else {
-          echo "<option value='{$f->fecha_ensarte}'>" . $fe->format('Y-W') . "</option>";
-        }
-      }
-      ?>
-    </select>
+<link rel="stylesheet" href="scripts/crud_tables.css?v=2">
+
+<div class="container-fluid" style="padding-top:6px;">
+  <!-- Page Header Banner (Hidden on Print) -->
+  <div class="crud-page-header d-print-none">
+    <div class="crud-header-left">
+      <div class="crud-header-icon">
+        <span class="material-icons">print</span>
+      </div>
+      <div>
+        <h4 class="crud-page-title">Programa de Ensartes - Imprimir</h4>
+        <div class="crud-page-subtitle">
+          <span class="crud-page-badge">Siembras</span>
+          <span class="text-muted d-none d-sm-inline">• Control de ensartes y cosechas de esquejes para impresión horizontal</span>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <button name="buscar" type="submit" class="btn btn-brand-green mb-2">Buscar</button>
-  <button name="print" type="submit" class="btn btn-outline-brand-green mb-2" onclick="imprime();">Imprimir</button>
-</form>
-</div>
+  <!-- Barra de Filtros (Hidden on Print) -->
+  <div class="crud-print-toolbar d-print-none mb-4">
+    <form action="home.php?menu=tables&report=imprimir_ensartes" method="post" enctype="multipart/form-data">
+      <div class="form-row align-items-end">
+        <div class="form-group col-md-3 col-sm-6 mb-2">
+          <label class="small font-weight-bold text-muted mb-1">Año Programa</label>
+          <select name="xprograma" class="form-control form-control-sm" data-live-search="true">
+            <option value="">Año Programa</option>
+            <?php
+            while ($f = $COM->fetch_object()) {
+              if ($f->programa == $programa) {
+                echo "<option value='{$f->programa}' selected='selected'>{$f->programa}</option>";
+              } else {
+                echo "<option value='{$f->programa}'>{$f->programa}</option>";
+              }
+            }
+            ?>
+          </select>
+        </div>
+
+        <div class="form-group col-md-3 col-sm-6 mb-2">
+          <label class="small font-weight-bold text-muted mb-1">Tipo de Planificación</label>
+          <select id="tipo" name="tipo" class="form-control form-control-sm" data-live-search="true">
+            <?php if ($tabla == 'program') { ?>
+              <option value="program" selected='selected'>Programa</option>
+              <option value="program_add_pto">Reemplazo</option>
+            <?php } else { ?>
+              <option value="program">Programa</option>
+              <option value="program_add_pto" selected='selected'>Reemplazo</option>
+            <?php } ?>
+          </select>
+        </div>
+
+        <div class="form-group col-md-3 col-sm-6 mb-2">
+          <label class="small font-weight-bold text-muted mb-1">Fecha Ensarte (Semana)</label>
+          <select name="xfecha" class="form-control form-control-sm" data-live-search="true">
+            <option value="">Fecha Ensarte</option>
+            <?php
+            while ($f = $COM2->fetch_object()) {
+              $fe = new Carbon($f->fecha_ensarte);
+              if ($f->fecha_ensarte == $fecha_ensarte) {
+                echo "<option value='{$f->fecha_ensarte}' selected='selected'>" . $fe->format('Y-W') . "</option>";
+              } else {
+                echo "<option value='{$f->fecha_ensarte}'>" . $fe->format('Y-W') . "</option>";
+              }
+            }
+            ?>
+          </select>
+        </div>
+
+        <div class="form-group col-md-3 col-sm-6 mb-2 d-flex">
+          <button name="buscar" type="submit" class="btn btn-brand-green btn-sm flex-fill mr-2 d-flex align-items-center justify-content-center" style="height: 31px;">
+            <span class="material-icons mr-1" style="font-size: 1rem;">search</span> Buscar
+          </button>
+          <button name="print" type="submit" class="btn btn-outline-brand-green btn-sm flex-fill d-flex align-items-center justify-content-center" onclick="imprime();" style="height: 31px;">
+            <span class="material-icons mr-1" style="font-size: 1rem;">print</span> Imprimir
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
 
 <div class="row landscape">
   <div class="col">
@@ -197,6 +233,7 @@ $COM2 = $conexion->query($slqCOMBO2);
     </div>
     <?php } ?>
   </div>
+</div>
 </div>
 
 <script>

@@ -1,7 +1,7 @@
-﻿<?php
+<?php
 // Archivo PUENTE:
 // Este codigo delega la responsabilidad al sistema MVC en /src,
-// preservando la ruta original usada en el enrutador (report=12).
+// compatible con la ruta descriptiva (report=registra_floreros) y numérica (report=12).
 
 include_once('funciones/conexion.php');
 

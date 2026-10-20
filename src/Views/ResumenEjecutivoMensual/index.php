@@ -62,8 +62,9 @@
 
 <?php
 if (!function_exists('renderTareasDetalle')) {
-    function renderTareasDetalle($detalle) {
-        $texto = trim((string)$detalle);
+    function renderTareasDetalle($detalle)
+    {
+        $texto = trim((string) $detalle);
         if ($texto === '') {
             return '<span class="text-muted">Sin tareas</span>';
         }
@@ -72,7 +73,7 @@ if (!function_exists('renderTareasDetalle')) {
         $html = '<div class="tareas-detalle">';
 
         foreach ($items as $index => $item) {
-            $textoItem = trim((string)$item);
+            $textoItem = trim((string) $item);
             if ($textoItem === '') {
                 continue;
             }
@@ -94,7 +95,8 @@ if (!function_exists('renderTareasDetalle')) {
     <div class="row mb-3 align-items-end">
         <div class="col-6 col-md-2">
             <label class="small text-muted mb-0">Año</label>
-            <input type="number" min="2020" max="2099" step="1" id="fAnio" class="form-control form-control-sm" value="<?php echo (int)$anio; ?>">
+            <input type="number" min="2020" max="2099" step="1" id="fAnio" class="form-control form-control-sm"
+                value="<?php echo (int) $anio; ?>">
         </div>
         <div class="col-12 col-md-4">
             <label class="small text-muted mb-0">Categoría</label>
@@ -171,14 +173,14 @@ if (!function_exists('renderTareasDetalle')) {
                             <td><?php echo htmlspecialchars($row->nombre ?? ''); ?></td>
                             <td><?php echo htmlspecialchars($row->objetivo_alcance ?? ''); ?></td>
                             <td><?php echo htmlspecialchars($row->responsable ?? ''); ?></td>
-                            <td><?php echo (int)($row->avance_proyecto ?? 0); ?>%</td>
+                            <td><?php echo (int) ($row->avance_proyecto ?? 0); ?>%</td>
                             <td><span class="resumen-chip"><?php echo htmlspecialchars($row->estado ?? ''); ?></span></td>
                             <td><?php echo htmlspecialchars($row->logros_principales ?? ''); ?></td>
                             <td><?php echo htmlspecialchars($row->riesgos_pendientes ?? ''); ?></td>
                             <td><?php echo renderTareasDetalle($row->tareas_detalle ?? ''); ?></td>
                             <td>
-                                Total: <?php echo (int)($row->actividades_mes ?? 0); ?><br>
-                                Completadas: <?php echo (int)($row->completadas_mes ?? 0); ?>
+                                Total: <?php echo (int) ($row->actividades_mes ?? 0); ?><br>
+                                Completadas: <?php echo (int) ($row->completadas_mes ?? 0); ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>

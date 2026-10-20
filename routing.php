@@ -33,10 +33,22 @@ if (is_file("funciones/conexion.php")){
 								<p class="text-muted small mb-4">Por favor, ingrese sus credenciales para acceder al sistema.</p>
 								
 								<?php if (!empty($_GET['error'])): ?>
-								<div class="alert alert-danger text-center py-2 px-3 mb-4" style="border-radius: 0.5rem; font-size: 0.875rem;">
-									<span class="material-icons align-middle mr-1" style="font-size: 1.1rem;">error_outline</span>
-									Usuario o contraseña incorrectos.
-								</div>
+									<?php if ($_GET['error'] === 'inactive'): ?>
+										<div class="alert alert-warning text-center py-2 px-3 mb-4" style="border-radius: 0.5rem; font-size: 0.875rem; background-color: #fff3cd; border-color: #ffeeba; color: #856404;">
+											<span class="material-icons align-middle mr-1" style="font-size: 1.1rem;">block</span>
+											Su cuenta ha sido desactivada por el administrador.
+										</div>
+									<?php elseif ($_GET['error'] === 'timeout'): ?>
+										<div class="alert alert-info text-center py-2 px-3 mb-4" style="border-radius: 0.5rem; font-size: 0.875rem; background-color: #e2f0fb; border-color: #b8daff; color: #004085;">
+											<span class="material-icons align-middle mr-1" style="font-size: 1.1rem;">schedule</span>
+											Su sesión ha finalizado por inactividad. Ingrese nuevamente.
+										</div>
+									<?php else: ?>
+										<div class="alert alert-danger text-center py-2 px-3 mb-4" style="border-radius: 0.5rem; font-size: 0.875rem;">
+											<span class="material-icons align-middle mr-1" style="font-size: 1.1rem;">error_outline</span>
+											Usuario o contraseña incorrectos.
+										</div>
+									<?php endif; ?>
 								<?php endif; ?>
 								
 								<form action="login.php" method="POST" name="login" class="needs-validation">

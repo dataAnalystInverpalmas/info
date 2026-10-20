@@ -277,12 +277,12 @@
                                 </select>
                             </div>
                             <div class="mb-2">
-                                <label for="cFiltroFechaDesde">Fecha desde</label>
-                                <input type="date" id="cFiltroFechaDesde" class="form-control form-control-sm" value="<?php echo htmlspecialchars($rangoFechasDefault['desde'] ?? ''); ?>">
+                                <label for="cFiltroFechaDesde">Semana desde (yyww)</label>
+                                <input type="text" id="cFiltroFechaDesde" class="form-control form-control-sm" inputmode="numeric" maxlength="4" pattern="\d{4}" placeholder="yyww" value="<?php echo htmlspecialchars($rangoSemanasDefault['desde'] ?? ''); ?>">
                             </div>
                             <div class="mb-2">
-                                <label for="cFiltroFechaHasta">Fecha hasta</label>
-                                <input type="date" id="cFiltroFechaHasta" class="form-control form-control-sm" value="<?php echo htmlspecialchars($rangoFechasDefault['hasta'] ?? ''); ?>">
+                                <label for="cFiltroFechaHasta">Semana hasta (yyww)</label>
+                                <input type="text" id="cFiltroFechaHasta" class="form-control form-control-sm" inputmode="numeric" maxlength="4" pattern="\d{4}" placeholder="yyww" value="<?php echo htmlspecialchars($rangoSemanasDefault['hasta'] ?? ''); ?>">
                             </div>
                         </div>
                     </div>
@@ -635,8 +635,8 @@ var ReporteComparativo = (function () {
             actualizandoFiltros = true;
             $('#cFiltroFinca, #cFiltroBloque, #cFiltroVariedad, #cFiltroTemporada, #cFiltroFlor, #cFiltroTipoSiembra, #cFiltroPrograma, #cFiltroColor').val(null).trigger('change');
             actualizandoFiltros = false;
-            document.getElementById('cFiltroFechaDesde').value = '<?php echo htmlspecialchars($rangoFechasDefault['desde'] ?? ''); ?>';
-            document.getElementById('cFiltroFechaHasta').value = '<?php echo htmlspecialchars($rangoFechasDefault['hasta'] ?? ''); ?>';
+            document.getElementById('cFiltroFechaDesde').value = '<?php echo htmlspecialchars($rangoSemanasDefault['desde'] ?? ''); ?>';
+            document.getElementById('cFiltroFechaHasta').value = '<?php echo htmlspecialchars($rangoSemanasDefault['hasta'] ?? ''); ?>';
             actualizarOpcionesFiltros();
             cargarDatos();
         }

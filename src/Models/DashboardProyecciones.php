@@ -105,6 +105,50 @@ class DashboardProyecciones
             $whereMiniclavel['params']
         );
 
+        $catalogoFincasRows = self::fetchAll(
+            $conexion,
+            'SELECT DISTINCT finca FROM ' . self::qi(self::TABLE_NAME) . ' WHERE finca IS NOT NULL AND TRIM(finca) <> \'\' ORDER BY finca ASC',
+            '',
+            []
+        );
+        $fincasDisponibles = array_values(array_filter(array_map(function ($r) {
+            return trim((string)($r['finca'] ?? ''));
+        }, $catalogoFincasRows)));
+
+        $catalogoFloresRows = self::fetchAll(
+            $conexion,
+            'SELECT DISTINCT COALESCE(NULLIF(TRIM(producto), \'\'), \'SIN FLOR\') AS flor FROM ' . self::qi(self::TABLE_NAME) . ' WHERE plantas > 0 ORDER BY flor ASC',
+            '',
+            []
+        );
+        $floresDisponibles = array_values(array_filter(array_map(function ($r) {
+            return trim((string)($r['flor'] ?? ''));
+        }, $catalogoFloresRows)));
+
+        $picoClavel = null;
+        foreach ($camasEdadClavelRows as $r) {
+            $camasVal = (float)($r['camas'] ?? 0);
+            if (!$picoClavel || $camasVal > (float)($picoClavel['camas'] ?? 0)) {
+                $picoClavel = [
+                    'semana' => (int)($r['edad_semanas'] ?? 0),
+                    'finca' => (string)($r['finca'] ?? ''),
+                    'camas' => $camasVal,
+                ];
+            }
+        }
+
+        $picoMiniclavel = null;
+        foreach ($camasEdadMiniclavelRows as $r) {
+            $camasVal = (float)($r['camas'] ?? 0);
+            if (!$picoMiniclavel || $camasVal > (float)($picoMiniclavel['camas'] ?? 0)) {
+                $picoMiniclavel = [
+                    'semana' => (int)($r['edad_semanas'] ?? 0),
+                    'finca' => (string)($r['finca'] ?? ''),
+                    'camas' => $camasVal,
+                ];
+            }
+        }
+
         return [
             'ok' => true,
             'message' => 'Datos de camas sembradas cargados correctamente.',
@@ -113,6 +157,10 @@ class DashboardProyecciones
                 'plantas' => $totalPlantas,
                 'camas' => $totalCamas,
             ],
+            'fincasDisponibles' => $fincasDisponibles,
+            'floresDisponibles' => $floresDisponibles,
+            'picoClavel' => $picoClavel,
+            'picoMiniclavel' => $picoMiniclavel,
             'camasPorFincaFlor' => self::normalizeDetailRows($camasPorFincaFlorRows),
             'camasPorFlor' => self::normalizeFlorRows($camasPorFlorRows),
             'camasEdadClavel' => self::normalizeEdadRows($camasEdadClavelRows, 'CLAVEL'),
@@ -127,22 +175,29 @@ class DashboardProyecciones
         $today = date('Y-m-d');
         $defaultFrom = date('Y-m-d', strtotime('-365 days'));
 
-        $fechaDesde = self::normalizeDate(isset($raw['fecha_desde']) ? $raw['fecha_desde'] : '');
-        $fechaHasta = self::normalizeDate(isset($raw['fecha_hasta']) ? $raw['fecha_hasta'] : '');
+        $sinFiltroFechas = !empty($raw['sin_rango_fechas']) && ($raw['sin_rango_fechas'] === '1' || $raw['sin_rango_fechas'] === 'true');
 
-        if (!$fechaDesde && !$fechaHasta) {
-            $fechaDesde = $defaultFrom;
-            $fechaHasta = $today;
-        } elseif ($fechaDesde && !$fechaHasta) {
-            $fechaHasta = $today;
-        } elseif (!$fechaDesde && $fechaHasta) {
-            $fechaDesde = $defaultFrom;
-        }
+        if ($sinFiltroFechas) {
+            $fechaDesde = null;
+            $fechaHasta = null;
+        } else {
+            $fechaDesde = self::normalizeDate(isset($raw['fecha_desde']) ? $raw['fecha_desde'] : '');
+            $fechaHasta = self::normalizeDate(isset($raw['fecha_hasta']) ? $raw['fecha_hasta'] : '');
 
-        if ($fechaDesde > $fechaHasta) {
-            $tmp = $fechaDesde;
-            $fechaDesde = $fechaHasta;
-            $fechaHasta = $tmp;
+            if (!$fechaDesde && !$fechaHasta) {
+                $fechaDesde = $defaultFrom;
+                $fechaHasta = $today;
+            } elseif ($fechaDesde && !$fechaHasta) {
+                $fechaHasta = $today;
+            } elseif (!$fechaDesde && $fechaHasta) {
+                $fechaDesde = $defaultFrom;
+            }
+
+            if ($fechaDesde && $fechaHasta && $fechaDesde > $fechaHasta) {
+                $tmp = $fechaDesde;
+                $fechaDesde = $fechaHasta;
+                $fechaHasta = $tmp;
+            }
         }
 
         return [

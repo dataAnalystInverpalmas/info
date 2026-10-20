@@ -72,8 +72,8 @@
 $gestionActive = 'tareas';
 $gestionTitle = 'Gestión de Tareas';
 $gestionSubtitle = 'Consulta pendientes, prioriza ejecución y salta al tablero Kanban sin perder el hilo operativo.';
-$gestionProyectoFiltro = trim((string)($_GET['proyecto'] ?? ''));
-$gestionProyectoIdInicial = (int)($_GET['proyecto_id'] ?? 0);
+$gestionProyectoFiltro = trim((string) ($_GET['proyecto'] ?? ''));
+$gestionProyectoIdInicial = (int) ($_GET['proyecto_id'] ?? 0);
 $gestionQuickActions = [];
 require __DIR__ . '/../Shared/gestion_header.php';
 ?>
@@ -82,9 +82,10 @@ require __DIR__ . '/../Shared/gestion_header.php';
     <?php if ($gestionProyectoFiltro !== ''): ?>
         <div class="alert alert-light border d-flex align-items-center justify-content-between mb-3">
             <div>
-                <strong>Contexto activo:</strong> mostrando tareas del proyecto <strong><?php echo htmlspecialchars($gestionProyectoFiltro); ?></strong>.
+                <strong>Contexto activo:</strong> mostrando tareas del proyecto
+                <strong><?php echo htmlspecialchars($gestionProyectoFiltro); ?></strong>.
             </div>
-            <a class="btn btn-sm btn-outline-secondary" href="index.php?report=201">Limpiar filtro</a>
+            <a class="btn btn-sm btn-outline-secondary" href="index.php?report=tareas">Limpiar filtro</a>
         </div>
     <?php endif; ?>
     <div class="row">
@@ -108,7 +109,8 @@ require __DIR__ . '/../Shared/gestion_header.php';
                         </div>
                         <div class="mb-3">
                             <label for="filtroPrioridad">Prioridad</label>
-                            <select id="filtroPrioridad" class="form-control form-control-sm" onchange="filtrarTareas()">
+                            <select id="filtroPrioridad" class="form-control form-control-sm"
+                                onchange="filtrarTareas()">
                                 <option value="">Todas</option>
                                 <option value="baja">Baja</option>
                                 <option value="media">Media</option>
@@ -118,12 +120,15 @@ require __DIR__ . '/../Shared/gestion_header.php';
                         </div>
                         <div class="mb-3">
                             <label for="filtroProyectoTarea">Proyecto</label>
-                            <select id="filtroProyectoTarea" class="form-control form-control-sm" onchange="filtrarTareas()">
+                            <select id="filtroProyectoTarea" class="form-control form-control-sm"
+                                onchange="filtrarTareas()">
                                 <option value="">Todos</option>
                                 <option value="Sin proyecto">Sin proyecto</option>
                                 <?php if (!empty($proyectos)): ?>
                                     <?php foreach ($proyectos as $p): ?>
-                                        <option value="<?php echo htmlspecialchars($p->nombre); ?>" <?php echo $gestionProyectoFiltro !== '' && $gestionProyectoFiltro === (string)$p->nombre ? 'selected' : ''; ?>><?php echo htmlspecialchars(($p->categoria ? $p->categoria . ' / ' : '') . $p->nombre); ?></option>
+                                        <option value="<?php echo htmlspecialchars($p->nombre); ?>" <?php echo $gestionProyectoFiltro !== '' && $gestionProyectoFiltro === (string) $p->nombre ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars(($p->categoria ? $p->categoria . ' / ' : '') . $p->nombre); ?>
+                                        </option>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
                             </select>
@@ -138,69 +143,78 @@ require __DIR__ . '/../Shared/gestion_header.php';
 
         <div class="col-md-10 col-lg-10">
             <div class="table-responsive gestion-table-card">
-        <table id="tablaTareas" class="table display compact" style="width:100%">
-            <thead>
-                <tr>
-                    <td style="width: 30px; text-align: center;" title="Arrastrar para reordenar">⋮</td>
-                    <td>ID</td>
-                    <td>Tipo</td>
-                    <td>Nombre</td>
-                    <td>Proyecto</td>
-                    <td>% Avance</td>
-                    <td>Responsable</td>
-                    <td>Quien Solicita</td>
-                    <td>Estado</td>
-                    <td>Prioridad</td>
-                    <td>Orden</td>
-                    <td>Inicio</td>
-                    <td>Vencimiento</td>
-                    <td>Acciones</td>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (!empty($tareas)): ?>
-                    <?php foreach ($tareas as $row): ?>
-                        <tr data-id="<?php echo (int)$row->id; ?>" data-proyecto="<?php echo (int)($row->proyecto_id ?? 0); ?>">
-                            <td style="text-align: center; cursor: move; color: #999;" class="sortable-handle">⋮⋮</td>
-                            <td><?php echo (int)$row->id; ?></td>
-                            <td><span class="badge badge-<?php 
-                                $tipo = $row->tipo ?? 'prevista';
-                                echo ($tipo === 'prevista') ? 'info' : 'warning';
-                            ?>">▪</span> <?php echo htmlspecialchars($tipo); ?></td>
-                            <td><?php echo htmlspecialchars($row->nombre); ?></td>
-                            <td><?php echo htmlspecialchars($row->proyecto_nombre ?? 'Sin proyecto'); ?></td>
-                            <td><?php echo (int)($row->porcentaje_avance ?? 0); ?>%</td>
-                            <td><?php echo htmlspecialchars($row->responsable ?? ''); ?></td>
-                            <td><?php echo htmlspecialchars($row->quien_solicita ?? ''); ?></td>
-                            <td>
-                                <span class="badge badge-<?php
-                                    $estado = $row->estado;
-                                    echo ($estado === 'completada') ? 'success' : (($estado === 'en_progreso') ? 'primary' : (($estado === 'cancelada') ? 'danger' : 'secondary'));
-                                ?>">●</span>
-                                <?php echo htmlspecialchars($estado); ?>
-                            </td>
-                            <td>
-                                <span class="badge badge-<?php
-                                    $prioridad = $row->prioridad;
-                                    echo ($prioridad === 'urgente') ? 'danger' : (($prioridad === 'alta') ? 'warning' : (($prioridad === 'media') ? 'info' : 'light'));
-                                ?>">●</span>
-                                <?php echo htmlspecialchars($prioridad); ?>
-                            </td>
-                            <td><span class="badge badge-secondary"><?php echo htmlspecialchars(isset($row->orden_ejecucion) ? (string)$row->orden_ejecucion : '-'); ?></span></td>
-                            <td><?php echo htmlspecialchars($row->fecha_inicio ?? '-'); ?></td>
-                            <td><?php echo htmlspecialchars($row->fecha_vencimiento ?? '-'); ?></td>
-                            <td>
-                                <div class="action-icons">
-                                    <button class="action-icon-btn" data-variant="edit" title="Editar" onclick="editarTarea(<?php echo (int)$row->id; ?>)"><span class="material-icons">edit</span></button>
-                                    <button class="action-icon-btn" data-variant="panel" title="Imágenes / Bitácora" onclick="abrirPanelTarea(<?php echo (int)$row->id; ?>, '<?php echo addslashes($row->nombre); ?>')"><span class="material-icons">attach_file</span></button>
-                                    <button class="action-icon-btn" data-variant="danger" title="Eliminar" onclick="eliminarTarea(<?php echo (int)$row->id; ?>)"><span class="material-icons">delete</span></button>
-                                </div>
-                            </td>
+                <table id="tablaTareas" class="table display compact" style="width:100%">
+                    <thead>
+                        <tr>
+                            <td style="width: 30px; text-align: center;" title="Arrastrar para reordenar">⋮</td>
+                            <td>ID</td>
+                            <td>Tipo</td>
+                            <td>Nombre</td>
+                            <td>Proyecto</td>
+                            <td>% Avance</td>
+                            <td>Responsable</td>
+                            <td>Quien Solicita</td>
+                            <td>Estado</td>
+                            <td>Prioridad</td>
+                            <td>Orden</td>
+                            <td>Inicio</td>
+                            <td>Vencimiento</td>
+                            <td>Acciones</td>
                         </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
+                    </thead>
+                    <tbody>
+                        <?php if (!empty($tareas)): ?>
+                            <?php foreach ($tareas as $row): ?>
+                                <tr data-id="<?php echo (int) $row->id; ?>"
+                                    data-proyecto="<?php echo (int) ($row->proyecto_id ?? 0); ?>">
+                                    <td style="text-align: center; cursor: move; color: #999;" class="sortable-handle">⋮⋮</td>
+                                    <td><?php echo (int) $row->id; ?></td>
+                                    <td><span class="badge badge-<?php
+                                    $tipo = $row->tipo ?? 'prevista';
+                                    echo ($tipo === 'prevista') ? 'info' : 'warning';
+                                    ?>">▪</span> <?php echo htmlspecialchars($tipo); ?></td>
+                                    <td><?php echo htmlspecialchars($row->nombre); ?></td>
+                                    <td><?php echo htmlspecialchars($row->proyecto_nombre ?? 'Sin proyecto'); ?></td>
+                                    <td><?php echo (int) ($row->porcentaje_avance ?? 0); ?>%</td>
+                                    <td><?php echo htmlspecialchars($row->responsable ?? ''); ?></td>
+                                    <td><?php echo htmlspecialchars($row->quien_solicita ?? ''); ?></td>
+                                    <td>
+                                        <span class="badge badge-<?php
+                                        $estado = $row->estado;
+                                        echo ($estado === 'completada') ? 'success' : (($estado === 'en_progreso') ? 'primary' : (($estado === 'cancelada') ? 'danger' : 'secondary'));
+                                        ?>">●</span>
+                                        <?php echo htmlspecialchars($estado); ?>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-<?php
+                                        $prioridad = $row->prioridad;
+                                        echo ($prioridad === 'urgente') ? 'danger' : (($prioridad === 'alta') ? 'warning' : (($prioridad === 'media') ? 'info' : 'light'));
+                                        ?>">●</span>
+                                        <?php echo htmlspecialchars($prioridad); ?>
+                                    </td>
+                                    <td><span
+                                            class="badge badge-secondary"><?php echo htmlspecialchars(isset($row->orden_ejecucion) ? (string) $row->orden_ejecucion : '-'); ?></span>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($row->fecha_inicio ?? '-'); ?></td>
+                                    <td><?php echo htmlspecialchars($row->fecha_vencimiento ?? '-'); ?></td>
+                                    <td>
+                                        <div class="action-icons">
+                                            <button class="action-icon-btn" data-variant="edit" title="Editar"
+                                                onclick="editarTarea(<?php echo (int) $row->id; ?>)"><span
+                                                    class="material-icons">edit</span></button>
+                                            <button class="action-icon-btn" data-variant="panel" title="Imágenes / Bitácora"
+                                                onclick="abrirPanelTarea(<?php echo (int) $row->id; ?>, '<?php echo addslashes($row->nombre); ?>')"><span
+                                                    class="material-icons">attach_file</span></button>
+                                            <button class="action-icon-btn" data-variant="danger" title="Eliminar"
+                                                onclick="eliminarTarea(<?php echo (int) $row->id; ?>)"><span
+                                                    class="material-icons">delete</span></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -231,7 +245,9 @@ require __DIR__ . '/../Shared/gestion_header.php';
                             <option value="">-- Sin Proyecto --</option>
                             <?php if (!empty($proyectos)): ?>
                                 <?php foreach ($proyectos as $p): ?>
-                                    <option value="<?php echo (int)$p->id; ?>"><?php echo htmlspecialchars(($p->categoria ? $p->categoria . ' / ' : '') . $p->nombre); ?></option>
+                                    <option value="<?php echo (int) $p->id; ?>">
+                                        <?php echo htmlspecialchars(($p->categoria ? $p->categoria . ' / ' : '') . $p->nombre); ?>
+                                    </option>
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </select>
@@ -240,7 +256,8 @@ require __DIR__ . '/../Shared/gestion_header.php';
                 <label class="small text-muted mb-0">Nombre *</label>
                 <input type="text" id="tNombre" class="form-control mb-2" placeholder="Nombre de la tarea">
                 <label class="small text-muted mb-0">Descripción</label>
-                <textarea id="tDesc" class="form-control mb-2" rows="6" placeholder="Descripción (puede superar 100 caracteres)"></textarea>
+                <textarea id="tDesc" class="form-control mb-2" rows="6"
+                    placeholder="Descripción (puede superar 100 caracteres)"></textarea>
                 <div class="row">
                     <div class="col-4">
                         <label class="small text-muted mb-0">Responsable</label>
@@ -248,11 +265,13 @@ require __DIR__ . '/../Shared/gestion_header.php';
                     </div>
                     <div class="col-4">
                         <label class="small text-muted mb-0">Quien Solicita</label>
-                        <input type="text" id="tSolicita" class="form-control mb-2" placeholder="¿Quién lo solicita? (opcional)">
+                        <input type="text" id="tSolicita" class="form-control mb-2"
+                            placeholder="¿Quién lo solicita? (opcional)">
                     </div>
                     <div class="col-4">
                         <label class="small text-muted mb-0">Etapa / Fase</label>
-                        <input type="text" id="tEtapa" class="form-control mb-2" placeholder="Ej: Análisis, Desarrollo, Pruebas">
+                        <input type="text" id="tEtapa" class="form-control mb-2"
+                            placeholder="Ej: Análisis, Desarrollo, Pruebas">
                     </div>
                 </div>
                 <div class="row">
@@ -267,7 +286,8 @@ require __DIR__ . '/../Shared/gestion_header.php';
                     </div>
                     <div class="col-4">
                         <label class="small text-muted mb-0">% Avance</label>
-                        <input type="number" id="tAvance" class="form-control mb-2" min="0" max="100" step="1" value="0">
+                        <input type="number" id="tAvance" class="form-control mb-2" min="0" max="100" step="1"
+                            value="0">
                     </div>
                     <div class="col-4">
                         <label class="small text-muted mb-0">Prioridad</label>
@@ -282,7 +302,8 @@ require __DIR__ . '/../Shared/gestion_header.php';
                 <div class="row">
                     <div class="col-4">
                         <label class="small text-muted mb-0">Orden de ejecución</label>
-                        <input type="number" id="tOrden" class="form-control mb-2" min="1" step="1" placeholder="1, 2, 3...">
+                        <input type="number" id="tOrden" class="form-control mb-2" min="1" step="1"
+                            placeholder="1, 2, 3...">
                     </div>
                     <div class="col-4">
                         <label class="small text-muted mb-0">Fecha inicio</label>
@@ -350,7 +371,8 @@ require __DIR__ . '/../Shared/gestion_header.php';
                         <div class="mb-2">
                             <label class="btn btn-sm btn-outline-primary mb-0">
                                 📤 Subir imagen
-                                <input type="file" id="inputImagen" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none" onchange="subirImagen()">
+                                <input type="file" id="inputImagen" accept="image/jpeg,image/png,image/gif,image/webp"
+                                    style="display:none" onchange="subirImagen()">
                             </label>
                             <small class="text-muted ml-2">JPG, PNG, GIF, WEBP — máx 5 MB</small>
                         </div>
@@ -369,7 +391,9 @@ require __DIR__ . '/../Shared/gestion_header.php';
 </div>
 
 <!-- Lightbox simple -->
-<div id="lightbox" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center;cursor:zoom-out" onclick="cerrarLightbox()">
+<div id="lightbox"
+    style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center;cursor:zoom-out"
+    onclick="cerrarLightbox()">
     <img id="lightboxImg" src="" style="max-width:90%;max-height:90%;border-radius:4px;box-shadow:0 0 30px #000">
 </div>
 
@@ -377,14 +401,14 @@ require __DIR__ . '/../Shared/gestion_header.php';
 <script src="scripts/vendor/Sortable.min.js"></script>
 <script>
     // Inicializar drag-drop en tabla de tareas
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         var tableBody = document.querySelector('#tablaTareas tbody');
         if (tableBody) {
             Sortable.create(tableBody, {
                 handle: '.sortable-handle',
                 ghostClass: 'sortable-ghost',
                 animation: 150,
-                onEnd: function(evt) {
+                onEnd: function (evt) {
                     reordenarTareas();
                 }
             });
@@ -394,8 +418,8 @@ require __DIR__ . '/../Shared/gestion_header.php';
     function reordenarTareas() {
         var rows = document.querySelectorAll('#tablaTareas tbody tr');
         var reorden = [];
-        
-        rows.forEach(function(row, indice) {
+
+        rows.forEach(function (row, indice) {
             var tareaId = parseInt(row.getAttribute('data-id'), 10);
             var proyectoId = parseInt(row.getAttribute('data-proyecto'), 10);
             if (!isNaN(tareaId)) {
@@ -418,14 +442,14 @@ require __DIR__ . '/../Shared/gestion_header.php';
                 tareas: reorden
             }),
             dataType: 'json',
-            success: function(resp) {
+            success: function (resp) {
                 if (!resp.success) {
                     alert('Error al reordenar: ' + (resp.mensaje || 'Error desconocido'));
                     location.reload();
                 }
                 console.log('Tareas reordenadas exitosamente');
             },
-            error: function(xhr) {
+            error: function (xhr) {
                 console.error('Error de AJAX:', xhr);
                 alert('Error al reordenar tareas');
                 location.reload();
@@ -438,10 +462,12 @@ require __DIR__ . '/../Shared/gestion_header.php';
         opacity: 0.5;
         background-color: #f0f0f0;
     }
+
     .sortable-handle {
         user-select: none;
         -webkit-user-select: none;
     }
+
     #tablaTareas tbody tr:hover .sortable-handle {
         color: #333;
         font-weight: bold;
@@ -449,11 +475,11 @@ require __DIR__ . '/../Shared/gestion_header.php';
 </style>
 
 <script>
-var usuarioActual = <?php echo json_encode($_SESSION['usuario'] ?? ''); ?>;
+    var usuarioActual = <?php echo json_encode($_SESSION['usuario'] ?? ''); ?>;
 </script>
 <script src="scripts/tareas.js?v=<?php echo @filemtime(__DIR__ . '/../../../scripts/tareas.js'); ?>"></script>
 <script src="scripts/tarea_panel.js"></script>
 <script>
-window.gestionProyectoInicial = <?php echo json_encode($gestionProyectoFiltro, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
-window.gestionProyectoIdInicial = <?php echo json_encode($gestionProyectoIdInicial); ?>;
+    window.gestionProyectoInicial = <?php echo json_encode($gestionProyectoFiltro, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+    window.gestionProyectoIdInicial = <?php echo json_encode($gestionProyectoIdInicial); ?>;
 </script>

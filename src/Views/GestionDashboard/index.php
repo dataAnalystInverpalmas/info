@@ -200,6 +200,7 @@ $alertas = $dashboard['alertas'] ?? [];
     }
 
     @media (max-width: 1199.98px) {
+
         .gestion-main-column,
         .gestion-side-column {
             grid-column: span 12;
@@ -207,6 +208,7 @@ $alertas = $dashboard['alertas'] ?? [];
     }
 
     @media (max-width: 991.98px) {
+
         .gestion-kpi-grid,
         .gestion-project-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -214,6 +216,7 @@ $alertas = $dashboard['alertas'] ?? [];
     }
 
     @media (max-width: 575.98px) {
+
         .gestion-kpi-grid,
         .gestion-project-grid,
         .gestion-project-stats {
@@ -227,23 +230,28 @@ $alertas = $dashboard['alertas'] ?? [];
         <div class="gestion-kpi-grid">
             <div class="gestion-kpi">
                 <span class="gestion-kpi-label">Proyectos activos</span>
-                <strong class="gestion-kpi-value"><?php echo (int)($resumen['proyectos_activos'] ?? 0); ?></strong>
-                <span class="gestion-kpi-help"><?php echo (int)($resumen['total_proyectos'] ?? 0); ?> proyecto(s) en total</span>
+                <strong class="gestion-kpi-value"><?php echo (int) ($resumen['proyectos_activos'] ?? 0); ?></strong>
+                <span class="gestion-kpi-help"><?php echo (int) ($resumen['total_proyectos'] ?? 0); ?> proyecto(s) en
+                    total</span>
             </div>
             <div class="gestion-kpi">
                 <span class="gestion-kpi-label">Tareas abiertas</span>
-                <strong class="gestion-kpi-value"><?php echo (int)(($resumen['tareas_pendientes'] ?? 0) + ($resumen['tareas_en_progreso'] ?? 0)); ?></strong>
-                <span class="gestion-kpi-help"><?php echo (int)($resumen['tareas_en_progreso'] ?? 0); ?> en progreso y <?php echo (int)($resumen['tareas_pendientes'] ?? 0); ?> pendientes</span>
+                <strong
+                    class="gestion-kpi-value"><?php echo (int) (($resumen['tareas_pendientes'] ?? 0) + ($resumen['tareas_en_progreso'] ?? 0)); ?></strong>
+                <span class="gestion-kpi-help"><?php echo (int) ($resumen['tareas_en_progreso'] ?? 0); ?> en progreso y
+                    <?php echo (int) ($resumen['tareas_pendientes'] ?? 0); ?> pendientes</span>
             </div>
             <div class="gestion-kpi">
                 <span class="gestion-kpi-label">Avance promedio</span>
-                <strong class="gestion-kpi-value"><?php echo (int)($resumen['avance_promedio'] ?? 0); ?>%</strong>
-                <span class="gestion-kpi-help"><?php echo (int)($resumen['tareas_completadas'] ?? 0); ?> tarea(s) completadas</span>
+                <strong class="gestion-kpi-value"><?php echo (int) ($resumen['avance_promedio'] ?? 0); ?>%</strong>
+                <span class="gestion-kpi-help"><?php echo (int) ($resumen['tareas_completadas'] ?? 0); ?> tarea(s)
+                    completadas</span>
             </div>
             <div class="gestion-kpi">
                 <span class="gestion-kpi-label">Alertas</span>
-                <strong class="gestion-kpi-value"><?php echo (int)($resumen['tareas_atrasadas'] ?? 0); ?></strong>
-                <span class="gestion-kpi-help"><?php echo (int)($resumen['tareas_proximas'] ?? 0); ?> vencen esta semana</span>
+                <strong class="gestion-kpi-value"><?php echo (int) ($resumen['tareas_atrasadas'] ?? 0); ?></strong>
+                <span class="gestion-kpi-help"><?php echo (int) ($resumen['tareas_proximas'] ?? 0); ?> vencen esta
+                    semana</span>
             </div>
         </div>
 
@@ -253,17 +261,18 @@ $alertas = $dashboard['alertas'] ?? [];
                     <h4>Proyectos con más movimiento</h4>
                     <p>Accede directo al contexto operativo de cada frente de trabajo.</p>
                 </div>
-                <a class="btn btn-sm btn-outline-secondary" href="index.php?report=200">Ver todos los proyectos</a>
+                <a class="btn btn-sm btn-outline-secondary" href="index.php?report=proyectos">Ver todos los proyectos</a>
             </div>
 
             <div class="gestion-project-grid">
                 <?php if (empty($proyectosDestacados)): ?>
                     <div class="gestion-project-card" style="grid-column: 1 / -1;">
                         <h5>Sin proyectos destacados todavía</h5>
-                        <div class="gestion-project-meta">Crea tu primer proyecto o registra tareas para que el panel empiece a priorizar contexto operativo.</div>
+                        <div class="gestion-project-meta">Crea tu primer proyecto o registra tareas para que el panel
+                            empiece a priorizar contexto operativo.</div>
                         <div class="gestion-project-actions">
-                            <a class="btn btn-sm btn-outline-secondary" href="index.php?report=200">Ir a Proyectos</a>
-                            <a class="btn btn-sm btn-primary" href="index.php?report=201&nueva=1">Crear una tarea</a>
+                            <a class="btn btn-sm btn-outline-secondary" href="index.php?report=proyectos">Ir a Proyectos</a>
+                            <a class="btn btn-sm btn-primary" href="index.php?report=tareas&nueva=1">Crear una tarea</a>
                         </div>
                     </div>
                 <?php else: ?>
@@ -271,30 +280,36 @@ $alertas = $dashboard['alertas'] ?? [];
                         <div class="gestion-project-card">
                             <h5><?php echo htmlspecialchars($proyecto['nombre']); ?></h5>
                             <div class="gestion-project-meta">
-                                <?php echo htmlspecialchars($proyecto['categoria'] !== '' ? $proyecto['categoria'] : 'Sin categoría'); ?> ·
+                                <?php echo htmlspecialchars($proyecto['categoria'] !== '' ? $proyecto['categoria'] : 'Sin categoría'); ?>
+                                ·
                                 Estado: <?php echo htmlspecialchars($proyecto['estado']); ?> ·
-                                Avance: <?php echo (int)$proyecto['avance']; ?>%
+                                Avance: <?php echo (int) $proyecto['avance']; ?>%
                             </div>
 
                             <div class="gestion-project-stats">
                                 <div class="gestion-project-stat">
-                                    <strong><?php echo (int)$proyecto['pendientes']; ?></strong>
+                                    <strong><?php echo (int) $proyecto['pendientes']; ?></strong>
                                     <span>Pendientes</span>
                                 </div>
                                 <div class="gestion-project-stat">
-                                    <strong><?php echo (int)$proyecto['en_progreso']; ?></strong>
+                                    <strong><?php echo (int) $proyecto['en_progreso']; ?></strong>
                                     <span>En progreso</span>
                                 </div>
                                 <div class="gestion-project-stat">
-                                    <strong><?php echo (int)$proyecto['atrasadas']; ?></strong>
+                                    <strong><?php echo (int) $proyecto['atrasadas']; ?></strong>
                                     <span>Atrasadas</span>
                                 </div>
                             </div>
 
                             <div class="gestion-project-actions">
-                                <a class="btn btn-sm btn-outline-primary" href="index.php?report=201&proyecto=<?php echo rawurlencode($proyecto['nombre']); ?>">Ver tareas</a>
-                                <a class="btn btn-sm btn-outline-success" href="index.php?report=201&proyecto=<?php echo rawurlencode($proyecto['nombre']); ?>&proyecto_id=<?php echo (int)$proyecto['id']; ?>&nueva=1">Nueva tarea</a>
-                                <a class="btn btn-sm btn-outline-dark" href="index.php?report=202&proyecto=<?php echo rawurlencode($proyecto['nombre']); ?>">Bitácora</a>
+                                <a class="btn btn-sm btn-outline-primary"
+                                    href="index.php?report=tareas&proyecto=<?php echo rawurlencode($proyecto['nombre']); ?>">Ver
+                                    tareas</a>
+                                <a class="btn btn-sm btn-outline-success"
+                                    href="index.php?report=tareas&proyecto=<?php echo rawurlencode($proyecto['nombre']); ?>&proyecto_id=<?php echo (int) $proyecto['id']; ?>&nueva=1">Nueva
+                                    tarea</a>
+                                <a class="btn btn-sm btn-outline-dark"
+                                    href="index.php?report=bitacora&proyecto=<?php echo rawurlencode($proyecto['nombre']); ?>">Bitácora</a>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -321,8 +336,10 @@ $alertas = $dashboard['alertas'] ?? [];
                         <div class="gestion-list-item">
                             <div class="d-flex justify-content-between align-items-start gap-2">
                                 <div>
-                                    <div class="gestion-list-item-title"><?php echo htmlspecialchars($alerta['nombre']); ?></div>
-                                    <div class="gestion-list-item-meta"><?php echo htmlspecialchars($alerta['proyecto']); ?> · vence <?php echo htmlspecialchars($alerta['fecha_vencimiento']); ?></div>
+                                    <div class="gestion-list-item-title"><?php echo htmlspecialchars($alerta['nombre']); ?>
+                                    </div>
+                                    <div class="gestion-list-item-meta"><?php echo htmlspecialchars($alerta['proyecto']); ?> ·
+                                        vence <?php echo htmlspecialchars($alerta['fecha_vencimiento']); ?></div>
                                 </div>
                                 <span class="gestion-badge-alert <?php echo $alerta['atrasada'] ? 'danger' : 'warning'; ?>">
                                     <?php echo $alerta['atrasada'] ? 'Atrasada' : 'Próxima'; ?>
@@ -340,7 +357,7 @@ $alertas = $dashboard['alertas'] ?? [];
                     <h4>Actividad reciente</h4>
                     <p>Últimos movimientos registrados en el módulo.</p>
                 </div>
-                <a class="btn btn-sm btn-outline-secondary" href="index.php?report=202">Abrir Bitácora</a>
+                <a class="btn btn-sm btn-outline-secondary" href="index.php?report=bitacora">Abrir Bitácora</a>
             </div>
 
             <div class="gestion-list">
@@ -352,7 +369,8 @@ $alertas = $dashboard['alertas'] ?? [];
                 <?php else: ?>
                     <?php foreach ($actividadReciente as $actividad): ?>
                         <div class="gestion-list-item">
-                            <div class="gestion-list-item-title"><?php echo htmlspecialchars($actividad->descripcion ?? 'Registro'); ?></div>
+                            <div class="gestion-list-item-title">
+                                <?php echo htmlspecialchars($actividad->descripcion ?? 'Registro'); ?></div>
                             <div class="gestion-list-item-meta">
                                 <?php echo htmlspecialchars($actividad->proyecto_nombre ?? 'Sin proyecto'); ?> ·
                                 <?php echo htmlspecialchars($actividad->tarea_nombre ?? 'General'); ?> ·
@@ -375,16 +393,21 @@ $alertas = $dashboard['alertas'] ?? [];
 
             <div class="gestion-list">
                 <div class="gestion-list-item">
-                    <div class="gestion-list-item-title"><?php echo (int)($resumen['tareas_sin_proyecto'] ?? 0); ?> tarea(s) sin proyecto</div>
-                    <div class="gestion-list-item-meta">Útil para identificar trabajo operativo que aún no está asociado a un frente.</div>
+                    <div class="gestion-list-item-title"><?php echo (int) ($resumen['tareas_sin_proyecto'] ?? 0); ?>
+                        tarea(s) sin proyecto</div>
+                    <div class="gestion-list-item-meta">Útil para identificar trabajo operativo que aún no está asociado
+                        a un frente.</div>
                 </div>
                 <div class="gestion-list-item">
-                    <div class="gestion-list-item-title"><?php echo (int)($resumen['imprevistas'] ?? 0); ?> tarea(s) imprevistas</div>
+                    <div class="gestion-list-item-title"><?php echo (int) ($resumen['imprevistas'] ?? 0); ?> tarea(s)
+                        imprevistas</div>
                     <div class="gestion-list-item-meta">Mide cuánta ejecución reactiva está entrando al módulo.</div>
                 </div>
                 <div class="gestion-list-item">
-                    <div class="gestion-list-item-title"><?php echo (int)($resumen['tareas_canceladas'] ?? 0); ?> tarea(s) canceladas</div>
-                    <div class="gestion-list-item-meta">Sirve para revisar limpieza del backlog y cambios de prioridad.</div>
+                    <div class="gestion-list-item-title"><?php echo (int) ($resumen['tareas_canceladas'] ?? 0); ?>
+                        tarea(s) canceladas</div>
+                    <div class="gestion-list-item-meta">Sirve para revisar limpieza del backlog y cambios de prioridad.
+                    </div>
                 </div>
             </div>
         </div>
