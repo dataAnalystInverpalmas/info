@@ -246,8 +246,11 @@ class KanbanController {
 
         $html .= '<div class="clear"></div></body></html>';
 
-        require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
-        $mpdf = new \Mpdf\Mpdf();
+        $tempDir = sys_get_temp_dir() . '/mpdf';
+        if (!is_dir($tempDir)) {
+            @mkdir($tempDir, 0777, true);
+        }
+        $mpdf = new \Mpdf\Mpdf(['tempDir' => $tempDir]);
         $mpdf->WriteHTML($html);
         $filename = 'kanban_' . $desde . '_a_' . $hasta . '.pdf';
         $mpdf->Output($filename, 'D');

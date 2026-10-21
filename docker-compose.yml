@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: php:7.4.1-apache
+    image: php:8.2-apache
     container_name: php_web
     restart: always
     ports:
