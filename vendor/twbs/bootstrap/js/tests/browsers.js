@@ -5,21 +5,21 @@ const browsers = {
   safariMac: {
     base: 'BrowserStack',
     os: 'OS X',
-    os_version: 'Catalina',
+    os_version: 'High Sierra',
     browser: 'Safari',
     browser_version: 'latest'
   },
   chromeMac: {
     base: 'BrowserStack',
     os: 'OS X',
-    os_version: 'Catalina',
-    browser: 'Chrome',
-    browser_version: 'latest'
+    os_version: 'High Sierra',
+    browser : 'Chrome',
+    browser_version : 'latest'
   },
   firefoxMac: {
     base: 'BrowserStack',
     os: 'OS X',
-    os_version: 'Catalina',
+    os_version: 'High Sierra',
     browser: 'Firefox',
     browser_version: 'latest'
   },
@@ -28,7 +28,7 @@ const browsers = {
     os: 'Windows',
     os_version: '10',
     browser: 'Edge',
-    browser_version: '15'
+    browser_version: 'latest'
   },
   ie11Win10: {
     base: 'BrowserStack',
@@ -63,13 +63,6 @@ const browsers = {
     os: 'ios',
     os_version: '11.0',
     device: 'iPhone X',
-    real_mobile: true
-  },
-  iphone12: {
-    base: 'BrowserStack',
-    os: 'ios',
-    os_version: '14.0',
-    device: 'iPhone 12',
     real_mobile: true
   },
   pixel2: {

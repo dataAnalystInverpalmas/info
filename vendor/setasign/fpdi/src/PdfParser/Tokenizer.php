@@ -1,10 +1,9 @@
 <?php
-
 /**
  * This file is part of FPDI
  *
  * @package   setasign\Fpdi
- * @copyright Copyright (c) 2026 Setasign GmbH & Co. KG (https://www.setasign.com)
+ * @copyright Copyright (c) 2019 Setasign - Jan Slabon (https://www.setasign.com)
  * @license   http://opensource.org/licenses/mit-license The MIT License
  */
 
@@ -12,6 +11,8 @@ namespace setasign\Fpdi\PdfParser;
 
 /**
  * A tokenizer class.
+ *
+ * @package setasign\Fpdi\PdfParser
  */
 class Tokenizer
 {
@@ -68,7 +69,7 @@ class Tokenizer
     /**
      * Get next token.
      *
-     * @return false|string
+     * @return bool|string
      */
     public function getNextToken()
     {
@@ -81,7 +82,13 @@ class Tokenizer
             return false;
         }
 
-        if (\in_array($byte, ["\x20", "\x0A", "\x0D", "\x0C", "\x09", "\x00"], true)) {
+        if ($byte === "\x20" ||
+            $byte === "\x0A" ||
+            $byte === "\x0D" ||
+            $byte === "\x0C" ||
+            $byte === "\x09" ||
+            $byte === "\x00"
+        ) {
             if ($this->leapWhiteSpaces() === false) {
                 return false;
             }
@@ -117,8 +124,11 @@ class Tokenizer
         } while (
             // Break the loop if a delimiter or white space char is matched
             // in the current buffer or increase the buffers length
-            $bufferOffset + $pos === \strlen($lastBuffer)
-            && $this->streamReader->increaseLength()
+            $lastBuffer !== false &&
+            (
+                $bufferOffset + $pos === \strlen($lastBuffer) &&
+                $this->streamReader->increaseLength()
+            )
         );
 
         $result = \substr($lastBuffer, $bufferOffset - 1, $pos + 1);

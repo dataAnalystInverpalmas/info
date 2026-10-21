@@ -1,10 +1,9 @@
 <?php
-
 /**
  * This file is part of FPDI
  *
  * @package   setasign\Fpdi
- * @copyright Copyright (c) 2026 Setasign GmbH & Co. KG (https://www.setasign.com)
+ * @copyright Copyright (c) 2019 Setasign - Jan Slabon (https://www.setasign.com)
  * @license   http://opensource.org/licenses/mit-license The MIT License
  */
 
@@ -15,6 +14,8 @@ use setasign\Fpdi\PdfParser\Tokenizer;
 
 /**
  * Class representing a PDF name object
+ *
+ * @package setasign\Fpdi\PdfParser\Type
  */
 class PdfName extends PdfType
 {
@@ -27,7 +28,7 @@ class PdfName extends PdfType
      */
     public static function parse(Tokenizer $tokenizer, StreamReader $streamReader)
     {
-        $v = new self();
+        $v = new self;
         if (\strspn($streamReader->getByte(), "\x00\x09\x0A\x0C\x0D\x20()<>[]{}/%") === 0) {
             $v->value = (string) $tokenizer->getNextToken();
             return $v;
@@ -43,37 +44,14 @@ class PdfName extends PdfType
      * @param string $value
      * @return string
      */
-    public static function unescape($value)
+    static public function unescape($value)
     {
-        if (\strpos($value, '#') === false) {
+        if (strpos($value, '#') === false)
             return $value;
-        }
 
-        return \preg_replace_callback('/#([a-fA-F\d]{2})/', static function ($matches) {
-            return \chr(\hexdec($matches[1]));
+        return preg_replace_callback('/#[a-fA-F\d]{2}/', function($matches) {
+            return chr(hexdec($matches[0]));
         }, $value);
-    }
-
-    /**
-     * Escapes a name string.
-     *
-     * @param string $value
-     * @return string
-     */
-    public static function escape(string $value): string
-    {
-        $pattern = '/[\x00-\x21\x7E-\xFF()<>\[\]{}\/%#]/';
-        if (!\preg_match($pattern, $value)) {
-            return $value;
-        }
-
-        return \preg_replace_callback(
-            $pattern,
-            static function ($matches) {
-                return '#' . \substr('00' . \dechex(\ord($matches[0])), -2);
-            },
-            $value
-        );
     }
 
     /**
@@ -84,7 +62,7 @@ class PdfName extends PdfType
      */
     public static function create($string)
     {
-        $v = new self();
+        $v = new self;
         $v->value = $string;
 
         return $v;

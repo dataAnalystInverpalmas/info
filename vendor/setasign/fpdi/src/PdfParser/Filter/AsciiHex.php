@@ -1,10 +1,9 @@
 <?php
-
 /**
  * This file is part of FPDI
  *
  * @package   setasign\Fpdi
- * @copyright Copyright (c) 2026 Setasign GmbH & Co. KG (https://www.setasign.com)
+ * @copyright Copyright (c) 2019 Setasign - Jan Slabon (https://www.setasign.com)
  * @license   http://opensource.org/licenses/mit-license The MIT License
  */
 
@@ -12,6 +11,8 @@ namespace setasign\Fpdi\PdfParser\Filter;
 
 /**
  * Class for handling ASCII hexadecimal encoded data
+ *
+ * @package setasign\Fpdi\PdfParser\Filter
  */
 class AsciiHex implements FilterInterface
 {

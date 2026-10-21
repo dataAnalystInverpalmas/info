@@ -21,12 +21,10 @@ use Symfony\Component\Translation\MessageCatalogue;
  */
 class XliffFileDumper extends FileDumper
 {
-    public function __construct(
-        private string $extension = 'xlf',
-    ) {
-    }
-
-    public function formatCatalogue(MessageCatalogue $messages, string $domain, array $options = []): string
+    /**
+     * {@inheritdoc}
+     */
+    public function formatCatalogue(MessageCatalogue $messages, $domain, array $options = [])
     {
         $xliffVersion = '1.2';
         if (\array_key_exists('xliff_version', $options)) {
@@ -43,18 +41,21 @@ class XliffFileDumper extends FileDumper
             return $this->dumpXliff1($defaultLocale, $messages, $domain, $options);
         }
         if ('2.0' === $xliffVersion) {
-            return $this->dumpXliff2($defaultLocale, $messages, $domain);
+            return $this->dumpXliff2($defaultLocale, $messages, $domain, $options);
         }
 
-        throw new InvalidArgumentException(\sprintf('No support implemented for dumping XLIFF version "%s".', $xliffVersion));
+        throw new InvalidArgumentException(sprintf('No support implemented for dumping XLIFF version "%s".', $xliffVersion));
     }
 
-    protected function getExtension(): string
+    /**
+     * {@inheritdoc}
+     */
+    protected function getExtension()
     {
-        return $this->extension;
+        return 'xlf';
     }
 
-    private function dumpXliff1(string $defaultLocale, MessageCatalogue $messages, ?string $domain, array $options = []): string
+    private function dumpXliff1($defaultLocale, MessageCatalogue $messages, $domain, array $options = [])
     {
         $toolInfo = ['tool-id' => 'symfony', 'tool-name' => 'Symfony'];
         if (\array_key_exists('tool_info', $options)) {
@@ -80,20 +81,11 @@ class XliffFileDumper extends FileDumper
             $xliffTool->setAttribute($id, $value);
         }
 
-        if ($catalogueMetadata = $messages->getCatalogueMetadata('', $domain) ?? []) {
-            $xliffPropGroup = $xliffHead->appendChild($dom->createElement('prop-group'));
-            foreach ($catalogueMetadata as $key => $value) {
-                $xliffProp = $xliffPropGroup->appendChild($dom->createElement('prop'));
-                $xliffProp->setAttribute('prop-type', $key);
-                $xliffProp->appendChild($dom->createTextNode($value));
-            }
-        }
-
         $xliffBody = $xliffFile->appendChild($dom->createElement('body'));
         foreach ($messages->all($domain) as $source => $target) {
             $translation = $dom->createElement('trans-unit');
 
-            $translation->setAttribute('id', strtr(substr(base64_encode(hash('xxh128', $source, true)), 0, 7), '/+', '._'));
+            $translation->setAttribute('id', strtr(substr(base64_encode(hash('sha256', $source, true)), 0, 7), '/+', '._'));
             $translation->setAttribute('resname', $source);
 
             $s = $translation->appendChild($dom->createElement('source'));
@@ -137,7 +129,7 @@ class XliffFileDumper extends FileDumper
         return $dom->saveXML();
     }
 
-    private function dumpXliff2(string $defaultLocale, MessageCatalogue $messages, ?string $domain): string
+    private function dumpXliff2($defaultLocale, MessageCatalogue $messages, $domain, array $options = [])
     {
         $dom = new \DOMDocument('1.0', 'utf-8');
         $dom->formatOutput = true;
@@ -149,39 +141,28 @@ class XliffFileDumper extends FileDumper
         $xliff->setAttribute('trgLang', str_replace('_', '-', $messages->getLocale()));
 
         $xliffFile = $xliff->appendChild($dom->createElement('file'));
-        if (str_ends_with($domain, MessageCatalogue::INTL_DOMAIN_SUFFIX)) {
-            $xliffFile->setAttribute('id', substr($domain, 0, -\strlen(MessageCatalogue::INTL_DOMAIN_SUFFIX)).'.'.$messages->getLocale());
+        if (MessageCatalogue::INTL_DOMAIN_SUFFIX === substr($domain, -($suffixLength = \strlen(MessageCatalogue::INTL_DOMAIN_SUFFIX)))) {
+            $xliffFile->setAttribute('id', substr($domain, 0, -$suffixLength).'.'.$messages->getLocale());
         } else {
             $xliffFile->setAttribute('id', $domain.'.'.$messages->getLocale());
         }
 
-        if ($catalogueMetadata = $messages->getCatalogueMetadata('', $domain) ?? []) {
-            $xliff->setAttribute('xmlns:mda', 'urn:oasis:names:tc:xliff:metadata:2.0');
-            $xliffMetadata = $xliffFile->appendChild($dom->createElement('mda:metadata'));
-            $xliffMetaGroup = $xliffMetadata->appendChild($dom->createElement('mda:metaGroup'));
-            foreach ($catalogueMetadata as $key => $value) {
-                $xliffMeta = $xliffMetaGroup->appendChild($dom->createElement('mda:meta'));
-                $xliffMeta->setAttribute('type', $key);
-                $xliffMeta->appendChild($dom->createTextNode($value));
-            }
-        }
-
         foreach ($messages->all($domain) as $source => $target) {
             $translation = $dom->createElement('unit');
-            $translation->setAttribute('id', strtr(substr(base64_encode(hash('xxh128', $source, true)), 0, 7), '/+', '._'));
-
-            if (\strlen($source) <= 80) {
-                $translation->setAttribute('name', $source);
+            $translation->setAttribute('id', strtr(substr(base64_encode(hash('sha256', $source, true)), 0, 7), '/+', '._'));
+            $name = $source;
+            if (\strlen($source) > 80) {
+                $name = substr(md5($source), -7);
             }
-
+            $translation->setAttribute('name', $name);
             $metadata = $messages->getMetadata($source, $domain);
 
             // Add notes section
-            if ($this->hasMetadataArrayInfo('notes', $metadata) && $metadata['notes']) {
+            if ($this->hasMetadataArrayInfo('notes', $metadata)) {
                 $notesElement = $dom->createElement('notes');
                 foreach ($metadata['notes'] as $note) {
                     $n = $dom->createElement('note');
-                    $n->appendChild($dom->createTextNode($note['content'] ?? ''));
+                    $n->appendChild($dom->createTextNode(isset($note['content']) ? $note['content'] : ''));
                     unset($note['content']);
 
                     foreach ($note as $name => $value) {
@@ -193,12 +174,6 @@ class XliffFileDumper extends FileDumper
             }
 
             $segment = $translation->appendChild($dom->createElement('segment'));
-
-            if ($this->hasMetadataArrayInfo('segment-attributes', $metadata)) {
-                foreach ($metadata['segment-attributes'] as $name => $value) {
-                    $segment->setAttribute($name, $value);
-                }
-            }
 
             $s = $segment->appendChild($dom->createElement('source'));
             $s->appendChild($dom->createTextNode($source));
@@ -221,8 +196,14 @@ class XliffFileDumper extends FileDumper
         return $dom->saveXML();
     }
 
-    private function hasMetadataArrayInfo(string $key, ?array $metadata = null): bool
+    /**
+     * @param string     $key
+     * @param array|null $metadata
+     *
+     * @return bool
+     */
+    private function hasMetadataArrayInfo($key, $metadata = null)
     {
-        return is_iterable($metadata[$key] ?? null);
+        return null !== $metadata && \array_key_exists($key, $metadata) && ($metadata[$key] instanceof \Traversable || \is_array($metadata[$key]));
     }
 }

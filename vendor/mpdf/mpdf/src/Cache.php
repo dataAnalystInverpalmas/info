@@ -13,10 +13,6 @@ class Cache
 
 	public function __construct($basePath, $cleanupInterval = 3600)
 	{
-		if (!is_int($cleanupInterval) && false !== $cleanupInterval) {
-			throw new \Mpdf\MpdfException('Cache cleanup interval has to be an integer or false');
-		}
-
 		if (!$this->createBasePath($basePath)) {
 			throw new \Mpdf\MpdfException(sprintf('Temporary files directory "%s" is not writable', $basePath));
 		}
@@ -28,6 +24,10 @@ class Cache
 	protected function createBasePath($basePath)
 	{
 		if (!file_exists($basePath)) {
+			if (!$this->createBasePath(dirname($basePath))) {
+				return false;
+			}
+
 			if (!$this->createDirectory($basePath)) {
 				return false;
 			}
@@ -42,47 +42,15 @@ class Cache
 
 	protected function createDirectory($basePath)
 	{
-		$parentPath = $this->getExistingParentDirectory($basePath);
-		$permissions = $this->getPermission($parentPath);
-		if (!mkdir($basePath, $permissions, true)) {
+		if (!mkdir($basePath)) {
 			return false;
 		}
 
-
-		/* Check if umask modified the permissions and reset any created directories */
-		if (($permissions & ~umask()) !== $permissions) {
-			$basePath = realpath($basePath);
-			$folders = explode('/', substr($basePath, strlen($parentPath) + 1));
-			for ($i = 1, $total = count($folders); $i <= $total; $i++) {
-				$path = $parentPath . '/';
-				$path .= implode('/', array_slice($folders, 0, $i));
-
-				chmod($path, $permissions);
-			}
+		if (!chmod($basePath, 0777)) {
+			return false;
 		}
 
 		return true;
-	}
-
-	protected function getExistingParentDirectory($basePath)
-	{
-		$targetParent = dirname($basePath);
-		while ($targetParent !== '.' && ! is_dir($targetParent) && dirname($targetParent) !== $targetParent) {
-			$targetParent = dirname($targetParent);
-		}
-
-		return realpath($targetParent);
-	}
-
-	protected function getPermission($basePath, $fallbackPermission = 0777)
-	{
-		if (! is_dir($basePath)) {
-			return $fallbackPermission;
-		}
-
-		$result = fileperms($basePath);
-
-		return $result ? $result & 0007777 : $fallbackPermission;
 	}
 
 	public function tempFilename($filename)
@@ -102,12 +70,9 @@ class Cache
 
 	public function write($filename, $data)
 	{
-		$tempFile = tempnam($this->basePath, 'cache_tmp_');
-		file_put_contents($tempFile, $data);
-		chmod($tempFile, 0664);
-
 		$path = $this->getFilePath($filename);
-		rename($tempFile, $path);
+
+		file_put_contents($path, $data);
 
 		return $path;
 	}
@@ -139,9 +104,7 @@ class Cache
 
 	private function isOld(DirectoryIterator $item)
 	{
-		return $this->cleanupInterval
-			? $item->getMTime() + $this->cleanupInterval < time()
-			: false;
+		return $item->getMTime() + $this->cleanupInterval < time();
 	}
 
 	public function isDotFile(DirectoryIterator $item)

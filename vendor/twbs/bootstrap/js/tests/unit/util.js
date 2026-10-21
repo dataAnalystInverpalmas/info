@@ -3,8 +3,6 @@ $(function () {
 
   window.Util = typeof bootstrap !== 'undefined' ? bootstrap.Util : Util
 
-  var supportsAttachShadow = document.documentElement.attachShadow
-
   QUnit.module('util', {
     afterEach: function () {
       $('#qunit-fixture').html('')
@@ -48,28 +46,9 @@ $(function () {
 
     try {
       Util.typeCheckConfig(namePlugin, config, defaultType)
-    } catch (error) {
-      assert.strictEqual(error.message, 'COLLAPSE: Option "parent" provided type "number" but expected type "(string|element)".')
+    } catch (err) {
+      assert.strictEqual(err.message, 'COLLAPSE: Option "parent" provided type "number" but expected type "(string|element)".')
     }
-  })
-
-  QUnit.test('Util.typeCheckConfig should return null/undefined stringified when passed', function (assert) {
-    assert.expect(1)
-    var namePlugin = 'collapse'
-    var defaultType = {
-      toggle: '(null|undefined)'
-    }
-    var config = {
-      toggle: null
-    }
-
-    Util.typeCheckConfig(namePlugin, config, defaultType)
-
-    config.toggle = undefined
-
-    Util.typeCheckConfig(namePlugin, config, defaultType)
-
-    assert.true(true)
   })
 
   QUnit.test('Util.isElement should check if we passed an element or not', function (assert) {
@@ -78,7 +57,7 @@ $(function () {
 
     assert.strictEqual(Util.isElement($div), 1)
     assert.strictEqual(Util.isElement($div[0]), 1)
-    assert.strictEqual(typeof Util.isElement({}), 'undefined')
+    assert.strictEqual(typeof Util.isElement({}) === 'undefined', true)
   })
 
   QUnit.test('Util.getTransitionDurationFromElement should accept transition durations in milliseconds', function (assert) {
@@ -131,42 +110,54 @@ $(function () {
     var id = Util.getUID('test')
     var id2 = Util.getUID('test')
 
-    assert.notStrictEqual(id, id2, id + ' !== ' + id2)
+    assert.ok(id !== id2, id + ' !== ' + id2)
 
     id = Util.getUID('test')
     $('<div id="' + id + '"></div>').appendTo($('#qunit-fixture'))
 
     id2 = Util.getUID('test')
-    assert.notStrictEqual(id, id2, id + ' !== ' + id2)
+    assert.ok(id !== id2, id + ' !== ' + id2)
   })
 
   QUnit.test('Util.supportsTransitionEnd should return true', function (assert) {
     assert.expect(1)
-    assert.true(Util.supportsTransitionEnd())
+    assert.ok(Util.supportsTransitionEnd())
   })
 
-  // Only for newer browsers
-  QUnit[supportsAttachShadow ? 'test' : 'skip']('Util.findShadowRoot should find the shadow DOM root', function (assert) {
+  QUnit.test('Util.findShadowRoot should find the shadow DOM root', function (assert) {
+    // Only for newer browsers
+    if (!document.documentElement.attachShadow) {
+      assert.expect(0)
+      return
+    }
+
     assert.expect(2)
     var $div = $('<div id="test"></div>').appendTo($('#qunit-fixture'))
     var shadowRoot = $div[0].attachShadow({
       mode: 'open'
     })
 
-    assert.strictEqual(shadowRoot, Util.findShadowRoot(shadowRoot))
+    assert.equal(shadowRoot, Util.findShadowRoot(shadowRoot))
     shadowRoot.innerHTML = '<button>Shadow Button</button>'
-    assert.strictEqual(shadowRoot, Util.findShadowRoot(shadowRoot.firstChild))
+    assert.equal(shadowRoot, Util.findShadowRoot(shadowRoot.firstChild))
   })
 
-  QUnit[supportsAttachShadow ? 'skip' : 'test']('Util.findShadowRoot should return null when attachShadow is not available', function (assert) {
+  QUnit.test('Util.findShadowRoot should return null when attachShadow is not available', function (assert) {
     assert.expect(1)
+
     var $div = $('<div id="test"></div>').appendTo($('#qunit-fixture'))
+    if (!document.documentElement.attachShadow) {
+      assert.equal(null, Util.findShadowRoot($div[0]))
+    } else {
+      var sandbox = sinon.createSandbox()
 
-    assert.strictEqual(Util.findShadowRoot($div[0]), null)
-  })
+      sandbox.replace(document.documentElement, 'attachShadow', function () {
+        // to avoid empty function
+        return $div
+      })
 
-  QUnit.test('Util.jQueryDetection should detect jQuery', function (assert) {
-    assert.expect(0)
-    Util.jQueryDetection()
+      assert.equal(null, Util.findShadowRoot($div[0]))
+      sandbox.restore()
+    }
   })
 })

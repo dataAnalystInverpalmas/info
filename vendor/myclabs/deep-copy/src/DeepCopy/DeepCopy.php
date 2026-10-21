@@ -2,26 +2,20 @@
 
 namespace DeepCopy;
 
-use ArrayObject;
 use DateInterval;
-use DatePeriod;
 use DateTimeInterface;
 use DateTimeZone;
 use DeepCopy\Exception\CloneException;
-use DeepCopy\Filter\ChainableFilter;
 use DeepCopy\Filter\Filter;
 use DeepCopy\Matcher\Matcher;
-use DeepCopy\Reflection\ReflectionHelper;
 use DeepCopy\TypeFilter\Date\DateIntervalFilter;
-use DeepCopy\TypeFilter\Date\DatePeriodFilter;
-use DeepCopy\TypeFilter\Spl\ArrayObjectFilter;
 use DeepCopy\TypeFilter\Spl\SplDoublyLinkedListFilter;
 use DeepCopy\TypeFilter\TypeFilter;
 use DeepCopy\TypeMatcher\TypeMatcher;
 use ReflectionObject;
 use ReflectionProperty;
+use DeepCopy\Reflection\ReflectionHelper;
 use SplDoublyLinkedList;
-use WeakMap;
 
 /**
  * @final
@@ -29,9 +23,9 @@ use WeakMap;
 class DeepCopy
 {
     /**
-     * @var WeakMap<object, object> Map of source objects to their copies.
+     * @var object[] List of objects copied.
      */
-    private $objectMap;
+    private $hashMap = [];
 
     /**
      * Filters to apply.
@@ -64,11 +58,8 @@ class DeepCopy
     public function __construct($useCloneMethod = false)
     {
         $this->useCloneMethod = $useCloneMethod;
-        $this->objectMap = new WeakMap();
 
-        $this->addTypeFilter(new ArrayObjectFilter($this), new TypeMatcher(ArrayObject::class));
         $this->addTypeFilter(new DateIntervalFilter(), new TypeMatcher(DateInterval::class));
-        $this->addTypeFilter(new DatePeriodFilter(), new TypeMatcher(DatePeriod::class));
         $this->addTypeFilter(new SplDoublyLinkedListFilter($this), new TypeMatcher(SplDoublyLinkedList::class));
     }
 
@@ -89,15 +80,13 @@ class DeepCopy
     /**
      * Deep copies the given object.
      *
-     * @template TObject
+     * @param mixed $object
      *
-     * @param TObject $object
-     *
-     * @return TObject
+     * @return mixed
      */
     public function copy($object)
     {
-        $this->objectMap = new WeakMap();
+        $this->hashMap = [];
 
         return $this->recursiveCopy($object);
     }
@@ -126,14 +115,6 @@ class DeepCopy
         ];
     }
 
-    public function prependTypeFilter(TypeFilter $filter, TypeMatcher $matcher)
-    {
-        array_unshift($this->typeFilters, [
-            'matcher' => $matcher,
-            'filter'  => $filter,
-        ]);
-    }
-
     private function recursiveCopy($var)
     {
         // Matches Type Filter
@@ -153,11 +134,6 @@ class DeepCopy
 
         // Scalar
         if (! is_object($var)) {
-            return $var;
-        }
-
-        // Enum
-        if (PHP_VERSION_ID >= 80100 && enum_exists(get_class($var))) {
             return $var;
         }
 
@@ -190,8 +166,10 @@ class DeepCopy
      */
     private function copyObject($object)
     {
-        if (isset($this->objectMap[$object])) {
-            return $this->objectMap[$object];
+        $objectHash = spl_object_hash($object);
+
+        if (isset($this->hashMap[$objectHash])) {
+            return $this->hashMap[$objectHash];
         }
 
         $reflectedObject = new ReflectionObject($object);
@@ -199,7 +177,7 @@ class DeepCopy
 
         if (false === $isCloneable) {
             if ($this->skipUncloneable) {
-                $this->objectMap[$object] = $object;
+                $this->hashMap[$objectHash] = $object;
 
                 return $object;
             }
@@ -213,7 +191,7 @@ class DeepCopy
         }
 
         $newObject = clone $object;
-        $this->objectMap[$object] = $newObject;
+        $this->hashMap[$objectHash] = $newObject;
 
         if ($this->useCloneMethod && $reflectedObject->hasMethod('__clone')) {
             return $newObject;
@@ -237,11 +215,6 @@ class DeepCopy
             return;
         }
 
-        // Ignore readonly properties
-        if (method_exists($property, 'isReadOnly') && $property->isReadOnly()) {
-            return;
-        }
-
         // Apply the filters
         foreach ($this->filters as $item) {
             /** @var Matcher $matcher */
@@ -258,24 +231,12 @@ class DeepCopy
                     }
                 );
 
-                if ($filter instanceof ChainableFilter) {
-                    continue;
-                }
-
                 // If a filter matches, we stop processing this property
                 return;
             }
         }
 
-        if (PHP_VERSION_ID < 80100) {
-            $property->setAccessible(true);
-        }
-
-        // Ignore uninitialized properties (for PHP >7.4)
-        if (method_exists($property, 'isInitialized') && !$property->isInitialized($object)) {
-            return;
-        }
-
+        $property->setAccessible(true);
         $propertyValue = $property->getValue($object);
 
         // Copy the property

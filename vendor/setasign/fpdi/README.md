@@ -3,7 +3,9 @@ FPDI - Free PDF Document Importer
 
 [![Latest Stable Version](https://poser.pugx.org/setasign/fpdi/v/stable.svg)](https://packagist.org/packages/setasign/fpdi)
 [![Total Downloads](https://poser.pugx.org/setasign/fpdi/downloads.svg)](https://packagist.org/packages/setasign/fpdi)
+[![Latest Unstable Version](https://poser.pugx.org/setasign/fpdi/v/unstable.svg)](https://packagist.org/packages/setasign/fpdi)
 [![License](https://poser.pugx.org/setasign/fpdi/license.svg)](https://packagist.org/packages/setasign/fpdi)
+[![Build Status](https://travis-ci.org/Setasign/FPDI.svg?branch=development)](https://travis-ci.org/Setasign/FPDI)
 
 :heavy_exclamation_mark: This document refers to FPDI 2. Version 1 is deprecated and development is discontinued. :heavy_exclamation_mark: 
 
@@ -12,43 +14,79 @@ documents and use them as templates in [FPDF](http://www.fpdf.org), which was de
 from a copy of [FPDF](http://www.fpdf.org), FPDI does not require any special PHP extensions.
 
 FPDI can also be used as an extension for [TCPDF](https://github.com/tecnickcom/TCPDF) or 
-[tFPDF](http://fpdf.org/en/script/script92.php).
+[tFPDF](http://fpdf.org/en/script/script92.php), too.
 
 ## Installation with [Composer](https://packagist.org/packages/setasign/fpdi)
 
-Because FPDI can be used with FPDF, TCPDF or tFPDF, we haven't added a fixed dependency in the main
-composer.json file. You need to add the dependency to the PDF generation library of your choice
-yourself.
+Because FPDI can be used with FPDF, TCPDF or tFPDF we didn't added a fixed dependency in the main
+composer.json file but we added metadata packages for 
+[FPDF](https://github.com/Setasign/FPDI-FPDF), 
+[TCPDF](https://github.com/Setasign/FPDI-TCPDF) and
+[tFPDF](https://github.com/Setasign/FPDI-tFPDF).
 
-To use FPDI with FPDF, include the following in your composer.json file:
+### Evaluate Dependencies Automatically
 
+For FPDF add following [package](https://github.com/Setasign/FPDI-FPDF) to your composer.json:
 ```json
 {
     "require": {
-        "setasign/fpdf": "1.9.*",
-        "setasign/fpdi": "^2.6"
+        "setasign/fpdi-fpdf": "^2.0"
     }
 }
 ```
 
-If you want to use TCPDF, you have to update your composer.json to:
-
+For TCPDF add following [package](https://github.com/Setasign/FPDI-TCPDF) to your composer.json:
 ```json
 {
     "require": {
-        "tecnickcom/tcpdf": "6.11.*",
-        "setasign/fpdi": "^2.6"
+        "setasign/fpdi-tcpdf": "^2.0"
     }
 }
 ```
 
-If you want to use tFPDF, you have to update your composer.json to:
+For tFPDF add following [package](https://github.com/Setasign/FPDI-tFPDF) to your composer.json:
+```json
+{
+    "require": {
+        "setasign/fpdi-tfpdf": "^2.1"
+    }
+}
+```
+
+### Manual Dependencies
+
+If you don't want to use the metadata packages, it is up to you to add the dependencies to your
+composer.json file.
+
+To use FPDI with FPDF include following in your composer.json file:
 
 ```json
 {
     "require": {
-        "setasign/tfpdf": "1.33.*",
-        "setasign/fpdi": "^2.6"
+        "setasign/fpdf": "^1.8",
+        "setasign/fpdi": "^2.0"
+    }
+}
+```
+
+If you want to use TCPDF, your have to update your composer.json respectively to:
+
+```json
+{
+    "require": {
+        "tecnickcom/tcpdf": "^6.2",
+        "setasign/fpdi": "^2.0"
+    }
+}
+```
+
+If you want to use tFPDF, your have to update your composer.json respectively to:
+
+```json
+{
+    "require": {
+        "tecnickcom/tfpdf": "1.25",
+        "setasign/fpdi": "^2.1"
     }
 }
 ```
@@ -94,7 +132,7 @@ version 2:
   result in an `InvalidArgumentException` now.
 - The return value of `getTemplateSize()` had changed to an array with more speaking keys
   and reusability: Use `width` instead of `w` and `height` instead of `h`.
-- If you want to use **FPDI with TCPDF**, you need to refactor your code to use the class `Tcpdf\Fpdi`
+- If you want to use **FPDI with TCPDF** you need to refactor your code to use the class `Tcpdf\Fpdi`
 (since 2.1; before it was `TcpdfFpdi`) instead of `FPDI`.
 
 ## Example and Documentation

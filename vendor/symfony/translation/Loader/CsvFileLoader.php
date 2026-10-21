@@ -20,30 +20,34 @@ use Symfony\Component\Translation\Exception\NotFoundResourceException;
  */
 class CsvFileLoader extends FileLoader
 {
-    private string $delimiter = ';';
-    private string $enclosure = '"';
-    /**
-     * @deprecated since Symfony 7.2, to be removed in 8.0
-     */
-    private string $escape = '';
+    private $delimiter = ';';
+    private $enclosure = '"';
+    private $escape = '\\';
 
-    protected function loadResource(string $resource): array
+    /**
+     * {@inheritdoc}
+     */
+    protected function loadResource($resource)
     {
         $messages = [];
 
-        if (!$file = @fopen($resource, 'r')) {
-            throw new NotFoundResourceException(\sprintf('Error opening file "%s".', $resource));
+        try {
+            $file = new \SplFileObject($resource, 'rb');
+        } catch (\RuntimeException $e) {
+            throw new NotFoundResourceException(sprintf('Error opening file "%s".', $resource), 0, $e);
         }
 
-        try {
-            while (false !== $data = fgetcsv($file, null, $this->delimiter, $this->enclosure, $this->escape)) {
-                // empty lines are read as [null]
-                if (isset($data[1]) && 2 === \count($data) && !str_starts_with($data[0], '#')) {
-                    $messages[$data[0]] = $data[1];
-                }
+        $file->setFlags(\SplFileObject::READ_CSV | \SplFileObject::SKIP_EMPTY);
+        $file->setCsvControl($this->delimiter, $this->enclosure, $this->escape);
+
+        foreach ($file as $data) {
+            if (false === $data) {
+                continue;
             }
-        } finally {
-            fclose($file);
+
+            if ('#' !== substr($data[0], 0, 1) && isset($data[1]) && 2 === \count($data)) {
+                $messages[$data[0]] = $data[1];
+            }
         }
 
         return $messages;
@@ -51,15 +55,15 @@ class CsvFileLoader extends FileLoader
 
     /**
      * Sets the delimiter, enclosure, and escape character for CSV.
+     *
+     * @param string $delimiter Delimiter character
+     * @param string $enclosure Enclosure character
+     * @param string $escape    Escape character
      */
-    public function setCsvControl(string $delimiter = ';', string $enclosure = '"', string $escape = ''): void
+    public function setCsvControl($delimiter = ';', $enclosure = '"', $escape = '\\')
     {
         $this->delimiter = $delimiter;
         $this->enclosure = $enclosure;
-        if ('' !== $escape) {
-            trigger_deprecation('symfony/translation', '7.2', 'The "escape" parameter of the "%s" method is deprecated. It will be removed in 8.0.', __METHOD__);
-        }
-
         $this->escape = $escape;
     }
 }

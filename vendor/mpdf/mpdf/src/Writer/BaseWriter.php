@@ -3,6 +3,7 @@
 namespace Mpdf\Writer;
 
 use Mpdf\Strict;
+
 use Mpdf\Mpdf;
 use Mpdf\Pdf\Protection;
 
@@ -32,7 +33,7 @@ final class BaseWriter
 		if ($this->mpdf->state === 2) {
 			$this->endPage($s, $ln);
 		} else {
-			$this->mpdf->buffer->append($s, $ln);
+			$this->mpdf->buffer .= $s . ($ln ? "\n" : '');
 		}
 	}
 
@@ -53,7 +54,7 @@ final class BaseWriter
 
 		// Begin a new object
 		if (!$onlynewobj) {
-			$this->mpdf->offsets[$obj_id] = $this->mpdf->buffer->getLength();
+			$this->mpdf->offsets[$obj_id] = strlen($this->mpdf->buffer);
 			$this->write($obj_id . ' 0 obj');
 			$this->mpdf->currentObjectNumber = $obj_id; // for later use with encryption
 		}

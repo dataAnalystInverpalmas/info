@@ -4,12 +4,15 @@
     "type": "project",
     "license": "proprietary",
     "require": {
-        "nesbot/carbon": "^2.66 || ^3.0",
-        "phpoffice/phpspreadsheet": "^1.29",
-        "mpdf/mpdf": "^8.2",
+        "nesbot/carbon": "^1.39",
+        "phpoffice/phpspreadsheet": "^1.8",
+        "mpdf/mpdf": "^8.0",
         "twbs/bootstrap": "^4.3.1",
         "datatables/datatables": "^1.10",
-        "components/jquery": "^3.7"
+        "components/jquery": "3.4.1"
+    },
+    "require-dev": {
+        "composer/composer": "^1.9"
     },
     "autoload": {
         "psr-4": {
@@ -17,6 +20,9 @@
         }
     },
     "config": {
+        "platform": {
+            "php": "7.4.33"
+        },
         "allow-plugins": {
             "kylekatarnls/update-helper": false
         }

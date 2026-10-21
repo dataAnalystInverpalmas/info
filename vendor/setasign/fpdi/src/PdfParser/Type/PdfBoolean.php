@@ -1,10 +1,9 @@
 <?php
-
 /**
  * This file is part of FPDI
  *
  * @package   setasign\Fpdi
- * @copyright Copyright (c) 2026 Setasign GmbH & Co. KG (https://www.setasign.com)
+ * @copyright Copyright (c) 2019 Setasign - Jan Slabon (https://www.setasign.com)
  * @license   http://opensource.org/licenses/mit-license The MIT License
  */
 
@@ -12,6 +11,8 @@ namespace setasign\Fpdi\PdfParser\Type;
 
 /**
  * Class representing a boolean PDF object
+ *
+ * @package setasign\Fpdi\PdfParser\Type
  */
 class PdfBoolean extends PdfType
 {
@@ -23,8 +24,8 @@ class PdfBoolean extends PdfType
      */
     public static function create($value)
     {
-        $v = new self();
-        $v->value = (bool) $value;
+        $v = new self;
+        $v->value = (boolean) $value;
         return $v;
     }
 

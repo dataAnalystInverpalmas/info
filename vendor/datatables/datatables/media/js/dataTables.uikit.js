@@ -50,8 +50,8 @@ $.extend( true, DataTable.defaults, {
 /* Default class modification */
 $.extend( DataTable.ext.classes, {
 	sWrapper:      "dataTables_wrapper uk-form dt-uikit",
-	sFilterInput:  "uk-form-small uk-input",
-	sLengthSelect: "uk-form-small uk-select",
+	sFilterInput:  "uk-form-small",
+	sLengthSelect: "uk-form-small",
 	sProcessing:   "dataTables_processing uk-panel"
 } );
 
@@ -167,7 +167,7 @@ DataTable.ext.renderer.pageButton.uikit = function ( settings, host, idx, button
 	);
 
 	if ( activeEl ) {
-		$(host).find( '[data-dt-idx='+activeEl+']' ).trigger('focus');
+		$(host).find( '[data-dt-idx='+activeEl+']' ).focus();
 	}
 };
 

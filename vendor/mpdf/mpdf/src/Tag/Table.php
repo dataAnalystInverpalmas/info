@@ -163,7 +163,7 @@ class Table extends Tag
 		}
 
 		if (isset($attr['ALIGN']) && array_key_exists(strtolower($attr['ALIGN']), self::ALIGN)) {
-			$table['a'] = $this->getAlign($attr['ALIGN']);
+			$table['a'] = self::ALIGN[strtolower($attr['ALIGN'])];
 		}
 		if (!$table['a']) {
 			if ($table['direction'] === 'rtl') {
@@ -182,27 +182,18 @@ class Table extends Tag
 		}
 
 		if (isset($properties['BACKGROUND-COLOR'])) {
-			if ($table['bgcolor'] === false) { // @todo cleaner initialization
-				$table['bgcolor'] = [];
-			}
 			$table['bgcolor'][-1] = $properties['BACKGROUND-COLOR'];
 		} elseif (isset($properties['BACKGROUND'])) {
-			if ($table['bgcolor'] === false) {
-				$table['bgcolor'] = [];
-			}
 			$table['bgcolor'][-1] = $properties['BACKGROUND'];
 		} elseif (isset($attr['BGCOLOR'])) {
-			if ($table['bgcolor'] === false) {
-				$table['bgcolor'] = [];
-			}
 			$table['bgcolor'][-1] = $attr['BGCOLOR'];
 		}
 
 		if (isset($properties['VERTICAL-ALIGN']) && array_key_exists(strtolower($properties['VERTICAL-ALIGN']), self::ALIGN)) {
-			$table['va'] = $this->getAlign($properties['VERTICAL-ALIGN']);
+			$table['va'] = self::ALIGN[strtolower($properties['VERTICAL-ALIGN'])];
 		}
 		if (isset($properties['TEXT-ALIGN']) && array_key_exists(strtolower($properties['TEXT-ALIGN']), self::ALIGN)) {
-			$table['txta'] = $this->getAlign($properties['TEXT-ALIGN']);
+			$table['txta'] = self::ALIGN[strtolower($properties['TEXT-ALIGN'])];
 		}
 
 		if (!empty($properties['AUTOSIZE']) && $this->mpdf->tableLevel == 1) {
@@ -212,7 +203,7 @@ class Table extends Tag
 			}
 		}
 		if (!empty($properties['ROTATE']) && $this->mpdf->tableLevel == 1) {
-			$this->mpdf->table_rotate = $this->parseTableRotate($properties['ROTATE']);
+			$this->mpdf->table_rotate = $properties['ROTATE'];
 		}
 		if (isset($properties['TOPNTAIL'])) {
 			$table['topntail'] = $properties['TOPNTAIL'];
@@ -496,7 +487,7 @@ class Table extends Tag
 			}
 		}
 		if (isset($attr['ROTATE']) && $this->mpdf->tableLevel == 1) {
-			$this->mpdf->table_rotate = $this->parseTableRotate($attr['ROTATE']);
+			$this->mpdf->table_rotate = $attr['ROTATE'];
 		}
 
 		//++++++++++++++++++++++++++++
@@ -712,7 +703,7 @@ class Table extends Tag
 			$objattr['row'] = $this->mpdf->row;
 			$objattr['col'] = $this->mpdf->col;
 			$objattr['level'] = $this->mpdf->tableLevel;
-			$e = Mpdf::OBJECT_IDENTIFIER . "type=nestedtable,objattr=" . serialize($objattr) . Mpdf::OBJECT_IDENTIFIER;
+			$e = "\xbb\xa4\xactype=nestedtable,objattr=" . serialize($objattr) . "\xbb\xa4\xac";
 			$this->mpdf->_saveCellTextBuffer($e);
 			$this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['s'] += $tl;
 			if (!isset($this->mpdf->cell[$this->mpdf->row][$this->mpdf->col]['maxs'])) {
@@ -1278,28 +1269,4 @@ class Table extends Tag
 		return $ret;
 	}
 
-	/**
-	 * @param string $rotate
-	 * @return int
-	 */
-	private function parseTableRotate($rotate)
-	{
-		if (1 !== preg_match('/^(-?[0-9]+)(?:deg)?$/', $rotate, $matches)) {
-			return 0;
-		}
-
-		$rotationDegrees = (int) $matches[1] % 360;
-		if ($rotationDegrees > 180) {
-			$rotationDegrees -= 360;
-		} elseif ($rotationDegrees < -180) {
-			$rotationDegrees += 360;
-		}
-
-		// Only 90 and -90 are supported
-		if ($rotationDegrees !== 90 && $rotationDegrees !== -90) {
-			$rotationDegrees = 0;
-		}
-
-		return $rotationDegrees;
-	}
 }

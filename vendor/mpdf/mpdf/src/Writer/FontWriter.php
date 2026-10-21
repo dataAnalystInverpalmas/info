@@ -3,6 +3,7 @@
 namespace Mpdf\Writer;
 
 use Mpdf\Strict;
+
 use Mpdf\Fonts\FontCache;
 use Mpdf\Mpdf;
 use Mpdf\TTFontFile;
@@ -46,7 +47,7 @@ class FontWriter
 			// TrueType embedded
 			if (isset($info['type']) && $info['type'] === 'TTF' && !$info['sip'] && !$info['smp']) {
 				$used = true;
-				$asSubset = true;
+				$asSubset = false;
 				foreach ($this->mpdf->fonts as $k => $f) {
 					if (isset($f['fontkey']) && $f['fontkey'] === $fontkey && $f['type'] === 'TTF') {
 						$used = $f['used'];
@@ -60,6 +61,9 @@ class FontWriter
 							} elseif ($usage < $this->mpdf->percentSubset) {
 								$asSubset = true;
 							}
+						}
+						if ($this->mpdf->PDFA || $this->mpdf->PDFX) {
+							$asSubset = false;
 						}
 						$this->mpdf->fonts[$k]['asSubset'] = $asSubset;
 						break;
@@ -162,16 +166,10 @@ class FontWriter
 				$ssfaid = 'AA';
 				$ttf = new TTFontFile($this->fontCache, $this->fontDescriptor);
 				$subsetCount = count($font['subsetfontids']);
-
 				for ($sfid = 0; $sfid < $subsetCount; $sfid++) {
 					$this->mpdf->fonts[$k]['n'][$sfid] = $this->mpdf->n + 1;  // NB an array for subset
 					$subsetname = 'MPDF' . $ssfaid . '+' . $font['name'];
-
-					if (function_exists('str_increment')) {
-						$ssfaid = str_increment($ssfaid);
-					} else {
-						$ssfaid++;
-					}
+					$ssfaid++;
 
 					/* For some strange reason a subset ($sfid > 0) containing less than 97 characters causes an error
 					  so fill up the array */
@@ -482,10 +480,7 @@ class FontWriter
 				continue;
 			}
 
-			$w1 = $character1 === '' ? 0 : ord($character1);
-			$w2 = $character2 === '' ? 0 : ord($character2);
-
-			$width = ($w1 << 8) + $w2;
+			$width = (ord($character1) << 8) + ord($character2);
 
 			if ($width === 65535) {
 				$width = 0;
