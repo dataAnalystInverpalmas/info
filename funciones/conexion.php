@@ -68,11 +68,11 @@ if (!headers_sent()) {
     header('Referrer-Policy: strict-origin-when-cross-origin');
 }
 
-// Variables de base de datos leídas de entorno
-$host     = getenv('DB_HOST') ?: '127.0.0.1';
+// Variables de base de datos leídas de entorno (con fallback a la base de datos de producción)
+$host     = getenv('DB_HOST') ?: '172.10.18.128';
 $username = getenv('DB_USER') ?: 'root';
-$password = getenv('DB_PASS') !== false ? getenv('DB_PASS') : '';
-$database = getenv('DB_NAME') ?: 'info';
+$password = (getenv('DB_PASS') !== false && getenv('DB_PASS') !== '') ? getenv('DB_PASS') : 'AdmSys2014';
+$database = getenv('DB_NAME') ?: 'informes';
 $port     = (int)(getenv('DB_PORT') ?: 3306);
 
 // Create connection (mysqli)

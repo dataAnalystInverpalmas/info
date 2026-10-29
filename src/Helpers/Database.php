@@ -45,10 +45,10 @@ class Database
             include_once __DIR__ . '/../../funciones/conexion.php';
         }
 
-        $host   = getenv('DB_HOST') ?: '127.0.0.1';
-        $dbname = getenv('DB_NAME') ?: 'info';
+        $host   = getenv('DB_HOST') ?: '172.10.18.128';
+        $dbname = getenv('DB_NAME') ?: 'informes';
         $user   = getenv('DB_USER') ?: 'root';
-        $pass   = getenv('DB_PASS') !== false ? getenv('DB_PASS') : '';
+        $pass   = (getenv('DB_PASS') !== false && getenv('DB_PASS') !== '') ? getenv('DB_PASS') : 'AdmSys2014';
         $port   = getenv('DB_PORT') ?: '3306';
 
         $dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset=utf8mb4";
