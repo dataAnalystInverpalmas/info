@@ -246,10 +246,10 @@ $stmt_menu->close();
                         '<span class="material-icons" style="font-size: 1.8rem;">table_chart</span>' +
                     '</div>' +
                 '</div>' +
-                '<span class="badge badge-pill badge-light border text-uppercase font-weight-bold px-3 py-1 mb-2" style="color: #00796B; letter-spacing: 0.5px;">' +
-                    '<span class="material-icons mr-1 align-middle" style="font-size: 0.9rem;">sync</span>' + meta.badge +
+                '<span class="badge rounded-pill bg-light text-dark border text-uppercase fw-bold px-3 py-1 mb-2" style="color: #00796B; letter-spacing: 0.5px;">' +
+                    '<span class="material-icons me-1 align-middle" style="font-size: 0.9rem;">sync</span>' + meta.badge +
                 '</span>' +
-                '<h4 class="font-weight-bold text-dark mb-1" style="font-size: 1.35rem;">Importando y Sincronizando Matriz</h4>' +
+                '<h4 class="fw-bold text-dark mb-1" style="font-size: 1.35rem;">Importando y Sincronizando Matriz</h4>' +
                 '<p class="text-muted small mb-0">' + meta.name + '</p>' +
                 '<div class="ip-progress-wrapper">' +
                     '<div class="ip-progress-bar-fill" id="ipProgressBar"></div>' +
@@ -264,7 +264,7 @@ $stmt_menu->close();
                     '<span id="ipStepText">Iniciando lectura y verificación del archivo Excel...</span>' +
                 '</div>' +
                 '<p class="text-muted small mb-0" style="font-size: 0.78rem;">' +
-                    '<span class="material-icons align-middle text-muted mr-1" style="font-size: 0.95rem;">info</span>' +
+                    '<span class="material-icons align-middle text-muted me-1" style="font-size: 0.95rem;">info</span>' +
                     'Por favor espere. El servidor está actualizando los registros de forma segura.' +
                 '</p>' +
             '</div>' +
@@ -277,24 +277,24 @@ $stmt_menu->close();
                 '<div style="width: 78px; height: 78px; background: #E6F4F1; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; border: 2px solid #80CBC4; box-shadow: 0 8px 20px rgba(0, 121, 107, 0.2);">' +
                     '<span class="material-icons" style="font-size: 3rem; color: #00796B;">check_circle</span>' +
                 '</div>' +
-                '<span class="badge badge-pill badge-light border text-uppercase font-weight-bold px-3 py-1 mb-2" style="color: #00796B; letter-spacing: 0.5px;">' +
+                '<span class="badge rounded-pill bg-light text-dark border text-uppercase fw-bold px-3 py-1 mb-2" style="color: #00796B; letter-spacing: 0.5px;">' +
                     'Sincronización Exitosa' +
                 '</span>' +
-                '<h3 class="font-weight-bold text-dark mb-2">¡Matriz Sincronizada con Éxito!</h3>' +
+                '<h3 class="fw-bold text-dark mb-2">¡Matriz Sincronizada con Éxito!</h3>' +
                 '<p class="text-muted small mb-4">' +
                     'La matriz <strong>' + meta.name + '</strong> fue procesada e integrada en la base de datos de Inverpalmas en <strong>' + totalElapsed + ' segundos</strong>.' +
                 '</p>' +
                 '<div class="d-flex justify-content-center flex-wrap" style="gap: 0.75rem;">' +
-                    '<a href="index.php" class="btn btn-success px-4 py-2 font-weight-bold d-inline-flex align-items-center" style="background-color: #00796B; border-color: #00796B;">' +
-                        '<span class="material-icons mr-1" style="font-size: 1.1rem;">dashboard</span>' +
+                    '<a href="index.php" class="btn btn-success px-4 py-2 fw-bold d-inline-flex align-items-center" style="background-color: #00796B; border-color: #00796B;">' +
+                        '<span class="material-icons me-1" style="font-size: 1.1rem;">dashboard</span>' +
                         'Ir al Dashboard' +
                     '</a>' +
-                    '<a href="index.php?report=cargar_archivos" class="btn btn-outline-secondary px-3 py-2 font-weight-bold d-inline-flex align-items-center">' +
-                        '<span class="material-icons mr-1" style="font-size: 1.1rem;">cloud_upload</span>' +
+                    '<a href="index.php?report=cargar_archivos" class="btn btn-outline-secondary px-3 py-2 fw-bold d-inline-flex align-items-center">' +
+                        '<span class="material-icons me-1" style="font-size: 1.1rem;">cloud_upload</span>' +
                         'Cargar Otro Archivo' +
                     '</a>' +
-                    '<a href="index.php?report=plano_siembras" class="btn btn-outline-info px-3 py-2 font-weight-bold d-inline-flex align-items-center">' +
-                        '<span class="material-icons mr-1" style="font-size: 1.1rem;">table_chart</span>' +
+                    '<a href="index.php?report=plano_siembras" class="btn btn-outline-info px-3 py-2 fw-bold d-inline-flex align-items-center">' +
+                        '<span class="material-icons me-1" style="font-size: 1.1rem;">table_chart</span>' +
                         'Ver Plano de Siembras' +
                     '</a>' +
                 '</div>' +
@@ -308,18 +308,18 @@ $stmt_menu->close();
                 '<div style="width: 78px; height: 78px; background: #FEE2E2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; border: 2px solid #FCA5A5;">' +
                     '<span class="material-icons" style="font-size: 3rem; color: #DC2626;">error_outline</span>' +
                 '</div>' +
-                '<span class="badge badge-pill badge-danger font-weight-bold px-3 py-1 mb-2">Error en Procesamiento</span>' +
-                '<h3 class="font-weight-bold text-dark mb-2">No se pudo completar la sincronización</h3>' +
+                '<span class="badge rounded-pill bg-danger text-white fw-bold px-3 py-1 mb-2">Error en Procesamiento</span>' +
+                '<h3 class="fw-bold text-dark mb-2">No se pudo completar la sincronización</h3>' +
                 '<p class="text-muted small mb-4">' +
                     'Ocurrió un error al procesar <strong>' + meta.name + '</strong>. Verifique que las columnas del archivo coincidan con la plantilla requerida y vuelva a intentarlo.' +
                 '</p>' +
                 '<div class="d-flex justify-content-center flex-wrap" style="gap: 0.75rem;">' +
-                    '<button type="button" class="btn btn-danger px-4 py-2 font-weight-bold d-inline-flex align-items-center" onclick="listar_tabla(\'' + link + '\');">' +
-                        '<span class="material-icons mr-1" style="font-size: 1.1rem;">refresh</span>' +
+                    '<button type="button" class="btn btn-danger px-4 py-2 fw-bold d-inline-flex align-items-center" onclick="listar_tabla(\'' + link + '\');">' +
+                        '<span class="material-icons me-1" style="font-size: 1.1rem;">refresh</span>' +
                         'Reintentar Importación' +
                     '</button>' +
-                    '<a href="index.php?report=cargar_archivos" class="btn btn-outline-secondary px-3 py-2 font-weight-bold d-inline-flex align-items-center">' +
-                        '<span class="material-icons mr-1" style="font-size: 1.1rem;">arrow_back</span>' +
+                    '<a href="index.php?report=cargar_archivos" class="btn btn-outline-secondary px-3 py-2 fw-bold d-inline-flex align-items-center">' +
+                        '<span class="material-icons me-1" style="font-size: 1.1rem;">arrow_back</span>' +
                         'Volver a Cargar Archivos' +
                     '</a>' +
                 '</div>' +
@@ -482,8 +482,6 @@ $reportes = array(
 	'bautizo'                  => 'views/formBautizo.php',
 	'aplicaciones'             => 'views/applications.php',
 	'aplicaciones_semana'      => 'views/applications.php',
-	'presupuesto_siembras'     => 'views/program.php',
-	'presupuesto_area'         => 'views/programView.php',
 	'evaluacion_cosechas'      => 'views/growplanting.php',
 	'reporte_cosecha_lonas'    => 'views/reporte_cosecha_lonas.php',
 
@@ -493,7 +491,6 @@ $reportes = array(
 	'crud_emv'                 => 'views/entrada_material_vegetal.php',
 	'programs'                 => 'views/programs.php',
 	'programsf'                => 'views/programsf.php',
-	'plano_consulta'           => 'views/plano_consulta.php',
 	'plano_reemplazos'         => 'views/plano_reemplazos.php',
 	'imprimir_siembras'        => 'views/print.php',
 	'imprimir_ensartes'        => 'views/growroot.php',
@@ -510,6 +507,8 @@ $reportes = array(
 	'curvas'                   => 'views/report_pb_jl_curvas_clavel.php',
 
 	// --- Reportes de Producción ---
+	'dashboard'                => 'views/dashboard_proyecciones.php',
+	'dashboard_proyecciones'   => 'views/dashboard_proyecciones.php',
 	'reportes_produccion'      => 'views/reportes_dashboard.php',
 	'reportes_real_vs_teorico' => 'views/reporte_comparativo.php',
 	'curvas_clavel_produccion' => 'views/curvas_clavel_produccion.php',
@@ -559,8 +558,6 @@ $reportes = array(
 	// --- Retrocompatibilidad con rutas numéricas previas ---
 	'1'                        => 'views/formBautizo.php',
 	'2'                        => 'views/applications.php',
-	'4'                        => 'views/program.php',
-	'5'                        => 'views/programView.php',
 	'6'                        => 'views/print.php',
 	'7'                        => 'views/growroot.php',
 	'8'                        => 'views/growplanting.php',
@@ -609,7 +606,7 @@ if (isset($_GET['table'])) {
 				<div class="col-md-6 text-center">
 					<div class="p-5 bg-white border border-danger-subtle rounded-lg shadow-sm" style="border-radius: 12px;">
 						<span class="material-icons text-danger mb-3" style="font-size: 4rem;">block</span>
-						<h3 class="font-weight-bold text-dark mb-2">Acceso Restringido</h3>
+						<h3 class="fw-bold text-dark mb-2">Acceso Restringido</h3>
 						<p class="text-secondary small mb-4">No tiene los permisos necesarios para visualizar esta tabla. Si considera que es un error, por favor contacte al administrador.</p>
 						<a href="index.php" class="btn btn-outline-secondary btn-sm px-4">Volver al Inicio</a>
 					</div>
@@ -650,7 +647,7 @@ if (isset($_GET['report'])) {
 				<div class="col-md-6 text-center">
 					<div class="p-5 bg-white border border-danger-subtle rounded-lg shadow-sm" style="border-radius: 12px;">
 						<span class="material-icons text-danger mb-3" style="font-size: 4rem;">block</span>
-						<h3 class="font-weight-bold text-dark mb-2">Acceso Restringido</h3>
+						<h3 class="fw-bold text-dark mb-2">Acceso Restringido</h3>
 						<p class="text-secondary small mb-4">No tiene los permisos necesarios para visualizar este reporte. Si considera que es un error, por favor contacte al administrador.</p>
 						<a href="index.php" class="btn btn-outline-secondary btn-sm px-4">Volver al Inicio</a>
 					</div>

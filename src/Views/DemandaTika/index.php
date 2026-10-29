@@ -1,6 +1,18 @@
+<link rel="stylesheet" href="scripts/crud_tables.css?v=2">
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <style>
+    .crud-page-header .crud-header-actions.report-actions-bar {
+        margin-bottom: 0 !important;
+        flex: 1 1 auto;
+        justify-content: flex-end;
+    }
+
+    .crud-page-header .crud-page-subtitle {
+        font-size: 0.85rem;
+        margin-top: 0;
+    }
+
     .dtk-bar {
         background: #ffffff;
         border-bottom: 1px solid #eef2f5;
@@ -36,6 +48,13 @@
     }
     .dtk-filtros-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.25rem 0.75rem; }
     .dtk-filtros-grid-full { grid-column: 1 / -1; }
+
+    @media (max-width: 991.98px) {
+        .dtk-filtro-sidebar { position: static !important; margin-bottom: 1.25rem; }
+    }
+    @media (max-width: 575.98px) {
+        .dtk-filtros-grid { grid-template-columns: 1fr; }
+    }
 
     .dtk-section-card {
         border: 1px solid #e1ebe9;
@@ -73,97 +92,115 @@
     }
 </style>
 
-<div class="dtk-bar">
-    <h1>Demanda Semanal</h1>
-    <p>Pivote de demanda (tika_demanda) por ítem y semana, con gráfico resumen agrupable por mercado, submercado, grupo de demanda o flor.</p>
-</div>
-
-<div class="container-fluid px-3 px-lg-4 pb-4">
-    <div class="row" id="dtkRow">
-        <div class="col-md-4 col-lg-3" id="dtkSidebarCol">
-            <div class="dtk-filtro-sidebar mr-0 mr-lg-3">
-                <div class="card mb-3 shadow-sm">
-                    <div class="card-header" id="dtkFiltrosToggle">
-                        <span>
-                            <span class="material-icons" style="font-size:1rem;vertical-align:middle;">filter_list</span>
-                            Filtros
-                        </span>
-                        <span class="material-icons toggle-icon">chevron_left</span>
-                    </div>
-                    <div class="card-body p-3" id="dtkFiltrosBody">
-                        <div class="dtk-filtros-grid">
-                            <div class="mb-2">
-                                <label for="dtkFiltroFlor">Flor</label>
-                                <select id="dtkFiltroFlor" class="form-control select2" multiple>
-                                    <?php foreach ($flores as $flor): ?>
-                                        <option value="<?php echo htmlspecialchars($flor); ?>"><?php echo htmlspecialchars($flor); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-2">
-                                <label for="dtkFiltroMercado">Mercado</label>
-                                <select id="dtkFiltroMercado" class="form-control select2" multiple>
-                                    <?php foreach ($mercados as $mercado): ?>
-                                        <option value="<?php echo htmlspecialchars($mercado); ?>"><?php echo htmlspecialchars($mercado); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-2">
-                                <label for="dtkFiltroSubmercado">Submercado</label>
-                                <select id="dtkFiltroSubmercado" class="form-control select2" multiple>
-                                    <?php foreach ($submercados as $submercado): ?>
-                                        <option value="<?php echo htmlspecialchars($submercado); ?>"><?php echo htmlspecialchars($submercado); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-2">
-                                <label for="dtkFiltroGrupo">Grupo demanda</label>
-                                <select id="dtkFiltroGrupo" class="form-control select2" multiple>
-                                    <?php foreach ($gruposDemanda as $grupo): ?>
-                                        <option value="<?php echo htmlspecialchars($grupo); ?>"><?php echo htmlspecialchars($grupo); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-2 dtk-filtros-grid-full">
-                                <label for="dtkFiltroItem">Ítem</label>
-                                <select id="dtkFiltroItem" class="form-control select2" multiple>
-                                    <?php foreach ($items as $item): ?>
-                                        <option value="<?php echo htmlspecialchars($item); ?>"><?php echo htmlspecialchars($item); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-2">
-                                <label for="dtkFiltroSemanaDesde">Semana desde</label>
-                                <select id="dtkFiltroSemanaDesde" class="form-control select2-single">
-                                    <?php foreach ($semanas as $semana): ?>
-                                        <option value="<?php echo htmlspecialchars($semana); ?>" <?php echo $semana === $semanaDesdeDefault ? 'selected' : ''; ?>><?php echo htmlspecialchars($semana); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-2">
-                                <label for="dtkFiltroSemanaHasta">Semana hasta</label>
-                                <select id="dtkFiltroSemanaHasta" class="form-control select2-single">
-                                    <?php foreach ($semanas as $semana): ?>
-                                        <option value="<?php echo htmlspecialchars($semana); ?>" <?php echo $semana === $semanaHastaDefault ? 'selected' : ''; ?>><?php echo htmlspecialchars($semana); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <button class="btn btn-sm w-100 mb-2" style="background-color:#00796B;border-color:#00796B;color:#fff;" onclick="DemandaTika.aplicarFiltros()">
-                    <span class="material-icons" style="font-size:1rem;">search</span> Aplicar
-                </button>
-                <button class="btn btn-outline-secondary btn-sm w-100" onclick="DemandaTika.limpiarFiltros()">
-                    <span class="material-icons" style="font-size:1rem;">restart_alt</span> Limpiar
-                </button>
+<!-- Page Header Banner / Navbar estilo CRUD EMV -->
+<div class="crud-page-header d-print-none no-print">
+    <div class="crud-header-left">
+        <div class="crud-header-icon">
+            <span class="material-icons">difference</span>
+        </div>
+        <div>
+            <!-- Título omitido según indicación del usuario (ya presente en el navbar/breadcrumb superior) -->
+            <div class="crud-page-subtitle">
+                <span class="crud-page-badge">Producción</span>
+                <span class="text-muted d-none d-sm-inline">• Comparativo y balance de demanda semanal Tika</span>
             </div>
         </div>
+    </div>
+    <div class="crud-header-actions report-actions-bar mb-0">
+        <!-- Espacio para los chips de filtros activos a medida que se agregan -->
+        <div class="filtros-aplicados"></div>
+        <button type="button" class="btn btn-sm btn-teal d-flex align-items-center" data-bs-toggle="offcanvas"
+            data-bs-target="#dtkFiltros" aria-controls="dtkFiltros" title="Mostrar filtros">
+            <span class="material-icons me-1" style="font-size:1rem;">filter_list</span>
+            Filtros
+            <span class="badge rounded-pill bg-light text-dark ms-1 d-none filtros-badge">0</span>
+        </button>
+    </div>
+</div>
 
-        <div class="col-md-8 col-lg-9" id="dtkMainCol">
-            <button type="button" class="btn btn-outline-secondary btn-sm mb-3" id="dtkBtnMostrarFiltros" style="display:none;" onclick="DemandaTika.toggleSidebar()">
-                <span class="material-icons" style="font-size:1rem;vertical-align:middle;">chevron_right</span> Mostrar filtros
-            </button>
+<!-- Barra lateral vertical de filtros (mismo patrón que Reporte Lonas) -->
+<div class="offcanvas offcanvas-end filtros-sidebar no-print" tabindex="-1" id="dtkFiltros"
+    data-bs-scroll="true" data-bs-backdrop="false" aria-labelledby="dtkFiltrosLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="dtkFiltrosLabel">
+            <span class="material-icons" style="font-size: 1.2rem; color: #00796B;">filter_list</span>
+            Filtros
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div>
+            <label class="filter-label" for="dtkFiltroFlor">Flor</label>
+            <select id="dtkFiltroFlor" class="form-control select2" multiple data-cuenta-filtro>
+                <?php foreach ($flores as $flor): ?>
+                    <option value="<?php echo htmlspecialchars($flor); ?>"><?php echo htmlspecialchars($flor); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div>
+            <label class="filter-label" for="dtkFiltroMercado">Mercado</label>
+            <select id="dtkFiltroMercado" class="form-control select2" multiple data-cuenta-filtro>
+                <?php foreach ($mercados as $mercado): ?>
+                    <option value="<?php echo htmlspecialchars($mercado); ?>"><?php echo htmlspecialchars($mercado); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div>
+            <label class="filter-label" for="dtkFiltroSubmercado">Submercado</label>
+            <select id="dtkFiltroSubmercado" class="form-control select2" multiple data-cuenta-filtro>
+                <?php foreach ($submercados as $submercado): ?>
+                    <option value="<?php echo htmlspecialchars($submercado); ?>"><?php echo htmlspecialchars($submercado); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div>
+            <label class="filter-label" for="dtkFiltroGrupo">Grupo demanda</label>
+            <select id="dtkFiltroGrupo" class="form-control select2" multiple data-cuenta-filtro>
+                <?php foreach ($gruposDemanda as $grupo): ?>
+                    <option value="<?php echo htmlspecialchars($grupo); ?>"><?php echo htmlspecialchars($grupo); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div>
+            <label class="filter-label" for="dtkFiltroItem">Ítem</label>
+            <select id="dtkFiltroItem" class="form-control select2" multiple data-cuenta-filtro>
+                <?php foreach ($items as $item): ?>
+                    <option value="<?php echo htmlspecialchars($item); ?>"><?php echo htmlspecialchars($item); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div>
+            <label class="filter-label" for="dtkFiltroSemanaDesde">Semana desde</label>
+            <select id="dtkFiltroSemanaDesde" class="form-control select2-single">
+                <?php foreach ($semanas as $semana): ?>
+                    <option value="<?php echo htmlspecialchars($semana); ?>" <?php echo $semana === $semanaDesdeDefault ? 'selected' : ''; ?>><?php echo htmlspecialchars($semana); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div>
+            <label class="filter-label" for="dtkFiltroSemanaHasta">Semana hasta</label>
+            <select id="dtkFiltroSemanaHasta" class="form-control select2-single">
+                <?php foreach ($semanas as $semana): ?>
+                    <option value="<?php echo htmlspecialchars($semana); ?>" <?php echo $semana === $semanaHastaDefault ? 'selected' : ''; ?>><?php echo htmlspecialchars($semana); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+    </div>
+    <div class="filtros-footer d-flex gap-2">
+        <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" onclick="DemandaTika.limpiarFiltros()" title="Limpiar todos los filtros">
+            <span class="material-icons align-middle" style="font-size: 1rem;">restart_alt</span>
+            Limpiar
+        </button>
+        <button type="button" class="btn btn-sm btn-teal flex-fill" data-filtros-aplicar onclick="DemandaTika.aplicarFiltros()" title="Consultar con los filtros seleccionados">
+            <span class="material-icons align-middle" style="font-size: 1rem;">search</span>
+            Consultar
+        </button>
+    </div>
+</div>
+
+<div class="container-fluid px-0 pb-4">
+    <div class="row g-3" id="dtkRow">
+        <div class="col-12" id="dtkMainCol">
 
             <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
                 <div id="dtkEstadoCarga" class="text-muted small">Cargando información...</div>
@@ -248,4 +285,4 @@
     </div>
 </div>
 
-<script src="/scripts/demanda_tika.js?v=2"></script>
+<script src="scripts/demanda_tika.js?v=3"></script>

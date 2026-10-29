@@ -47,7 +47,7 @@ $respuesta = [
 
 //finca
 $whereFinca = buildWhere('finca', $fincas, $bloques, $variedades, $siembras, $conexion);
-$queryFinca = "SELECT DISTINCT finca from informes.plane $whereFinca order by 1 asc ";
+$queryFinca = "SELECT DISTINCT finca from plane $whereFinca order by 1 asc ";
 $resultFinca = $conexion->query($queryFinca);
 while($row = $resultFinca->fetch_assoc()){
     $respuesta['finca'][] = $row['finca'];
@@ -55,7 +55,7 @@ while($row = $resultFinca->fetch_assoc()){
 
 //bloque
 $whereBloque = buildWhere('bloque', $fincas, $bloques, $variedades, $siembras, $conexion);
-$queryBloque = "SELECT DISTINCT bloque from informes.plane $whereBloque order by 1 asc";
+$queryBloque = "SELECT DISTINCT bloque from plane $whereBloque order by 1 asc";
 $resultBloque = $conexion->query($queryBloque);
 while($row = $resultBloque->fetch_assoc()){
     $respuesta['bloque'][] = $row['bloque'];
@@ -63,7 +63,7 @@ while($row = $resultBloque->fetch_assoc()){
 
 //variedad
 $whereVariedad = buildWhere('variedad', $fincas, $bloques, $variedades, $siembras, $conexion);
-$queryVariedad = "SELECT DISTINCT variedad from informes.plane $whereVariedad order by 1 asc";
+$queryVariedad = "SELECT DISTINCT variedad from plane $whereVariedad order by 1 asc";
 $resultVariedad = $conexion->query($queryVariedad);
 while($row = $resultVariedad->fetch_assoc()){
     $respuesta['variedad'][] = $row['variedad'];
@@ -71,7 +71,7 @@ while($row = $resultVariedad->fetch_assoc()){
 
 //siembra
 $whereSiembra = buildWhere('siembra', $fincas, $bloques, $variedades, $siembras, $conexion);
-$querySiembra = "SELECT DISTINCT  temporada from informes.plane $whereSiembra order by 1 asc";
+$querySiembra = "SELECT DISTINCT  temporada from plane $whereSiembra order by 1 asc";
 $resultSiembra = $conexion->query($querySiembra);
 while($row = $resultSiembra->fetch_assoc()){
     $respuesta['siembra'][] = $row['temporada'];

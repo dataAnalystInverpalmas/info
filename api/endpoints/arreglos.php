@@ -52,7 +52,7 @@ if (!empty($_GET['fecha_fin'])) {
 
 $whereClause = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
-$countStmt = $conexion->prepare("SELECT COUNT(*) FROM informes.ld_arre $whereClause");
+$countStmt = $conexion->prepare("SELECT COUNT(*) FROM ld_arre $whereClause");
 if (!$countStmt) {
     Response::error('Error preparando consulta COUNT: ' . $conexion->error, 500);
 }
@@ -63,7 +63,7 @@ $countStmt->close();
 
 $stmt = $conexion->prepare(
     "SELECT fecha, finca, bloque, flor, nombre_variedad AS variedad, cosecha, tipo, tallos
-     FROM informes.ld_arre
+     FROM ld_arre
      $whereClause
      ORDER BY fecha DESC, finca, bloque
      LIMIT ? OFFSET ?"

@@ -2,7 +2,7 @@
 //lamar conexion
 include ('../funciones/conexion.php');
 
- $sql=$conexion->query("select distinct nombre from informes.varieties order by nombre");
+ $sql=$conexion->query("select distinct nombre from varieties order by nombre");
  ?>
 <option value="">Variedad</option>
  <?php

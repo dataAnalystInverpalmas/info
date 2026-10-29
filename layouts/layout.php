@@ -11,12 +11,13 @@
 
 
 	<link rel="stylesheet" type="text/css" href="scripts/stylesSP.css">
-	<link href="vendor/twbs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+	<!-- Bootstrap 5 CSS -->
+	<link href="vendor/twbs/bootstrap5/dist/css/bootstrap.min.css" rel="stylesheet">
 	<link href="scripts/print.css" rel="stylesheet">
 	<link href="scripts/myStyles.css" rel="stylesheet" media="screen" type="text/css">
-	<!-- DataTables CSS -->
+	<!-- DataTables CSS (Bootstrap 5 styling) -->
 	<link rel="stylesheet" type="text/css" href="vendor/datatables/datatables/media/css/jquery.dataTables.min.css">
-	<link rel="stylesheet" type="text/css" href="vendor/datatables/datatables/media/css/dataTables.bootstrap4.min.css">
+	<link rel="stylesheet" type="text/css" href="vendor/datatables/datatables/media/css/dataTables.bootstrap5.min.css">
 	<!-- DataTables FixedColumns CSS -->
 	<link rel="stylesheet" type="text/css"
 		href="https://cdn.datatables.net/fixedcolumns/4.0.2/css/fixedColumns.dataTables.min.css">
@@ -26,15 +27,51 @@
 		type="text/css" />
 	<link href="scripts/fonts/inter.css" rel="stylesheet">
 	<link href="scripts/fonts/material-icons.css" rel="stylesheet">
-	<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+	<link href="scripts/minimal_premium.css" rel="stylesheet" media="screen" type="text/css">
+	<link href="scripts/sidebar_layout.css?v=3" rel="stylesheet" media="screen" type="text/css">
+	<script src="scripts/sidebar_layout.js?v=3" defer></script>
+	<script>
+		// Evitar FOUC cuando el menú está colapsado
+		(function() {
+			try {
+				if (localStorage.getItem('ip_sidebar_collapsed') === '1' && window.innerWidth >= 992) {
+					document.documentElement.classList.add('sidebar-collapsed');
+				}
+			} catch (e) {}
+		})();
+	</script>
+	<!-- Chart.js local con fallback a CDN -->
+	<script src="scripts/Chart.min.js"></script>
+	<script>if (typeof Chart === 'undefined') { document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"><\/script>'); }</script>
 	<!-- jQuery local para evitar timeout de CDN -->
 	<script type="text/javascript" src="vendor/components/jquery/jquery.min.js"></script>
-	<!-- DataTables JS local -->
+	<!-- DataTables JS local y adaptador Bootstrap 5 -->
 	<script type="text/javascript" src="vendor/datatables/datatables/media/js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="vendor/datatables/datatables/media/js/dataTables.bootstrap5.min.js"></script>
 	<!-- DataTables FixedColumns JS -->
 	<script type="text/javascript" src="https://cdn.datatables.net/fixedcolumns/4.0.2/js/dataTables.fixedColumns.min.js"
 		defer></script>
 	<script src="scripts/JsBarcode.all.min.js"></script>
+
+	<!-- Configuración dinámica de rutas base y resolvedor de endpoints -->
+	<?php
+	$scriptDir = dirname($_SERVER['SCRIPT_NAME'] ?? '/index.php');
+	$scriptDir = str_replace('\\', '/', $scriptDir);
+	$appBasePath = ($scriptDir === '/' || $scriptDir === '.') ? '' : rtrim($scriptDir, '/');
+	?>
+	<script>
+		window.APP_BASE_PATH = '<?php echo $appBasePath; ?>';
+		window.getEndpointUrl = function(path) {
+			if (!path) return '';
+			if (/^https?:\/\//i.test(path)) return path;
+			var clean = String(path).replace(/^(\.\.\/|\/)+/, '');
+			var base = (typeof window.APP_BASE_PATH !== 'undefined' && window.APP_BASE_PATH !== null)
+				? window.APP_BASE_PATH
+				: (window.location.pathname.match(/^(.*\/info)(?:\/.*)?$/i) ? RegExp.$1 : '');
+			base = base ? base.replace(/\/+$/, '') : '';
+			return (base ? base + '/' : '') + clean;
+		};
+	</script>
 
 	<!-- Polyfill para ClipboardItem -->
 	<script>
@@ -50,288 +87,9 @@
 	<?php setlocale(LC_TIME, "es_CO"); ?>
 </head>
 
-<body>
+<body class="<?php echo !empty($_SESSION['usuario']) ? 'has-app-sidebar' : ''; ?>">
 	<style>
-		:root {
-			--navbar-fixed-offset: 4rem;
-		}
-
-		body {
-			font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-			background-color: #f8f9fa !important;
-			color: #2D3748 !important;
-			padding-top: 4rem !important;
-		}
-
-		/* Global professional overrides for cards, tables, forms, buttons */
-		.card {
-			border: none !important;
-			border-radius: 12px !important;
-			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
-			background-color: #ffffff !important;
-		}
-
-		.form-control {
-			border-radius: 8px !important;
-			border: 1px solid #E2E8F0 !important;
-			font-size: 0.9rem !important;
-			padding: 0.6rem 0.75rem !important;
-			height: auto !important;
-			color: #4A5568 !important;
-			transition: all 0.2s ease-in-out !important;
-		}
-
-		.form-control:focus {
-			border-color: #00796B !important;
-			box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.15) !important;
-			outline: none !important;
-		}
-
-		.btn {
-			border-radius: 8px !important;
-			font-weight: 500 !important;
-			font-size: 0.875rem !important;
-			padding: 0.5rem 1rem !important;
-			transition: all 0.2s ease !important;
-		}
-
-		.btn-success {
-			background-color: #00796B !important;
-			border-color: #00796B !important;
-			color: #ffffff !important;
-		}
-
-		.btn-success:hover,
-		.btn-success:focus,
-		.btn-success:active {
-			background-color: #004D40 !important;
-			border-color: #004D40 !important;
-			color: #ffffff !important;
-		}
-
-		.btn-outline-success {
-			color: #00796B !important;
-			border-color: #00796B !important;
-		}
-
-		.btn-outline-success:hover {
-			background-color: #00796B !important;
-			color: #ffffff !important;
-			border-color: #00796B !important;
-		}
-
-		/* Soft custom background for alerts */
-		.alert {
-			border: none !important;
-			border-radius: 8px !important;
-		}
-
-		/* MODERN TABLES & DATATABLES UX OVERRIDES */
-		.table-responsive {
-			border-radius: 12px !important;
-			background: #ffffff !important;
-			padding: 1rem !important;
-			border: 1px solid #E2E8F0 !important;
-			box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02) !important;
-			margin-bottom: 2rem !important;
-		}
-
-		table.table,
-		table.dataTable {
-			border-collapse: separate !important;
-			border-spacing: 0 !important;
-			width: 100% !important;
-			margin: 0 !important;
-			border: none !important;
-		}
-
-		/* Style table headers */
-		table.table thead th,
-		table.dataTable thead th,
-		table.dataTable thead td {
-			background-color: #F8FAFC !important;
-			color: #4A5568 !important;
-			font-weight: 600 !important;
-			font-size: 0.75rem !important;
-			letter-spacing: 0.5px;
-			text-transform: uppercase !important;
-			padding: 14px 16px !important;
-			border-bottom: 2px solid #E2E8F0 !important;
-			border-top: none !important;
-			outline: none !important;
-		}
-
-		/* Style table cells */
-		table.table tbody td,
-		table.dataTable tbody td {
-			padding: 12px 16px !important;
-			font-size: 0.85rem !important;
-			color: #2D3748 !important;
-			border-bottom: 1px solid #EDF2F7 !important;
-			border-top: none !important;
-			vertical-align: middle !important;
-		}
-
-		/* Subtle stripe on tables */
-		table.table-striped tbody tr:nth-of-type(odd) {
-			background-color: #F8FAFC !important;
-		}
-
-		table.table-striped tbody tr:nth-of-type(even) {
-			background-color: #ffffff !important;
-		}
-
-		/* Modern hovered row */
-		table.table tbody tr:hover,
-		table.dataTable tbody tr:hover {
-			background-color: #F1F5F9 !important;
-			transition: background-color 0.15s ease-in-out;
-		}
-
-		/* DataTables elements skinning */
-		.dataTables_wrapper .dataTables_length,
-		.dataTables_wrapper .dataTables_filter,
-		.dataTables_wrapper .dataTables_info,
-		.dataTables_wrapper .dataTables_paginate {
-			font-size: 0.825rem !important;
-			color: #718096 !important;
-			margin-bottom: 1.25rem !important;
-		}
-
-		.dataTables_wrapper .dataTables_length select {
-			border-radius: 6px !important;
-			border: 1px solid #CBD5E1 !important;
-			padding: 4px 8px !important;
-			outline: none !important;
-			margin: 0 4px !important;
-			background-color: #fff !important;
-		}
-
-		.dataTables_wrapper .dataTables_filter input {
-			border-radius: 8px !important;
-			border: 1px solid #CBD5E1 !important;
-			padding: 6px 12px !important;
-			outline: none !important;
-			margin-left: 8px !important;
-			background-color: #fff !important;
-			transition: all 0.2s ease !important;
-		}
-
-		.dataTables_wrapper .dataTables_filter input:focus {
-			border-color: #00796B !important;
-			box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.15) !important;
-		}
-
-		/* DataTables Paginate buttons override */
-		.dataTables_wrapper .dataTables_paginate .paginate_button {
-			border-radius: 6px !important;
-			border: 1px solid #E2E8F0 !important;
-			background: #ffffff !important;
-			color: #4A5568 !important;
-			padding: 5px 12px !important;
-			margin: 0 2px !important;
-			transition: all 0.2s ease !important;
-			vertical-align: middle !important;
-			display: inline-block !important;
-			line-height: normal !important;
-		}
-
-		.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-			background: #EDF2F7 !important;
-			color: #1A202C !important;
-			border-color: #CBD5E0 !important;
-		}
-
-		.dataTables_wrapper .dataTables_paginate .paginate_button.current,
-		.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
-			background: #00796B !important;
-			color: #ffffff !important;
-			border-color: #00796B !important;
-			font-weight: 600 !important;
-		}
-
-		.dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
-		.dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
-			background: #F8FAFC !important;
-			color: #A0AEC0 !important;
-			border-color: #EDF2F7 !important;
-			cursor: not-allowed !important;
-		}
-
-		/* FORM GROUPS & LABELS UX OVERRIDES */
-		.form-group label,
-		label.form-label {
-			font-weight: 600 !important;
-			font-size: 0.775rem !important;
-			color: #4A5568 !important;
-			text-transform: uppercase !important;
-			letter-spacing: 0.5px !important;
-			margin-bottom: 0.45rem !important;
-			display: inline-block !important;
-		}
-
-		select.form-control {
-			padding-right: 2rem !important;
-			background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%234a5568' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
-			background-repeat: no-repeat !important;
-			background-position: right 0.75rem center !important;
-			background-size: 16px 12px !important;
-			appearance: none !important;
-			-webkit-appearance: none !important;
-			-moz-appearance: none !important;
-		}
-
-		textarea.form-control {
-			border-radius: 10px !important;
-			padding: 0.75rem !important;
-			line-height: 1.5 !important;
-		}
-
-		/* MODERN BOOTSTRAP MODALS OVERRIDES */
-		.modal-content {
-			border: none !important;
-			border-radius: 14px !important;
-			box-shadow: 0 10px 45px rgba(0, 0, 0, 0.08) !important;
-			overflow: hidden !important;
-		}
-
-		.modal-header {
-			background-color: #F8FAFC !important;
-			border-bottom: 1px solid #E2E8F0 !important;
-			padding: 1.25rem 1.5rem !important;
-		}
-
-		.modal-header .modal-title {
-			font-size: 1.05rem !important;
-			font-weight: 600 !important;
-			color: #1A202C !important;
-		}
-
-		.modal-header .close {
-			padding: 1.25rem 1.5rem !important;
-			margin: -1.25rem -1.5rem -1.25rem auto !important;
-			outline: none !important;
-			color: #4A5568 !important;
-			opacity: 0.8 !important;
-			transition: opacity 0.2s ease !important;
-		}
-
-		.modal-header .close:hover {
-			opacity: 1 !important;
-		}
-
-		.modal-body {
-			padding: 1.5rem !important;
-			background-color: #ffffff !important;
-		}
-
-		.modal-footer {
-			background-color: #F8FAFC !important;
-			border-top: 1px solid #E2E8F0 !important;
-			padding: 1rem 1.5rem !important;
-		}
-
-		/* Keep modal header/actions visible below the fixed navbar */
+		/* Keep modal header/actions visible below the navbar */
 		.modal.show {
 			padding-top: var(--navbar-fixed-offset) !important;
 		}
@@ -349,49 +107,188 @@
 			:root {
 				--navbar-fixed-offset: 4.75rem;
 			}
+			.dataTables_wrapper .dataTables_length,
+			.dataTables_wrapper .dataTables_filter {
+				float: none !important;
+				text-align: left !important;
+				width: 100% !important;
+				margin-bottom: 0.65rem !important;
+			}
+			.dataTables_wrapper .dataTables_filter input {
+				width: 100% !important;
+				margin-left: 0 !important;
+				margin-top: 0.25rem !important;
+				display: block !important;
+			}
+			.dataTables_wrapper .dataTables_info,
+			.dataTables_wrapper .dataTables_paginate {
+				float: none !important;
+				text-align: center !important;
+				width: 100% !important;
+				margin-top: 0.65rem !important;
+			}
+			.dataTables_wrapper .dataTables_paginate {
+				display: flex !important;
+				flex-wrap: wrap !important;
+				justify-content: center !important;
+				gap: 4px !important;
+			}
+			.dt-buttons {
+				display: flex !important;
+				flex-wrap: wrap !important;
+				gap: 6px !important;
+				margin-bottom: 0.75rem !important;
+			}
+			.dt-buttons .dt-button {
+				flex: 1 1 auto !important;
+				text-align: center !important;
+			}
 		}
 
 		@media screen {
-			body {
-				padding-top: 5.5rem;
+			body:not(.has-app-sidebar) {
+				padding-top: 4.5rem;
+			}
+			body.has-app-sidebar {
+				padding-top: 0 !important;
 			}
 		}
 	</style>
-	<header>
-		<?php
-		require_once('header.php');
-		?>
-	</header>
-	<section>
-		<div class="container-fluid">
-			<?php
-			// carga el archivo routing.php para direccionar a la página .php que se incrustará entre la header y el footer
-			require_once('routing.php');
-			?>
-		</div>
-	</section>
 
-	<!-- Cargar scripts de DataTables y Bootstrap al final 
-<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>-->
+	<?php
+	// Carga del sidebar navigation y definiciones
+	require_once('header.php');
+	?>
+
+	<div id="appMainWrapper" class="app-main-wrapper d-flex flex-column min-vh-100">
+		<?php if (!empty($_SESSION['usuario'])): ?>
+			<?php renderAppTopBar(); ?>
+		<?php else: ?>
+			<header class="app-topbar justify-content-center border-bottom bg-white py-2">
+				<img src="img/logo.png" height="34" alt="Inverpalmas">
+			</header>
+		<?php endif; ?>
+
+		<main class="app-content-area flex-grow-1">
+			<div class="container-fluid py-3 px-3 px-md-4">
+				<?php
+				// carga el archivo routing.php para direccionar a la página .php que se incrustará entre la header y el footer
+				require_once('routing.php');
+				?>
+			</div>
+		</main>
+
+		<footer class="app-footer">
+			<?php
+			include_once('footer.php');
+			?>
+		</footer>
+	</div>
+
+	<!-- Cargar scripts de DataTables Buttons y Bootstrap 5 Bundle -->
 	<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"
 		defer></script>
 	<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"
 		defer></script>
-	<!--<script type="text/javascript" src="/DataTables/datatables.js"></script>-->
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-		integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-		crossorigin="anonymous"></script>
-	<script src="vendor/twbs/bootstrap/dist/js/bootstrap.min.js"
-		integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-		crossorigin="anonymous"></script>
+	<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"
+		defer></script>
+	<!-- Bootstrap 5.3 Bundle (incluye Popper v2) -->
+	<script src="vendor/twbs/bootstrap5/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/smartwizard@5/dist/js/jquery.smartWizard.min.js"
 		type="text/javascript"></script>
-	<!---footer-->
-	<footer>
-		<?php
-		include_once('footer.php');
-		?>
-	</footer>
+
+	<!-- Puente de compatibilidad dual Bootstrap 4 -> Bootstrap 5 y Toast Global -->
+	<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;" id="appToastContainer"></div>
+	<script>
+		// Puente bidireccional para atributos legacy BS4 (data-toggle, data-target, data-dismiss)
+		$(document).on('click', '[data-toggle="modal"]', function(e) {
+			var target = $(this).data('target') || $(this).attr('href');
+			if (target && target.charAt(0) === '#') {
+				var el = document.querySelector(target);
+				if (el && window.bootstrap && window.bootstrap.Modal) {
+					bootstrap.Modal.getOrCreateInstance(el).show();
+				}
+			}
+		});
+
+		$(document).on('click', '[data-dismiss="modal"]', function(e) {
+			var modalEl = $(this).closest('.modal')[0];
+			if (modalEl && window.bootstrap && window.bootstrap.Modal) {
+				var inst = bootstrap.Modal.getInstance(modalEl);
+				if (inst) inst.hide();
+				else $(modalEl).modal('hide');
+			}
+		});
+
+		$(document).on('click', '[data-toggle="collapse"]', function(e) {
+			var target = $(this).data('target') || $(this).attr('href');
+			if (target && target.charAt(0) === '#') {
+				var el = document.querySelector(target);
+				if (el && window.bootstrap && window.bootstrap.Collapse) {
+					bootstrap.Collapse.getOrCreateInstance(el).toggle();
+				}
+			}
+		});
+
+		// Inicialización automática de Tooltips y Popovers nativos de Bootstrap 5
+		document.addEventListener('DOMContentLoaded', function() {
+			if (window.bootstrap && window.bootstrap.Tooltip) {
+				var tooltipList = document.querySelectorAll('[data-bs-toggle="tooltip"], [data-toggle="tooltip"]');
+				tooltipList.forEach(function(el) {
+					new bootstrap.Tooltip(el);
+				});
+			}
+			if (window.bootstrap && window.bootstrap.Popover) {
+				var popoverList = document.querySelectorAll('[data-bs-toggle="popover"], [data-toggle="popover"]');
+				popoverList.forEach(function(el) {
+					new bootstrap.Popover(el);
+				});
+			}
+		});
+
+		// Función utilitaria global para Toasts dinámicos modernos
+		window.showAppToast = function(message, type, title) {
+			type = type || 'success';
+			var bgClass = 'bg-success text-white';
+			var icon = 'check_circle';
+			if (type === 'danger' || type === 'error') {
+				bgClass = 'bg-danger text-white';
+				icon = 'error';
+			} else if (type === 'warning') {
+				bgClass = 'bg-warning text-dark';
+				icon = 'warning';
+			} else if (type === 'info') {
+				bgClass = 'bg-info text-dark';
+				icon = 'info';
+			}
+
+			var toastId = 'toast_' + Date.now();
+			var html = '<div id="' + toastId + '" class="toast align-items-center ' + bgClass + ' border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true" style="border-radius:10px;">' +
+				'<div class="d-flex">' +
+				'<div class="toast-body d-flex align-items-center py-2 px-3" style="font-size:0.9rem;">' +
+				'<span class="material-icons me-2" style="font-size:1.25rem;">' + icon + '</span>' +
+				'<div>' + (title ? '<strong>' + title + '</strong><br>' : '') + message + '</div>' +
+				'</div>' +
+				'<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>' +
+				'</div>' +
+				'</div>';
+
+			var $container = $('#appToastContainer');
+			if (!$container.length) {
+				$('body').append('<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 2000;" id="appToastContainer"></div>');
+				$container = $('#appToastContainer');
+			}
+			$container.append(html);
+			var toastEl = document.getElementById(toastId);
+			if (window.bootstrap && window.bootstrap.Toast) {
+				var t = new bootstrap.Toast(toastEl, { delay: 4000 });
+				t.show();
+				toastEl.addEventListener('hidden.bs.toast', function() { $(toastEl).remove(); });
+			} else {
+				setTimeout(function() { $(toastEl).fadeOut(300, function() { $(this).remove(); }); }, 4000);
+			}
+		};
+	</script>
 </body>
 
 </html>

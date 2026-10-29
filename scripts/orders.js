@@ -13,13 +13,17 @@ $(document).ready(function () {
     var dia_i = "01";
 
     //////////////////////////////////////////////////////////////
-    document.getElementById('fecha_ini').value = ano + "-" + mes_i + "-" + dia_i;
-    document.getElementById('fecha_fin').value = ano + "-" + mes + "-" + dia;
+    var fIni = document.getElementById('fecha_ini');
+    var fFin = document.getElementById('fecha_fin');
+    if (fIni) fIni.value = ano + "-" + mes_i + "-" + dia_i;
+    if (fFin) fFin.value = ano + "-" + mes + "-" + dia;
     /////////////////////fechas///////////////////////////////////////  
 
     var id, opcion;
 
-    listar();
+    if ($('#tableOrders').length) {
+        listar();
+    }
 
     var fila; //captura la fila, para editar o eliminar
     //submit para el Alta y Actualización
@@ -214,7 +218,7 @@ $(document).ready(function () {
                 'serverSide': "false",
             },
             "language": {
-                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                "url": "scripts/Spanish.json"
             },
             "columns": [
                 { "data": "id" },
@@ -240,7 +244,7 @@ $(document).ready(function () {
                 "dataSrc": "",
             },
             "language": {
-                "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+                "url": "scripts/Spanish.json"
             },
             "columns": [
                 { "data": "id", "visible": false },
@@ -346,12 +350,9 @@ function listar() {
     var fecha_ini = $("#fecha_ini").val();
     var fecha_fin = $("#fecha_fin").val();
     var tipo = 0;//cero para trabajar con pedido general   
-    var nuevo = document.getElementById("nuevo");
-
-    if (tipo == "1") {
-        nuevo.style.display = "none";
-    } else {
-        nuevo.style.display = "block";
+    var nuevo = document.getElementById("nuevo") || document.getElementById("btnNuevo");
+    if (nuevo) {
+        nuevo.style.display = (tipo == "1") ? "none" : "";
     }
 
     var tableOrders = $('#tableOrders').DataTable({
@@ -367,7 +368,7 @@ function listar() {
             'serverSide': "false",
         },
         "language": {
-            "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
+            "url": "scripts/Spanish.json"
         },
         "columns": [
             { "data": "id" },

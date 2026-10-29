@@ -26,7 +26,7 @@ if (is_file("funciones/conexion.php")){
 
 $query="SELECT * FROM 
 (
-SELECT o.date as fecha,v.nombre as variedad,v.producto,oc.comment as comentario,e.nombre as evaluador,
+SELECT o.date as fecha, v.nombre as variedad, v.producto, MAX(oc.comment) as comentario, e.nombre as evaluador,
 sum(case when eg.nombre='COLOR' then od.value else 0 end) as color,
 sum(case when eg.nombre='CICLO' then od.value else 0 end) as ciclo,
 sum(case when eg.nombre='PRODUCTIVIDAD' then od.value else 0 end) as productividad,
@@ -49,10 +49,10 @@ LEFT JOIN eval_goals as eg
 ON eg.id=od.eval_goals_id
 LEFT JOIN evaluators as e
 ON e.id=o.evaluator_id
-LEFT JOiN order_comments as oc
+LEFT JOIN order_comments as oc
 ON oc.orders_id=o.id AND oc.variety_id=od.variety_id
 $where
-GROUP BY v.nombre,e.nombre
+GROUP BY o.date, v.nombre, v.producto, e.nombre
 ) as eval
 ";
 

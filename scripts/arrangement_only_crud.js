@@ -1,4 +1,44 @@
 $(document).ready(function(){
+    function resolveUrl(path) {
+        if (typeof window.getEndpointUrl === 'function') {
+            return window.getEndpointUrl(path);
+        }
+        if (!path) return '';
+        if (/^https?:\/\//i.test(path)) return path;
+        var clean = String(path).replace(/^(\.\.\/|\/)+/, '');
+        var m = window.location.pathname.match(/^(.*\/info)(?:\/.*)?$/i);
+        var base = m ? m[1] : '';
+        return (base ? base.replace(/\/+$/, '') + '/' : '') + clean;
+    }
+
+    function notify(msg, type, title) {
+        if (typeof window.showAppToast === 'function') {
+            window.showAppToast(msg, type, title);
+        } else {
+            alert(msg);
+        }
+    }
+
+    function showModal(selector) {
+        var el = document.querySelector(selector);
+        if (el && window.bootstrap && window.bootstrap.Modal) {
+            bootstrap.Modal.getOrCreateInstance(el).show();
+        } else {
+            $(selector).modal('show');
+        }
+    }
+
+    function hideModal(selector) {
+        var el = document.querySelector(selector);
+        if (el && window.bootstrap && window.bootstrap.Modal) {
+            var inst = bootstrap.Modal.getInstance(el);
+            if (inst) inst.hide();
+            else $(selector).modal('hide');
+        } else {
+            $(selector).modal('hide');
+        }
+    }
+
     function toInt(value){
         var n = parseInt(value, 10);
         return isNaN(n) ? 0 : n;
@@ -31,7 +71,7 @@ $(document).ready(function(){
 
     var arrangementTable = $('#arrangementTable').DataTable({
         ajax: {
-            url: '../ajax/arrangement_list.php',
+            url: resolveUrl('ajax/arrangement_list.php'),
             data: function(d){
                 d.tipo = $('#f_aa_tipo').val() || '';
                 d.aplicar = $('#f_aa_aplicar').val() || '';
@@ -129,7 +169,7 @@ $(document).ready(function(){
         $('#modalArrangementTitle').text('Nuevo Registro Arrangement');
         $('#modalArrangementSubtitle').text('Completar campos para definir un nuevo tipo y aplicación');
         $('#modalArrangementIcon').text('add_circle');
-        $('#arrangementModal').modal('show');
+        showModal('#arrangementModal');
     });
 
     $('#arrangementTable').on('click', '.btn-edit-aa', function(){
@@ -147,7 +187,7 @@ $(document).ready(function(){
         $('#modalArrangementTitle').text('Editar Arrangement #' + (row.id || ''));
         $('#modalArrangementSubtitle').text('Modifica los valores configurados para este tipo');
         $('#modalArrangementIcon').text('edit_note');
-        $('#arrangementModal').modal('show');
+        showModal('#arrangementModal');
     });
 
     $('#saveArrangement').on('click', function(){
@@ -167,36 +207,38 @@ $(document).ready(function(){
             return;
         }
 
-        var url = payload.id ? '../ajax/arrangement_update.php' : '../ajax/arrangement_create.php';
+        var url = payload.id ? resolveUrl('ajax/arrangement_update.php') : resolveUrl('ajax/arrangement_create.php');
         var $btn = $(this);
-        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm mr-1"></span> Guardando...');
+        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1 mr-1"></span> Guardando...');
 
         $.post(url, payload, function(res){
-            $btn.prop('disabled', false).html('<span class="material-icons align-middle mr-1" style="font-size: 1rem;">save</span> Guardar Datos');
+            $btn.prop('disabled', false).html('<span class="material-icons align-middle me-1 mr-1" style="font-size: 1rem;">save</span> Guardar Datos');
             if(res && res.success){
-                $('#arrangementModal').modal('hide');
+                hideModal('#arrangementModal');
+                notify('Arrangement guardado exitosamente', 'success');
                 arrangementTable.ajax.reload(null, false);
             } else {
-                alert((res && res.message) ? res.message : 'Error al guardar arrangement');
+                notify((res && res.message) ? res.message : 'Error al guardar arrangement', 'danger');
             }
         }, 'json').fail(function(xhr){
-            $btn.prop('disabled', false).html('<span class="material-icons align-middle mr-1" style="font-size: 1rem;">save</span> Guardar Datos');
-            alert('Error en la petición: ' + (xhr && xhr.responseText ? xhr.responseText : 'sin respuesta'));
+            $btn.prop('disabled', false).html('<span class="material-icons align-middle me-1 mr-1" style="font-size: 1rem;">save</span> Guardar Datos');
+            notify('Error en la petición: ' + (xhr && xhr.responseText ? xhr.responseText : 'sin respuesta'), 'danger');
         });
     });
 
     $('#arrangementTable').on('click', '.btn-delete-aa', function(){
         if(!confirm('¿Está seguro de eliminar este registro de arrangement? Esta acción no se puede deshacer.')) return;
         var row = JSON.parse(decodeURIComponent($(this).attr('data-row') || '%7B%7D'));
-        $.post('../ajax/arrangement_delete.php', {
+        $.post(resolveUrl('ajax/arrangement_delete.php'), {
             id: row.id || '',
             tipo: row.tipo || '',
             aplicar: row.aplicar || ''
         }, function(res){
             if(res && res.success){
+                notify('Arrangement eliminado con éxito', 'info');
                 arrangementTable.ajax.reload(null, false);
             } else {
-                alert((res && res.message) ? res.message : 'Error al eliminar');
+                notify((res && res.message) ? res.message : 'Error al eliminar', 'danger');
             }
         }, 'json');
     });

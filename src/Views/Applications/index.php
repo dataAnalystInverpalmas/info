@@ -1,53 +1,93 @@
 <?php use Carbon\Carbon; ?>
 <style>
-    @media screen,
-    print {
+    /* Estilos base de la vista */
+    .reportes-bar {
+        background: #ffffff;
+        border-bottom: 1px solid #eef2f5;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+        margin: -0.5rem -15px 1.25rem;
+        padding: 0.85rem 20px;
+    }
 
-        td,
-        tr,
-        th {
-            border: 1px solid black;
-            padding-bottom: 0em;
-            height: 10px;
-            margin-bottom: 0px;
-            margin-right: 0px;
-            margin-left: 0px;
+    .reportes-bar h1 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        margin: 0;
+        color: #17312d;
+    }
+
+    .reportes-bar p {
+        margin: 0.15rem 0 0;
+        color: #5f6f6b;
+        font-size: 0.82rem;
+    }
+
+    .filtro-sidebar {
+        position: sticky;
+        top: 1rem;
+    }
+
+    @media (max-width: 991.98px) {
+        .filtro-sidebar {
+            position: static !important;
+            margin-bottom: 1.25rem;
         }
     }
 
-    @media print {
+    .filtro-sidebar .card {
+        border: 1px solid #dbe7e4;
+        border-radius: 14px;
+        overflow: hidden;
+    }
 
-        /* elimina el espacio superior del navbar fijo y del formulario de filtros */
-        body {
-            padding-top: 0 !important;
-        }
+    .filtro-sidebar .card-header {
+        background: linear-gradient(135deg, #00796B 0%, #004D40 100%);
+        color: #fff;
+        font-weight: 700;
+        font-size: 0.88rem;
+        padding: 0.75rem 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
 
-        .imprimir-form,
-        .imprimir-gap {
-            display: none !important;
-        }
+    .filtro-sidebar label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.25rem;
+    }
 
-        h5 {
-            margin: 0 0 4px 0;
-            font-size: 1.05rem;
-        }
+    .table-aplicaciones-reporte {
+        width: 100%;
+        margin-bottom: 1rem;
+        color: #212529;
+        border-collapse: collapse;
+    }
 
-        @page {
-            margin-top: 10mm;
-            margin-bottom: 15mm;
+    .table-aplicaciones-reporte th,
+    .table-aplicaciones-reporte td {
+        border: 1px solid #000000;
+        padding: 4px 6px;
+        font-size: 0.85rem;
+        vertical-align: middle;
+    }
 
-            @bottom-left {
-                content: "Impreso el: <?php echo date('d/m/Y H:i'); ?>";
-                font-size: 9px;
-                font-family: Arial, sans-serif;
-            }
+    .table-aplicaciones-reporte thead th {
+        background-color: #f1f5f3;
+        font-weight: 700;
+        text-align: center;
+    }
 
-            @bottom-right {
-                content: "Página " counter(page) " de " counter(pages);
-                font-size: 9px;
-                font-family: Arial, sans-serif;
-            }
-        }
+    .table-aplicaciones-reporte .subtotal-row {
+        background-color: #f8fbf9;
+        font-weight: 700;
+    }
+
+    .table-aplicaciones-reporte .total-row {
+        background-color: #e8f5e9;
+        font-weight: 800;
+        font-size: 0.9rem;
     }
 
     /* ESTILOS DEL FORMATO SOLICITUD SALIDA DE MATERIALES */
@@ -148,96 +188,211 @@
     }
 
     @media print {
-        /* Ocultar el modal si se imprime la página principal del reporte de aplicaciones */
+        body {
+            padding-top: 0 !important;
+            background: #ffffff !important;
+        }
+
+        .imprimir-ocultar,
+        .reportes-bar,
+        .navbar,
+        #aplicacionesSidebarCol,
         #modalSalidaMateriales,
         .modal-backdrop {
             display: none !important;
         }
+
+        #aplicacionesMainCol {
+            width: 100% !important;
+            max-width: 100% !important;
+            flex: 0 0 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .table-aplicaciones-reporte th,
+        .table-aplicaciones-reporte td {
+            border: 1px solid #000 !important;
+            padding: 2px 4px !important;
+            font-size: 8pt !important;
+        }
+
+        h5 {
+            margin: 0 0 4px 0;
+            font-size: 1.05rem;
+        }
+
+        @page {
+            margin-top: 10mm;
+            margin-bottom: 15mm;
+
+            @bottom-left {
+                content: "Impreso el: <?php echo date('d/m/Y H:i'); ?>";
+                font-size: 9px;
+                font-family: Arial, sans-serif;
+            }
+
+            @bottom-right {
+                content: "Página " counter(page) " de " counter(pages);
+                font-size: 9px;
+                font-family: Arial, sans-serif;
+            }
+        }
     }
 </style>
 
-<div class="card imprimir-form">
-    <div class="card-header">
-        <form class="form-inline" action="home.php?menu=tables&report=aplicaciones" method="post" enctype="multipart/form-data">
-            <div class="form-group mx-sm-3 mb-2">
-                <select name="xfinca" class="form-control" data-live-search="true">
-                    <option value="">Finca</option>
-                    <?php foreach ($fincas as $f): ?>
-                        <option value="<?php echo htmlspecialchars($f); ?>" <?php echo ($f === $finca) ? " selected='selected'" : ''; ?>>
-                            <?php echo htmlspecialchars($f); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="form-group mx-sm-3 mb-2">
-                <label class="sr-only">Fecha Inicial</label>
-                <input type="date" name="dateIni" value="<?php echo htmlspecialchars($dateIni); ?>"
-                    class="form-control">
-            </div>
-            <div class="form-group mx-sm-3 mb-2">
-                <label class="sr-only">Fecha Final</label>
-                <input type="date" name="dateEnd" value="<?php echo htmlspecialchars($dateEnd); ?>"
-                    class="form-control">
-            </div>
-            <div class="form-group mx-sm-3 mb-2">
-                <select name="xtipo" class="form-control" data-live-search="true">
-                    <option value="">Tipo</option>
-                    <?php foreach ($tipos as $t): ?>
-                        <option value="<?php echo htmlspecialchars($t); ?>" <?php echo ($t === $tipo) ? " selected='selected'" : ''; ?>>
-                            <?php echo htmlspecialchars($t); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="form-group mx-sm-3 mb-2">
-                <button name="buscar" type="submit" class="btn btn-brand-green mb-2">Buscar</button>
-            </div>
-            <div class="form-group mx-sm-3 mb-2">
-                <button name="imprimir" type="submit" class="btn btn-outline-brand-green mb-2"
-                    onclick="window.print();">Imprimir</button>
-            </div>
-            <div class="form-group mx-sm-2 mb-2">
-                <button type="button" class="btn btn-outline-primary mb-2" id="btnFormatoSalidaMateriales"
-                    data-toggle="modal" data-target="#modalSalidaMateriales"
-                    title="Formato Solicitud Salida de Materiales">
-                    <span class="material-icons align-middle mr-1" style="font-size: 1.1rem;">receipt_long</span>
-                    Formato Salida Materiales
-                </button>
-            </div>
-        </form>
+<!-- Barra superior del reporte -->
+<div class="reportes-bar d-flex flex-wrap justify-content-between align-items-center">
+    <div class="mb-2 mb-md-0">
+        <h1 class="d-flex align-items-center">
+            <span class="material-icons mr-2 me-2" style="color: #00796B; font-size: 1.4rem;">science</span>
+            Reporte Semanal de Aplicaciones
+        </h1>
+        <p>Programación semanal y control de labores y mezclas de insumos por finca</p>
+    </div>
+    <div class="d-flex align-items-center flex-wrap gap-2 imprimir-ocultar">
+        <button type="button" id="btnMostrarFiltros" class="btn btn-brand-green btn-sm d-none align-items-center me-2 mr-2" onclick="toggleSidebar();" style="border-radius: 8px;">
+            <span class="material-icons mr-1 me-1" style="font-size: 1.1rem;">tune</span>
+            Mostrar Filtros
+        </button>
+        <button type="button" class="btn btn-outline-brand-green btn-sm d-flex align-items-center me-2 mr-2" onclick="window.print();" style="border-radius: 8px;">
+            <span class="material-icons mr-1 me-1" style="font-size: 1.1rem;">print</span>
+            Imprimir
+        </button>
+        <button type="button" class="btn btn-outline-primary btn-sm d-flex align-items-center" id="btnFormatoSalidaMateriales"
+            data-toggle="modal" data-target="#modalSalidaMateriales" data-bs-toggle="modal" data-bs-target="#modalSalidaMateriales"
+            title="Formato Solicitud Salida de Materiales" style="border-radius: 8px;">
+            <span class="material-icons mr-1 me-1" style="font-size: 1.1rem;">receipt_long</span>
+            Formato Salida Materiales
+        </button>
     </div>
 </div>
-<br class="imprimir-gap">
 
-<?php if (!empty($rows)): ?>
-    <?php
-    try {
-        $finicial = new Carbon($dateIni);
-        $ffinal = new Carbon($dateEnd);
-        $txtIni = $finicial->format('d-m-y/W');
-        $txtEnd = $ffinal->format('d-m-y/W');
-    } catch (\Throwable $e) {
-        $txtIni = date('d-m-y', strtotime($dateIni)) . '/' . date('W', strtotime($dateIni));
-        $txtEnd = date('d-m-y', strtotime($dateEnd)) . '/' . date('W', strtotime($dateEnd));
-    }
-    ?>
-    <h5><?php echo htmlspecialchars($finca); ?></h5>
-    <h5>Reporte Semanal de Aplicaciones</h5>
-    <h5><?php echo htmlspecialchars($tipo); ?></h5>
-    <h5>Entre el: <?php echo $txtIni; ?> Y <?php echo $txtEnd; ?></h5>
+<div class="container-fluid px-3 px-lg-4 pb-4">
+    <div class="row" id="aplicacionesRow">
+        <!-- Panel Izquierdo de Filtros (Sidebar) -->
+        <div class="col-md-4 col-lg-3 mb-3 imprimir-ocultar" id="aplicacionesSidebarCol">
+            <div class="filtro-sidebar">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header">
+                        <span class="d-flex align-items-center">
+                            <span class="material-icons mr-2 me-2" style="font-size: 1.1rem;">filter_alt</span>
+                            Filtros de Búsqueda
+                        </span>
+                        <button type="button" class="btn btn-link text-white p-0 d-flex align-items-center text-decoration-none" onclick="toggleSidebar();" title="Ocultar filtros">
+                            <span class="material-icons" style="font-size: 1.25rem;">chevron_left</span>
+                        </button>
+                    </div>
+                    <div class="card-body p-3 bg-white">
+                        <form id="formFiltrosAplicaciones" action="<?php echo htmlspecialchars($_SERVER['REQUEST_URI'] ?? 'index.php?report=aplicaciones'); ?>" method="post" enctype="multipart/form-data">
+                            <div class="form-group mb-3">
+                                <label for="xfinca">Finca</label>
+                                <select name="xfinca" id="xfinca" class="form-control form-select">
+                                    <option value="">-- Todas las fincas --</option>
+                                    <?php foreach ($fincas as $f): ?>
+                                        <option value="<?php echo htmlspecialchars($f); ?>" <?php echo ($f === $finca) ? " selected='selected'" : ''; ?>>
+                                            <?php echo htmlspecialchars($f); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="xtipo">Tipo de Aplicación</label>
+                                <select name="xtipo" id="xtipo" class="form-control form-select">
+                                    <option value="">-- Todos los tipos --</option>
+                                    <?php foreach ($tipos as $t): ?>
+                                        <option value="<?php echo htmlspecialchars($t); ?>" <?php echo ($t === $tipo) ? " selected='selected'" : ''; ?>>
+                                            <?php echo htmlspecialchars($t); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="dateIni">Fecha Inicial</label>
+                                <input type="date" name="dateIni" id="dateIni" value="<?php echo htmlspecialchars($dateIni); ?>" class="form-control">
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="dateEnd">Fecha Final</label>
+                                <input type="date" name="dateEnd" id="dateEnd" value="<?php echo htmlspecialchars($dateEnd); ?>" class="form-control">
+                            </div>
 
-    <div class="row">
-        <div class="col-12">
-            <table class="table table-sm">
-                <tr>
-                    <th>Bloque</th>
-                    <th>Aplicar</th>
-                    <th>Variedad</th>
-                    <th>Temporada</th>
-                    <th>#Cama Fisica</th>
-                    <th>#Cama Real</th>
-                    <th>Realizado</th>
-                </tr>
+                            <div class="d-grid gap-2 mt-4">
+                                <button name="buscar" type="submit" class="btn btn-brand-green btn-block w-100 d-flex align-items-center justify-content-center py-2 shadow-sm mb-2" style="border-radius: 8px; font-weight: 600;">
+                                    <span class="material-icons mr-1 me-1" style="font-size: 1.15rem;">search</span>
+                                    Buscar
+                                </button>
+                                <a href="index.php?report=aplicaciones" class="btn btn-outline-secondary btn-block w-100 btn-sm d-flex align-items-center justify-content-center py-1" style="border-radius: 8px;">
+                                    <span class="material-icons mr-1 me-1" style="font-size: 1rem;">restart_alt</span>
+                                    Restablecer
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna de Contenido Principal -->
+        <div class="col-md-8 col-lg-9" id="aplicacionesMainCol">
+            <?php if (!empty($rows)): ?>
+                <?php
+                try {
+                    $finicial = new Carbon($dateIni);
+                    $ffinal = new Carbon($dateEnd);
+                    $txtIni = $finicial->format('d-m-y/W');
+                    $txtEnd = $ffinal->format('d-m-y/W');
+                } catch (\Throwable $e) {
+                    $txtIni = date('d-m-y', strtotime($dateIni)) . '/' . date('W', strtotime($dateIni));
+                    $txtEnd = date('d-m-y', strtotime($dateEnd)) . '/' . date('W', strtotime($dateEnd));
+                }
+                ?>
+                <!-- Tarjeta de Información de Filtros Actuales -->
+                <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 p-3 bg-white border rounded shadow-sm">
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <span class="badge bg-light text-dark border px-2 py-1 me-2 mr-2" style="font-size: 0.85rem;">
+                            <strong>Finca:</strong> <?php echo htmlspecialchars($finca ?: 'Todas'); ?>
+                        </span>
+                        <span class="badge bg-light text-dark border px-2 py-1 me-2 mr-2" style="font-size: 0.85rem;">
+                            <strong>Tipo:</strong> <?php echo htmlspecialchars($tipo ?: 'Todos'); ?>
+                        </span>
+                        <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 0.85rem;">
+                            <strong>Semana/Rango:</strong> <?php echo htmlspecialchars($txtIni . ' a ' . $txtEnd); ?>
+                        </span>
+                    </div>
+                    <div class="small text-muted mt-2 mt-sm-0">
+                        Total registros: <strong><?php echo count($rows); ?></strong>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px; overflow: hidden;">
+                    <div class="card-header bg-white py-2 border-bottom">
+                        <h6 class="font-weight-bold text-dark mb-0 d-flex align-items-center">
+                            <span class="material-icons mr-1 me-1 text-teal" style="font-size: 1.15rem; color: #00796B;">table_chart</span>
+                            Programación de Aplicaciones por Bloque y Cama
+                        </h6>
+                    </div>
+                    <div class="card-body p-2 p-md-3">
+                        <div class="table-responsive">
+                            <table class="table-aplicaciones-reporte table-sm mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Bloque</th>
+                                        <th>Aplicar</th>
+                                        <th>Variedad</th>
+                                        <th>Temporada</th>
+                                        <th>#Cama Física</th>
+                                        <th>#Cama Real</th>
+                                        <th>Realizado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                 <?php
                 $prevBloque = null;
                 $prevAplicar = null;
@@ -352,6 +507,7 @@
             </table>
         </div>
     </div>
+</div>
 
     <?php if (!empty($supplies)): ?>
         <?php
@@ -367,55 +523,93 @@
         <div class="saltoDePagina d-print-block"></div>
 
         <div class="row">
-            <div class="col-8">
-                <h5>Resumen de Insumos por Semana</h5>
-                <table class="table table-sm">
-                    <tr>
-                        <th>Aplicar</th>
-                        <th>Insumo</th>
-                        <th>Medida</th>
-                        <th>Dosis</th>
-                        <th>#Cama Real</th>
-                        <th>Cantidad a Usar</th>
-                    </tr>
-                    <?php
-                    foreach ($supplies as $sp):
-                        ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($sp->aplicacion); ?></td>
-                            <td><?php echo htmlspecialchars($sp->insumo); ?></td>
-                            <td><?php echo htmlspecialchars($sp->medida); ?></td>
-                            <td><?php echo number_format($sp->dosis, 2, ',', '.'); ?></td>
-                            <td><?php echo number_format($sp->ncamas, 0, '', '.'); ?></td>
-                            <td><?php echo number_format($sp->cantidad, 2, ',', '.'); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </table>
+            <div class="col-12 col-lg-8 mb-4">
+                <div class="card shadow-sm border-0 h-100" style="border-radius: 12px; overflow: hidden;">
+                    <div class="card-header bg-white py-2 border-bottom">
+                        <h6 class="font-weight-bold text-dark mb-0 d-flex align-items-center">
+                            <span class="material-icons mr-1 me-1 text-teal" style="font-size: 1.15rem; color: #00796B;">inventory_2</span>
+                            Resumen de Insumos por Semana
+                        </h6>
+                    </div>
+                    <div class="card-body p-2 p-md-3">
+                        <div class="table-responsive">
+                            <table class="table-aplicaciones-reporte table-sm mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Aplicar</th>
+                                        <th>Insumo</th>
+                                        <th>Medida</th>
+                                        <th>Dosis</th>
+                                        <th>#Cama Real</th>
+                                        <th>Cantidad a Usar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($supplies as $sp): ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($sp->aplicacion); ?></td>
+                                            <td class="font-weight-bold"><?php echo htmlspecialchars($sp->insumo); ?></td>
+                                            <td><?php echo htmlspecialchars($sp->medida); ?></td>
+                                            <td class="text-right"><?php echo number_format($sp->dosis, 2, ',', '.'); ?></td>
+                                            <td class="text-right"><?php echo number_format($sp->ncamas, 0, '', '.'); ?></td>
+                                            <td class="text-right font-weight-bold"><?php echo number_format($sp->cantidad, 2, ',', '.'); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="col-4">
-                <h5>Total por Insumo</h5>
-                <table class="table table-sm">
-                    <tr>
-                        <th>Insumo</th>
-                        <th>Medida</th>
-                        <th>Total</th>
-                    </tr>
-                    <?php foreach ($totalesPorInsumo as $key => $tot): ?>
-                        <?php list($insumo, $medida) = explode('|', $key); ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($insumo); ?></td>
-                            <td><?php echo htmlspecialchars($medida); ?></td>
-                            <td><?php echo number_format($tot, 2, ',', '.'); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </table>
+            <div class="col-12 col-lg-4 mb-4">
+                <div class="card shadow-sm border-0 h-100" style="border-radius: 12px; overflow: hidden;">
+                    <div class="card-header bg-white py-2 border-bottom">
+                        <h6 class="font-weight-bold text-dark mb-0 d-flex align-items-center">
+                            <span class="material-icons mr-1 me-1 text-teal" style="font-size: 1.15rem; color: #00796B;">calculate</span>
+                            Total por Insumo
+                        </h6>
+                    </div>
+                    <div class="card-body p-2 p-md-3">
+                        <div class="table-responsive">
+                            <table class="table-aplicaciones-reporte table-sm mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Insumo</th>
+                                        <th>Medida</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($totalesPorInsumo as $key => $tot): ?>
+                                        <?php list($insumo, $medida) = explode('|', $key); ?>
+                                        <tr>
+                                            <td class="font-weight-bold"><?php echo htmlspecialchars($insumo); ?></td>
+                                            <td><?php echo htmlspecialchars($medida); ?></td>
+                                            <td class="text-right font-weight-bold"><?php echo number_format($tot, 2, ',', '.'); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     <?php endif; ?>
 
 <?php else: ?>
-    <p>0 results</p>
+    <div class="card shadow-sm border-0 p-5 text-center bg-white" style="border-radius: 14px;">
+        <div class="py-4">
+            <span class="material-icons text-muted mb-2" style="font-size: 3rem; color: #a0aec0;">search_off</span>
+            <h5 class="text-dark font-weight-bold">No se encontraron aplicaciones</h5>
+            <p class="text-muted small mb-0">No hay registros de aplicaciones programadas para la finca y rango de fechas seleccionado.</p>
+        </div>
+    </div>
 <?php endif; ?>
+
+        </div> <!-- Fin #aplicacionesMainCol -->
+    </div> <!-- Fin #aplicacionesRow -->
+</div> <!-- Fin container-fluid -->
 
 <!-- ========================================================
      MODAL: FORMATO SOLICITUD SALIDA DE MATERIALES (FOR 012.2 ALM 406)
@@ -643,5 +837,29 @@
             printIframe.contentWindow.focus();
             printIframe.contentWindow.print();
         }, 250);
+    }
+
+    function toggleSidebar() {
+        var sidebar = document.getElementById('aplicacionesSidebarCol');
+        var main = document.getElementById('aplicacionesMainCol');
+        var btnMostrar = document.getElementById('btnMostrarFiltros');
+        if (!sidebar || !main) return;
+
+        var isHidden = sidebar.classList.toggle('d-none');
+        if (isHidden) {
+            main.classList.remove('col-md-8', 'col-lg-9');
+            main.classList.add('col-12');
+            if (btnMostrar) {
+                btnMostrar.classList.remove('d-none');
+                btnMostrar.classList.add('d-inline-flex');
+            }
+        } else {
+            main.classList.remove('col-12');
+            main.classList.add('col-md-8', 'col-lg-9');
+            if (btnMostrar) {
+                btnMostrar.classList.add('d-none');
+                btnMostrar.classList.remove('d-inline-flex');
+            }
+        }
     }
 </script>

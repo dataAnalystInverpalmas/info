@@ -6,7 +6,7 @@
 
 require_once dirname(__DIR__) . '/src/autoload.php';
 require_once dirname(__DIR__) . '/funciones/conexion.php';
-require_once dirname(__DIR__) . '/bd/conexion.php';
+
 
 use App\Controllers\BitacoraController;
 

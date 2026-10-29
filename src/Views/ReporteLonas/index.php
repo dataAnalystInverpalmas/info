@@ -43,23 +43,52 @@
         font-size: 0.8rem;
     }
 
-    /* Tarjeta de Filtros */
-    .card-filtros-lonas {
-        background: #ffffff;
-        border-radius: 10px;
-        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.03);
-        border: 1px solid #e2e8f0;
-        padding: 0.85rem 1rem;
-        margin-bottom: 1rem;
+    /* Barra lateral de filtros (mismo estilo que el sidebar principal) */
+    .filtros-sidebar.offcanvas {
+        --bs-offcanvas-width: 290px;
+        background-color: #FFFFFF;
+        border-left: 1px solid #E2E8F0;
+        box-shadow: -2px 0 12px rgba(15, 23, 42, 0.06);
     }
 
-    .card-filtros-lonas .filter-label {
+    .filtros-sidebar .offcanvas-header {
+        height: 60px;
+        padding: 0 1.25rem;
+        border-bottom: 1px solid #F1F5F9;
+        flex-shrink: 0;
+    }
+
+    .filtros-sidebar .offcanvas-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #004D40;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filtros-sidebar .offcanvas-body {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1.1rem 1.25rem;
+    }
+
+    .filtros-sidebar .filtros-footer {
+        padding: 0.85rem 1.25rem;
+        border-top: 1px solid #F1F5F9;
+        background: #F8FAFC;
+        flex-shrink: 0;
+    }
+
+    .filtros-sidebar .filter-label {
+        display: block;
         font-size: 0.72rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.03em;
         color: #4A5568;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.3rem;
     }
 
     .select2-container .select2-selection--single {
@@ -198,8 +227,8 @@
         border: 1px solid #000000;
         font-weight: 800;
         text-align: center;
-        padding: 3px 2px;
-        font-size: 0.7rem;
+        padding: 2.5px 2px;
+        font-size: 0.69rem;
         vertical-align: middle;
         line-height: 1.1;
     }
@@ -226,17 +255,17 @@
     }
 
     .table-planilla tbody tr {
-        height: 30px;
+        height: 22px;
     }
 
     .table-planilla tbody td {
         border: 1px solid #000000;
-        padding: 3.5px 3px;
+        padding: 1.5px 3px;
         vertical-align: middle;
-        line-height: 1.2;
-        height: 30px;
+        line-height: 19px;
+        height: 22px;
         font-variant-numeric: tabular-nums;
-        font-size: 0.74rem;
+        font-size: 0.72rem;
     }
 
     .table-planilla tbody td.cell-sem {
@@ -279,13 +308,15 @@
 
     /* ========================================================
        ESTILOS DE IMPRESIÓN (PRINT)
-       - Ocupa el largo completo de la página carta sin saltar de hoja
-       - Cuadrícula más ancha y tipos de letra más nítidos
+       - Ocupa exactamente el largo de la hoja carta (279.4mm) en 1 sola página
+       - Mantiene el encabezado unido a la tabla sin saltos de página huérfanos
+       - Formato media carta (50% de ancho) en la mitad izquierda
+       - 1CM de separación en el encabezado
        ======================================================== */
     @media print {
         @page {
             size: letter portrait;
-            margin: 1.5mm 3.5mm 1mm 3.5mm;
+            margin: 2.0mm 3.0mm 2.0mm 3.0mm;
         }
 
         html,
@@ -294,13 +325,14 @@
             padding: 0 !important;
             margin: 0 !important;
             width: 100% !important;
-            height: 100% !important;
+            height: auto !important;
+            min-height: 0 !important;
             color: #000000 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
         }
 
-        /* Ocultar elementos de UI */
+        /* Ocultar elementos de UI y navegación */
         .fixed-top,
         .navbar,
         .navbar-custom,
@@ -309,21 +341,33 @@
         .btn-toolbar-actions,
         .no-print,
         footer,
+        header,
+        nav,
+        aside,
         #sidebar,
         #mostrar_loading,
         #mostrar_listo,
-        #mostrar_error {
+        #mostrar_error,
+        .toast-container {
             display: none !important;
         }
 
+        /* Contenedores sin paddings ni márgenes que empujen la tabla */
+        section,
+        .container-fluid,
         .reporte-lonas-container {
             padding: 0 !important;
             margin: 0 !important;
             width: 100% !important;
             max-width: 100% !important;
+            border: none !important;
+            box-shadow: none !important;
+            overflow: visible !important;
+            height: auto !important;
+            min-height: 0 !important;
         }
 
-        /* EXACTAMENTE LA MITAD DE LA HOJA CARTA (50%) */
+        /* EXACTAMENTE LA MITAD DE LA HOJA CARTA (50% ANCHO) */
         .planilla-wrapper {
             width: 50% !important;
             max-width: 50% !important;
@@ -332,68 +376,135 @@
             padding: 0 !important;
             border: none !important;
             box-shadow: none !important;
+            box-sizing: border-box !important;
+            display: block !important;
+            height: auto !important;
+            min-height: 0 !important;
+            break-inside: avoid !important;
             page-break-inside: avoid !important;
+            break-after: avoid !important;
             page-break-after: avoid !important;
         }
 
+        /* ENCABEZADO DE LA PLANILLA (1CM superior en encabezado) */
         .planilla-header {
-            margin-top: 5mm !important;
-            margin-bottom: 0.8mm !important;
+            text-align: center !important;
+            margin-top: 10mm !important;
+            margin-bottom: 0.4mm !important;
+            padding: 0 !important;
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+            break-after: avoid !important;
+            page-break-after: avoid !important;
         }
 
         .planilla-header .finca-name {
             font-size: 8.0pt !important;
+            font-weight: 800 !important;
+            color: #000000 !important;
             line-height: 1.1 !important;
+            margin: 0 !important;
+            letter-spacing: 0.04em !important;
         }
 
         .planilla-header .form-title {
-            font-size: 7.4pt !important;
+            font-size: 7.0pt !important;
+            font-weight: 800 !important;
+            color: #000000 !important;
             line-height: 1.1 !important;
+            margin: 0.2mm 0 !important;
+            letter-spacing: 0.02em !important;
         }
 
         .planilla-header .doc-code {
-            font-size: 6.0pt !important;
+            font-size: 5.8pt !important;
+            font-weight: 700 !important;
+            color: #000000 !important;
             line-height: 1 !important;
+            margin: 0 !important;
+            letter-spacing: 0.05em !important;
         }
 
+        /* CAMPOS DE INFORMACIÓN */
         .planilla-fields {
-            margin-top: 0.8mm !important;
-            margin-bottom: 1.2mm !important;
-            font-size: 6.2pt !important;
+            margin-top: 0.3mm !important;
+            margin-bottom: 0.3mm !important;
+            padding: 0 !important;
+            font-size: 5.8pt !important;
+            color: #000000 !important;
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+            break-after: avoid !important;
+            page-break-after: avoid !important;
         }
 
         .planilla-field-row {
-            margin-bottom: 0.5mm !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: flex-end !important;
+            margin-bottom: 0.25mm !important;
+            gap: 3px !important;
+        }
+
+        .planilla-field {
+            display: flex !important;
+            align-items: flex-end !important;
+            white-space: nowrap !important;
         }
 
         .planilla-field .field-label {
-            font-size: 6.0pt !important;
+            font-size: 5.8pt !important;
             font-weight: 800 !important;
+            margin-right: 2px !important;
+            color: #000000 !important;
+            line-height: 1 !important;
         }
 
         .planilla-field .field-val {
-            font-size: 6.2pt !important;
+            font-size: 5.8pt !important;
+            font-weight: 700 !important;
             border-bottom: 0.5pt solid #000000 !important;
-            min-height: 2.6mm !important;
+            min-height: 2.2mm !important;
             padding: 0 2px !important;
+            color: #000000 !important;
+            line-height: 1.05 !important;
+            text-align: center !important;
         }
 
+        /* TABLA TIPO CUADRÍCULA: EVITAR SALTOS ANTES Y DENTRO */
         .table-planilla {
             width: 100% !important;
             border-collapse: collapse !important;
-            font-size: 6.5pt !important;
-            line-height: 1 !important;
             table-layout: fixed !important;
+            margin: 0 !important;
+            color: #000000 !important;
+            break-before: avoid !important;
+            page-break-before: avoid !important;
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+        }
+
+        .table-planilla thead {
+            display: table-header-group !important;
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+            break-after: avoid !important;
+            page-break-after: avoid !important;
         }
 
         .table-planilla thead th {
             border: 0.5pt solid #000000 !important;
-            padding: 1.2px 1px !important;
-            font-size: 6.6pt !important;
+            padding: 0 1px !important;
+            font-size: 5.9pt !important;
             font-weight: 800 !important;
             background: #ffffff !important;
             color: #000000 !important;
-            height: 5.0mm !important;
+            height: 3.6mm !important;
+            max-height: 3.6mm !important;
+            line-height: 3.6mm !important;
+            vertical-align: middle !important;
+            text-align: center !important;
+            box-sizing: border-box !important;
         }
 
         .table-planilla th.col-sem {
@@ -417,26 +528,30 @@
         }
 
         .table-planilla tbody {
+            break-inside: avoid !important;
             page-break-inside: avoid !important;
         }
 
-        /* FILAS CON ALTURA A 5.75mm */
+        /* FILAS CALIBRADAS EXACTAMENTE PARA 53 SEMANAS EN 1 SOLA HOJA CARTA CON 1CM EN ENCABEZADO */
         .table-planilla tbody tr {
-            height: 5.8mm !important;
-            max-height: 5.8mm !important;
+            height: 3.6mm !important;
+            max-height: 3.6mm !important;
+            break-inside: avoid !important;
             page-break-inside: avoid !important;
         }
 
         .table-planilla tbody td {
             border: 0.5pt solid #000000 !important;
-            padding: 1px 2px !important;
-            font-size: 6.5pt !important;
+            padding: 0 1px !important;
+            font-size: 5.9pt !important;
             color: #000000 !important;
-            line-height: 1.15 !important;
-            height: 5.8mm !important;
+            line-height: 3.6mm !important;
+            height: 3.6mm !important;
+            max-height: 3.6mm !important;
             vertical-align: middle !important;
             overflow: hidden !important;
             white-space: nowrap !important;
+            box-sizing: border-box !important;
         }
 
         .table-planilla tbody td.cell-sem {
@@ -444,8 +559,19 @@
             text-align: center !important;
         }
 
+        .table-planilla tbody td.cell-num {
+            text-align: right !important;
+        }
+
         .table-planilla tbody td.cell-tot {
             font-weight: 800 !important;
+            text-align: right !important;
+        }
+
+        .table-planilla tbody td.cell-fm,
+        .table-planilla tbody td.cell-acm {
+            text-align: center !important;
+            font-weight: 700 !important;
         }
 
         .table-planilla tbody td.cell-empty {
@@ -459,7 +585,7 @@
     <!-- Barra de Título y Acciones -->
     <div class="reporte-lonas-bar d-flex justify-content-between align-items-center">
         <div>
-            <h1>
+            <h1 id="reportTitle">
                 <span class="material-icons" style="font-size: 1.35rem; color: #00796B;">description</span>
                 Planilla para Registro Corte (Lonas)
             </h1>
@@ -468,111 +594,108 @@
             </p>
         </div>
         <div class="btn-toolbar-actions d-flex gap-2">
-            <button type="button" class="btn btn-outline-secondary mr-2" id="btnLimpiarFiltros"
-                title="Limpiar todos los filtros">
-                <span class="material-icons align-middle" style="font-size: 1rem;">refresh</span>
-                Limpiar
-            </button>
-            <button type="button" class="btn btn-teal mr-2" id="btnConsultar"
-                title="Actualizar datos con los filtros seleccionados">
-                <span class="material-icons align-middle" style="font-size: 1rem;">search</span>
-                Consultar
-            </button>
-            <button type="button" class="btn btn-outline-success mr-2" id="btnExportarExcel"
-                title="Exportar a Excel (CSV)">
+            <button type="button" class="btn btn-outline-secondary" id="btnExportarExcel"
+                title="Exportar planilla a Excel (CSV)">
                 <span class="material-icons align-middle" style="font-size: 1rem;">table_view</span>
                 Excel
             </button>
-            <button type="button" class="btn btn-success" id="btnImprimir"
-                title="Imprimir en tamaño carta (mitad de hoja)">
-                <span class="material-icons align-middle" style="font-size: 1rem;">local_printshop</span>
+            <button type="button" class="btn btn-outline-secondary" id="btnImprimir" title="Imprimir planilla">
+                <span class="material-icons align-middle" style="font-size: 1rem;">print</span>
                 Imprimir
+            </button>
+            <button type="button" class="btn btn-teal" id="btnMostrarFiltros" data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasFiltros" aria-controls="offcanvasFiltros" title="Mostrar filtros">
+                <span class="material-icons align-middle" style="font-size: 1rem;">filter_list</span>
+                Filtros
+                <span class="badge rounded-pill bg-light text-dark ms-1 d-none" id="badgeFiltrosActivos">0</span>
             </button>
         </div>
     </div>
 
-    <!-- Filtros de Segmentación (desde plane) -->
-    <div class="card-filtros-lonas no-print">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="font-weight-bold" style="font-size: 0.85rem; color: #2D3748;">
-                <span class="material-icons text-teal align-middle mr-1"
-                    style="font-size: 1.1rem; color: #00796B;">tune</span>
-                Filtros de Segmentación (Plane)
-            </span>
-            <span class="badge badge-light text-muted font-weight-normal px-2 py-1"
-                style="border: 1px solid #e2e8f0; font-size: 0.72rem;">
-                Los selectores se van segmentando automáticamente
-            </span>
+    <!-- Barra lateral vertical de filtros (alto completo) -->
+    <div class="offcanvas offcanvas-end filtros-sidebar no-print" tabindex="-1" id="offcanvasFiltros"
+        data-bs-scroll="true" data-bs-backdrop="false" aria-labelledby="offcanvasFiltrosLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasFiltrosLabel">
+                <span class="material-icons" style="font-size: 1.2rem; color: #00796B;">filter_list</span>
+                Filtros
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
         </div>
-
-        <div class="row">
-            <!-- 1. Finca -->
-            <div class="col-12 col-sm-6 col-md-4 col-lg-2 mb-2">
-                <label class="filter-label" for="selectFinca">1. Finca</label>
-                <select id="selectFinca" class="form-control select2-filter" data-placeholder="-- Finca --">
-                    <option value=""></option>
-                    <?php foreach ($opciones['fincas'] as $f): ?>
-                        <option value="<?php echo htmlspecialchars($f); ?>"><?php echo htmlspecialchars($f); ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-
-            <!-- 2. Bloque -->
-            <div class="col-12 col-sm-6 col-md-4 col-lg-2 mb-2">
-                <label class="filter-label" for="selectBloque">2. Bloque</label>
-                <select id="selectBloque" class="form-control select2-filter" data-placeholder="-- Bloque --">
-                    <option value=""></option>
-                    <?php foreach ($opciones['bloques'] as $b): ?>
-                        <option value="<?php echo htmlspecialchars($b); ?>"><?php echo htmlspecialchars($b); ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-
-            <!-- 3. Variedad -->
-            <div class="col-12 col-sm-6 col-md-4 col-lg-2 mb-2">
-                <label class="filter-label" for="selectVariedad">3. Variedad</label>
-                <select id="selectVariedad" class="form-control select2-filter" data-placeholder="-- Variedad --">
-                    <option value=""></option>
-                    <?php foreach ($opciones['variedades'] as $v): ?>
-                        <option value="<?php echo htmlspecialchars($v); ?>"><?php echo htmlspecialchars($v); ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-
-            <!-- 4. Semana Siembra (YYWW) -->
-            <div class="col-12 col-sm-6 col-md-4 col-lg-2 mb-2">
-                <label class="filter-label" for="selectSemanaSiembra">4. Sem. Siembra (YYWW)</label>
-                <select id="selectSemanaSiembra" class="form-control select2-filter"
-                    data-placeholder="-- Sem. Siembra --">
-                    <option value=""></option>
-                    <?php foreach ($opciones['semanas_siembra'] as $ss): ?>
-                        <option value="<?php echo htmlspecialchars($ss); ?>"><?php echo htmlspecialchars($ss); ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-
-            <!-- 5. Cosecha -->
-            <div class="col-12 col-sm-6 col-md-4 col-lg-2 mb-2">
-                <label class="filter-label" for="selectCosecha">5. Cosecha</label>
-                <select id="selectCosecha" class="form-control select2-filter" data-placeholder="-- Cosecha --">
-                    <option value=""></option>
-                    <?php foreach ($opciones['cosechas'] as $c): ?>
-                        <option value="<?php echo htmlspecialchars($c); ?>"><?php echo htmlspecialchars($c); ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-
-            <!-- 6. Año ISO -->
-            <div class="col-12 col-sm-6 col-md-4 col-lg-2 mb-2">
-                <label class="filter-label" for="selectAnio">Año ISO</label>
-                <select id="selectAnio" class="form-control select2-filter" data-placeholder="Año">
-                    <?php foreach ($anios as $a): ?>
-                        <option value="<?php echo $a; ?>" <?php echo $a === $anioDefault ? 'selected' : ''; ?>>
-                            <?php echo $a; ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
+        <div class="offcanvas-body">
+        <!-- 1. Finca -->
+        <div>
+            <label class="filter-label" for="selectFinca">1. Finca</label>
+            <select id="selectFinca" class="form-control select2-filter" data-placeholder="-- Finca --">
+                <option value=""></option>
+                <?php foreach ($opciones['fincas'] as $f): ?>
+                    <option value="<?php echo htmlspecialchars($f); ?>"><?php echo htmlspecialchars($f); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <!-- 2. Bloque -->
+        <div>
+            <label class="filter-label" for="selectBloque">2. Bloque</label>
+            <select id="selectBloque" class="form-control select2-filter" data-placeholder="-- Bloque --">
+                <option value=""></option>
+                <?php foreach ($opciones['bloques'] as $b): ?>
+                    <option value="<?php echo htmlspecialchars($b); ?>"><?php echo htmlspecialchars($b); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <!-- 3. Variedad -->
+        <div>
+            <label class="filter-label" for="selectVariedad">3. Variedad</label>
+            <select id="selectVariedad" class="form-control select2-filter" data-placeholder="-- Variedad --">
+                <option value=""></option>
+                <?php foreach ($opciones['variedades'] as $v): ?>
+                    <option value="<?php echo htmlspecialchars($v); ?>"><?php echo htmlspecialchars($v); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <!-- 4. Semana Siembra (YYWW) -->
+        <div>
+            <label class="filter-label" for="selectSemanaSiembra">4. Sem. Siembra (YYWW)</label>
+            <select id="selectSemanaSiembra" class="form-control select2-filter" data-placeholder="-- Sem. Siembra --">
+                <option value=""></option>
+                <?php foreach ($opciones['semanas_siembra'] as $ss): ?>
+                    <option value="<?php echo htmlspecialchars($ss); ?>"><?php echo htmlspecialchars($ss); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <!-- 5. Cosecha -->
+        <div>
+            <label class="filter-label" for="selectCosecha">5. Cosecha</label>
+            <select id="selectCosecha" class="form-control select2-filter" data-placeholder="-- Cosecha --">
+                <option value=""></option>
+                <?php foreach ($opciones['cosechas'] as $c): ?>
+                    <option value="<?php echo htmlspecialchars($c); ?>"><?php echo htmlspecialchars($c); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <!-- 6. Año ISO -->
+        <div>
+            <label class="filter-label" for="selectAnio">Año ISO</label>
+            <select id="selectAnio" class="form-control select2-filter" data-placeholder="Año">
+                <?php foreach ($anios as $a): ?>
+                    <option value="<?php echo $a; ?>" <?php echo $a === $anioDefault ? 'selected' : ''; ?> >
+                        <?php echo $a; ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        </div>
+        <div class="filtros-footer d-flex gap-2">
+            <button type="button" class="btn btn-outline-secondary flex-fill" id="btnLimpiarFiltros"
+                title="Limpiar todos los filtros">
+                <span class="material-icons align-middle" style="font-size: 1rem;">refresh</span>
+                Limpiar
+            </button>
+            <button type="button" class="btn btn-teal flex-fill" id="btnConsultar"
+                title="Actualizar datos con los filtros seleccionados">
+                <span class="material-icons align-middle" style="font-size: 1rem;">search</span>
+                Consultar
+            </button>
         </div>
     </div>
 
@@ -653,10 +776,20 @@
         var plantasActuales = 0;
 
         // Inicializar Select2
+        // dropdownParent: el offcanvas atrapa el foco, el buscador de Select2 debe vivir dentro
         $('.select2-filter').select2({
             width: '100%',
-            allowClear: true
+            allowClear: true,
+            dropdownParent: $('#offcanvasFiltros')
         });
+
+        // Contador de filtros activos en el botón
+        function actualizarBadgeFiltros() {
+            const activos = ['#selectFinca', '#selectBloque', '#selectVariedad', '#selectSemanaSiembra', '#selectCosecha']
+                .filter((id) => $(id).val()).length;
+            $('#badgeFiltrosActivos').text(activos).toggleClass('d-none', activos === 0);
+        }
+        $('.select2-filter').on('change', actualizarBadgeFiltros);
 
         // Formatear enteros con separador de miles
         function formatearEntero(num) {
@@ -804,6 +937,7 @@
                 });
 
                 actualizandoCascada = false;
+                actualizarBadgeFiltros();
                 if (typeof callback === 'function') callback();
             }).fail(function (xhr, status, error) {
                 actualizandoCascada = false;
@@ -866,7 +1000,8 @@
                 return;
             }
 
-            var acumFM = 0.0;
+            var tallosHistoricos = parseInt(matriz.tallos_historicos, 10) || 0;
+            var acumFM = (matas > 0 && tallosHistoricos > 0) ? (tallosHistoricos / matas) : 0.0;
             var html = '';
 
             matriz.semanas.forEach(function (sem) {

@@ -1,6 +1,18 @@
+<link rel="stylesheet" href="scripts/crud_tables.css?v=2">
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <style>
+    .crud-page-header .crud-header-actions.report-actions-bar {
+        margin-bottom: 0 !important;
+        flex: 1 1 auto;
+        justify-content: flex-end;
+    }
+
+    .crud-page-header .crud-page-subtitle {
+        font-size: 0.85rem;
+        margin-top: 0;
+    }
+
     .sgp-bar {
         background: #ffffff;
         border-bottom: 1px solid #eef2f5;
@@ -61,107 +73,125 @@
     }
 </style>
 
-<div class="sgp-bar">
-    <h1>Seguimiento de Producción</h1>
-    <p>Comparación por tipo (por defecto RE y AJ, hasta 3 a la vez) de F/M y corte por edad o por año-semana, con filtros combinables por finca, bloque, flor, variedad, cosecha, ciclo y rango de semanas.</p>
-</div>
-
-<div class="container-fluid px-3 px-lg-4 pb-4">
-    <div class="row" id="sgpRow">
-        <div class="col-md-4 col-lg-3" id="sgpSidebarCol">
-            <div class="sgp-filtro-sidebar mr-0 mr-lg-3">
-                <div class="card mb-3 shadow-sm">
-                    <div class="card-header" id="sgpFiltrosToggle">
-                        <span>
-                            <span class="material-icons" style="font-size:1rem;vertical-align:middle;">filter_list</span>
-                            Filtros
-                        </span>
-                        <span class="material-icons toggle-icon">chevron_left</span>
-                    </div>
-                    <div class="card-body p-3" id="sgpFiltrosBody">
-                        <div class="sgp-filtros-grid">
-                            <div class="mb-2">
-                                <label for="sgpFiltroFinca">Finca</label>
-                                <select id="sgpFiltroFinca" class="form-control select2" multiple>
-                                    <?php foreach ($fincas as $finca): ?>
-                                        <option value="<?php echo htmlspecialchars($finca); ?>"><?php echo htmlspecialchars($finca); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-2">
-                                <label for="sgpFiltroBloque">Bloque</label>
-                                <select id="sgpFiltroBloque" class="form-control select2" multiple>
-                                    <?php foreach ($bloques as $bloque): ?>
-                                        <option value="<?php echo htmlspecialchars($bloque); ?>"><?php echo htmlspecialchars($bloque); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-2">
-                                <label for="sgpFiltroFlor">Flor</label>
-                                <select id="sgpFiltroFlor" class="form-control select2" multiple>
-                                    <?php foreach ($flores as $flor): ?>
-                                        <option value="<?php echo htmlspecialchars($flor); ?>"><?php echo htmlspecialchars($flor); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-2">
-                                <label for="sgpFiltroVariedad">Variedad</label>
-                                <select id="sgpFiltroVariedad" class="form-control select2" multiple>
-                                    <?php foreach ($variedades as $variedad): ?>
-                                        <option value="<?php echo htmlspecialchars($variedad); ?>"><?php echo htmlspecialchars($variedad); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-2">
-                                <label for="sgpFiltroCosecha">Cosecha</label>
-                                <select id="sgpFiltroCosecha" class="form-control select2" multiple>
-                                    <?php foreach ($cosechas as $cosecha): ?>
-                                        <option value="<?php echo htmlspecialchars($cosecha); ?>"><?php echo htmlspecialchars($cosecha); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-2">
-                                <label for="sgpFiltroCiclo">Ciclo</label>
-                                <select id="sgpFiltroCiclo" class="form-control select2" multiple>
-                                    <option value="1">Ciclo 1 (edad ≤ 35)</option>
-                                    <option value="2">Ciclo 2 (edad &gt; 35)</option>
-                                </select>
-                            </div>
-                            <div class="mb-2 sgp-filtros-grid-full">
-                                <label>Tipo (comparar hasta 3)</label>
-                                <div id="sgpFiltroTipo" class="sgp-tipo-checks">
-                                    <?php foreach ($tipos as $tipoOpt): ?>
-                                        <div class="form-check">
-                                            <input class="form-check-input sgp-tipo-check" type="checkbox" value="<?php echo htmlspecialchars($tipoOpt); ?>" id="sgpTipo_<?php echo htmlspecialchars($tipoOpt); ?>" <?php echo in_array($tipoOpt, $tiposPorDefecto, true) ? 'checked' : ''; ?>>
-                                            <label class="form-check-label" for="sgpTipo_<?php echo htmlspecialchars($tipoOpt); ?>"><?php echo htmlspecialchars($tipoOpt); ?></label>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                            <div class="mb-2">
-                                <label for="sgpFiltroSemanaDesde">Semana desde <small class="text-muted">(aaww)</small></label>
-                                <input type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="aaww" id="sgpFiltroSemanaDesde" class="form-control form-control-sm" value="<?php echo htmlspecialchars($semanaDesdeDefault); ?>">
-                            </div>
-                            <div class="mb-2">
-                                <label for="sgpFiltroSemanaHasta">Semana hasta <small class="text-muted">(aaww)</small></label>
-                                <input type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="aaww" id="sgpFiltroSemanaHasta" class="form-control form-control-sm" value="<?php echo htmlspecialchars($semanaHastaDefault); ?>">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <button class="btn btn-sm w-100 mb-2" style="background-color:#00796B;border-color:#00796B;color:#fff;" onclick="SeguimientoProduccion.aplicarFiltros()">
-                    <span class="material-icons" style="font-size:1rem;">search</span> Aplicar
-                </button>
-                <button class="btn btn-outline-secondary btn-sm w-100" onclick="SeguimientoProduccion.limpiarFiltros()">
-                    <span class="material-icons" style="font-size:1rem;">restart_alt</span> Limpiar
-                </button>
+<!-- Page Header Banner / Navbar estilo CRUD EMV -->
+<div class="crud-page-header d-print-none no-print">
+    <div class="crud-header-left">
+        <div class="crud-header-icon">
+            <span class="material-icons">trending_up</span>
+        </div>
+        <div>
+            <!-- Título omitido según indicación del usuario (ya presente en el navbar/breadcrumb superior) -->
+            <div class="crud-page-subtitle">
+                <span class="crud-page-badge">Producción</span>
+                <span class="text-muted d-none d-sm-inline">• Seguimiento detallado del ciclo y avance de producción</span>
             </div>
         </div>
+    </div>
+    <div class="crud-header-actions report-actions-bar mb-0">
+        <!-- Espacio para los chips de filtros activos a medida que se agregan -->
+        <div class="filtros-aplicados"></div>
+        <button type="button" class="btn btn-sm btn-teal d-flex align-items-center" data-bs-toggle="offcanvas"
+            data-bs-target="#sgpFiltros" aria-controls="sgpFiltros" title="Mostrar filtros">
+            <span class="material-icons me-1" style="font-size:1rem;">filter_list</span>
+            Filtros
+            <span class="badge rounded-pill bg-light text-dark ms-1 d-none filtros-badge">0</span>
+        </button>
+    </div>
+</div>
 
-        <div class="col-md-8 col-lg-9" id="sgpMainCol">
-            <button type="button" class="btn btn-outline-secondary btn-sm mb-3" id="sgpBtnMostrarFiltros" style="display:none;" onclick="SeguimientoProduccion.toggleSidebar()">
-                <span class="material-icons" style="font-size:1rem;vertical-align:middle;">chevron_right</span> Mostrar filtros
-            </button>
+<!-- Barra lateral vertical de filtros (mismo patrón que Reporte Lonas) -->
+<div class="offcanvas offcanvas-end filtros-sidebar no-print" tabindex="-1" id="sgpFiltros"
+    data-bs-scroll="true" data-bs-backdrop="false" aria-labelledby="sgpFiltrosLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="sgpFiltrosLabel">
+            <span class="material-icons" style="font-size: 1.2rem; color: #00796B;">filter_list</span>
+            Filtros
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div>
+            <label class="filter-label" for="sgpFiltroFinca">Finca</label>
+            <select id="sgpFiltroFinca" class="form-control select2" multiple data-cuenta-filtro>
+                <?php foreach ($fincas as $finca): ?>
+                    <option value="<?php echo htmlspecialchars($finca); ?>"><?php echo htmlspecialchars($finca); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div>
+            <label class="filter-label" for="sgpFiltroBloque">Bloque</label>
+            <select id="sgpFiltroBloque" class="form-control select2" multiple data-cuenta-filtro>
+                <?php foreach ($bloques as $bloque): ?>
+                    <option value="<?php echo htmlspecialchars($bloque); ?>"><?php echo htmlspecialchars($bloque); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div>
+            <label class="filter-label" for="sgpFiltroFlor">Flor</label>
+            <select id="sgpFiltroFlor" class="form-control select2" multiple data-cuenta-filtro>
+                <?php foreach ($flores as $flor): ?>
+                    <option value="<?php echo htmlspecialchars($flor); ?>"><?php echo htmlspecialchars($flor); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div>
+            <label class="filter-label" for="sgpFiltroVariedad">Variedad</label>
+            <select id="sgpFiltroVariedad" class="form-control select2" multiple data-cuenta-filtro>
+                <?php foreach ($variedades as $variedad): ?>
+                    <option value="<?php echo htmlspecialchars($variedad); ?>"><?php echo htmlspecialchars($variedad); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div>
+            <label class="filter-label" for="sgpFiltroCosecha">Cosecha</label>
+            <select id="sgpFiltroCosecha" class="form-control select2" multiple data-cuenta-filtro>
+                <?php foreach ($cosechas as $cosecha): ?>
+                    <option value="<?php echo htmlspecialchars($cosecha); ?>"><?php echo htmlspecialchars($cosecha); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div>
+            <label class="filter-label" for="sgpFiltroCiclo">Ciclo</label>
+            <select id="sgpFiltroCiclo" class="form-control select2" multiple data-cuenta-filtro>
+                <option value="1">Ciclo 1 (edad ≤ 35)</option>
+                <option value="2">Ciclo 2 (edad &gt; 35)</option>
+            </select>
+        </div>
+        <div>
+            <label class="filter-label" for="sgpFiltroSemanaDesde">Semana desde <small class="text-muted">(aaww)</small></label>
+            <input type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="aaww" id="sgpFiltroSemanaDesde" class="form-control form-control-sm" value="<?php echo htmlspecialchars($semanaDesdeDefault); ?>">
+        </div>
+        <div>
+            <label class="filter-label" for="sgpFiltroSemanaHasta">Semana hasta <small class="text-muted">(aaww)</small></label>
+            <input type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="aaww" id="sgpFiltroSemanaHasta" class="form-control form-control-sm" value="<?php echo htmlspecialchars($semanaHastaDefault); ?>">
+        </div>
+        <div>
+            <label class="filter-label">Tipo (comparar hasta 3)</label>
+            <div id="sgpFiltroTipo" class="d-flex flex-wrap gap-2 pt-1">
+                <?php foreach ($tipos as $tipoOpt): ?>
+                    <div class="form-check form-check-inline m-0">
+                        <input class="form-check-input sgp-tipo-check" type="checkbox" value="<?php echo htmlspecialchars($tipoOpt); ?>" id="sgpTipo_<?php echo htmlspecialchars($tipoOpt); ?>" <?php echo in_array($tipoOpt, $tiposPorDefecto, true) ? 'checked' : ''; ?>>
+                        <label class="form-check-label" style="font-size:0.8rem;" for="sgpTipo_<?php echo htmlspecialchars($tipoOpt); ?>"><?php echo htmlspecialchars($tipoOpt); ?></label>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+    <div class="filtros-footer d-flex gap-2">
+        <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" onclick="SeguimientoProduccion.limpiarFiltros()" title="Limpiar todos los filtros">
+            <span class="material-icons align-middle" style="font-size: 1rem;">restart_alt</span>
+            Limpiar
+        </button>
+        <button type="button" class="btn btn-sm btn-teal flex-fill" data-filtros-aplicar onclick="SeguimientoProduccion.aplicarFiltros()" title="Consultar con los filtros seleccionados">
+            <span class="material-icons align-middle" style="font-size: 1rem;">search</span>
+            Consultar
+        </button>
+    </div>
+</div>
+
+<div class="container-fluid px-0 pb-4">
+    <div class="row g-3" id="sgpRow">
+        <div class="col-12" id="sgpMainCol">
 
             <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
                 <div id="sgpEstadoCarga" class="text-muted small">Cargando información...</div>
@@ -243,4 +273,4 @@
     </div>
 </div>
 
-<script src="/scripts/seguimiento_produccion.js?v=4"></script>
+<script src="scripts/seguimiento_produccion.js?v=5"></script>

@@ -43,7 +43,7 @@ $queryTeoSiembra = "
         AND v.producto IN ('CLAVEL', 'MINICLAVEL') 
         AND a.estado = 1
         AND a.fecha_siembra IS NOT NULL
-    GROUP BY a.fecha_siembra, a.variedad, a.temporada_obj, a.tipo, b.fecha_pico, a.finca, a.bloque
+    GROUP BY a.fecha_siembra, a.finca, a.bloque, v.producto, a.variedad, b.año, a.temporada_obj, b.fecha_pico, a.ciclo
 ";
 
 // ----------------------------------------------------------------------------
@@ -73,7 +73,7 @@ $queryTeoEnsarte = "
         AND a.estado = 1 
         AND a.raiz = 0
         AND a.fecha_ensarte IS NOT NULL
-    GROUP BY a.fecha_ensarte, a.variedad, a.temporada_obj, a.tipo, b.fecha_pico, br.nombre
+    GROUP BY a.fecha_ensarte, v.producto, a.variedad, b.año, a.temporada_obj, b.fecha_pico, a.tipo, br.nombre
 ";
 
 // ----------------------------------------------------------------------------
@@ -103,7 +103,7 @@ $queryTeoCosecha = "
         AND a.estado = 1 
         AND a.raiz = 0
         AND a.fecha_cosecha IS NOT NULL
-    GROUP BY a.fecha_cosecha, a.variedad, a.temporada_obj, a.tipo, b.fecha_pico, br.nombre
+    GROUP BY a.fecha_cosecha, v.producto, a.variedad, b.año, a.temporada_obj, b.fecha_pico, a.tipo, br.nombre
 ";
 
 // ----------------------------------------------------------------------------
@@ -122,7 +122,7 @@ $querySiembra = "
         'SIEMBRA' AS tipo,
         b.fecha_pico,
         a.tipo_siembra AS tipo_siembra,
-        maquilador,
+        a.maquilador,
         SUM(a.plantas) AS valor
     FROM hplane AS a 
     LEFT JOIN seasons AS b ON b.nombre = a.temporada
@@ -130,7 +130,7 @@ $querySiembra = "
     WHERE a.plantas > 0 
         AND v.producto IN ('CLAVEL', 'MINICLAVEL')
         AND a.fecha_siembra IS NOT NULL
-    GROUP BY a.fecha_siembra, a.variedad, a.temporada, b.fecha_pico, a.finca, a.bloque, a.tipo_siembra
+    GROUP BY a.fecha_siembra, a.finca, a.bloque, v.producto, a.variedad, b.año, a.temporada, b.fecha_pico, a.tipo_siembra, a.maquilador
 ";
 
 // ----------------------------------------------------------------------------

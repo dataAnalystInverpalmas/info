@@ -23,15 +23,22 @@ class ReporteComparativoController {
     }
 
     private static function extraerFiltros(array $get): array {
+        $limpiarArray = static function ($valor): array {
+            if (!is_array($valor)) {
+                $valor = $valor !== null && $valor !== '' ? [$valor] : [];
+            }
+            return array_values(array_filter($valor, static fn($v) => $v !== null && $v !== ''));
+        };
+
         return [
-            'finca' => $get['finca'] ?? [],
-            'bloque' => $get['bloque'] ?? [],
-            'variedad' => $get['variedad'] ?? [],
-            'temporada' => $get['temporada'] ?? [],
-            'flor' => $get['flor'] ?? [],
-            'tipo_siembra' => $get['tipo_siembra'] ?? [],
-            'programa' => $get['programa'] ?? [],
-            'color' => $get['color'] ?? [],
+            'finca' => $limpiarArray($get['finca'] ?? []),
+            'bloque' => $limpiarArray($get['bloque'] ?? []),
+            'variedad' => $limpiarArray($get['variedad'] ?? []),
+            'temporada' => $limpiarArray($get['temporada'] ?? []),
+            'flor' => $limpiarArray($get['flor'] ?? []),
+            'tipo_siembra' => $limpiarArray($get['tipo_siembra'] ?? []),
+            'programa' => $limpiarArray($get['programa'] ?? []),
+            'color' => $limpiarArray($get['color'] ?? []),
             // Desde/hasta llegan como semana ISO yyww; se traducen al lunes/domingo de esa semana.
             'desde' => FechasReporte::semanaYywwAFecha((string)($get['desde'] ?? '')),
             'hasta' => FechasReporte::semanaYywwAFecha((string)($get['hasta'] ?? ''), true),

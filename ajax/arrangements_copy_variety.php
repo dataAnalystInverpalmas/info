@@ -19,7 +19,7 @@ if (mb_strtolower($variedadOrigen, 'UTF-8') === mb_strtolower($variedadDestino, 
 $conexion->begin_transaction();
 
 try {
-    $sqlSource = "SELECT finca, tipo, aplicar, medidat, valor FROM informes.arrangements WHERE variedad = ?";
+    $sqlSource = "SELECT finca, tipo, aplicar, medidat, valor FROM arrangements WHERE variedad = ?";
     $stmtSource = $conexion->prepare($sqlSource);
     if (!$stmtSource) {
         throw new Exception($conexion->error);
@@ -39,13 +39,13 @@ try {
         exit;
     }
 
-    $sqlExists = "SELECT 1 FROM informes.arrangements WHERE variedad = ? AND finca = ? AND tipo = ? AND aplicar = ? LIMIT 1";
+    $sqlExists = "SELECT 1 FROM arrangements WHERE variedad = ? AND finca = ? AND tipo = ? AND aplicar = ? LIMIT 1";
     $stmtExists = $conexion->prepare($sqlExists);
     if (!$stmtExists) {
         throw new Exception($conexion->error);
     }
 
-    $sqlInsert = "INSERT INTO informes.arrangements (variedad, finca, tipo, aplicar, medidat, valor) VALUES (?,?,?,?,?,?)";
+    $sqlInsert = "INSERT INTO arrangements (variedad, finca, tipo, aplicar, medidat, valor) VALUES (?,?,?,?,?,?)";
     $stmtInsert = $conexion->prepare($sqlInsert);
     if (!$stmtInsert) {
         throw new Exception($conexion->error);

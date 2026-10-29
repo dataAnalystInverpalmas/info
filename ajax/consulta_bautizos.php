@@ -44,8 +44,8 @@ if ($modo === 'barcode') {
                 WHEN NULLIF(TRIM(lv.codigo), '') IS NULL THEN ''
                 ELSE LPAD(TRIM(lv.codigo), 4, '0')
             END AS codigo_variedad
-        FROM informes.plane AS p
-        LEFT JOIN informes.ld_variedades AS lv ON UPPER(TRIM(lv.nombre)) = UPPER(TRIM(p.variedad))
+        FROM plane AS p
+        LEFT JOIN ld_variedades AS lv ON UPPER(TRIM(lv.nombre)) = UPPER(TRIM(p.variedad))
     ";
 
     if (!empty($where)) {
@@ -62,7 +62,7 @@ if ($modo === 'barcode') {
     //para cambiar el tiempo cuando un bautizo es nuevo solo cambie donde dice  <= 7 <- por el nuevo valor de tiempo
     $sql = "
         SELECT 
-            id,
+            MIN(id) AS id,
             finca,
             bloque,
             variedad,
@@ -76,7 +76,7 @@ if ($modo === 'barcode') {
                 WHEN DATEDIFF(NOW(), fecha_siembra) <= 7 THEN 'NUEVO'
                 ELSE 'ANTIGUO'
             END AS estado
-        FROM informes.plane
+        FROM plane
     ";
 
     //aqui se pasa el where consturido
@@ -85,7 +85,7 @@ if ($modo === 'barcode') {
     }
 
     //agrupo y ordeno los resultados
-    $sql .= " GROUP BY finca, bloque, variedad, temporada, tipo_siembra
+    $sql .= " GROUP BY finca, bloque, variedad, temporada, tipo_siembra, fecha_siembra
               ORDER BY finca ASC, bloque ASC, fecha_siembra DESC";
 }
 

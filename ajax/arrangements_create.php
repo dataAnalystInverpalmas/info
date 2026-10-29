@@ -13,7 +13,7 @@ if ($variedad === '' || $finca === '' || $tipo === '' || $aplicar === '') {
     exit;
 }
 
-$sql = "INSERT INTO informes.arrangements (variedad, finca, tipo, aplicar, medidat, valor) VALUES (?,?,?,?,?,?)";
+$sql = "INSERT INTO arrangements (variedad, finca, tipo, aplicar, medidat, valor) VALUES (?,?,?,?,?,?)";
 $stmt = $conexion->prepare($sql);
 if (!$stmt) { echo json_encode(['success'=>false,'message'=>$conexion->error]); exit; }
 $stmt->bind_param('sssssd', $variedad, $finca, $tipo, $aplicar, $medidat, $valor);

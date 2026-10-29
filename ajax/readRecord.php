@@ -17,11 +17,18 @@ $data = '<table id="tabla_consumos" class="table">
     <th>Eliminar</th>
 </tr></thead>';
 
+$tblCheck = $conexion->query("SHOW TABLES LIKE 'indicator_transactions'");
+if (!$tblCheck || $tblCheck->num_rows === 0) {
+    echo $data . '<tbody><tr><td colspan="9">No hay registros!</td></tr></tbody><tfoot></tfoot></table>';
+    exit;
+}
+
 $query = "SELECT a.id,a.fecha,b.ubicacion as indicador,c.revision as revision,c.tipo as tipo,a.valor FROM indicator_transactions as a 
             LEFT JOIN locations as b ON a.ubicacion_id=b.id LEFT JOIN indicators as c ON a.indicador_id=c.id WHERE a.estado=1";
 
 if (!$result = mysqli_query($conexion, $query)) {
-exit(mysqli_error($conexion));
+    echo $data . '<tbody><tr><td colspan="9">No hay registros!</td></tr></tbody><tfoot></tfoot></table>';
+    exit;
 }
 
 // if query results contains rows then featch those rows 

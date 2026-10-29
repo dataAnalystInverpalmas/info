@@ -56,21 +56,17 @@ $sqlSt1 = "UPDATE varieties AS a
            )";
 $update1 = $conexion->query($sqlSt1);
 
-$sqlvar1 ="update varieties as a set producto='VITRINAS MINICLAVEL' where a.nombre=(select variedad from plane as b where a.nombre=b.variedad and temporada='VITRINAS' AND producto='MINICLAVEL' group by 1)";
-$sqlvar2 ="update varieties as a set producto='VITRINAS MINICLAVEL' where a.nombre=(select variedad from plane as b where a.nombre=b.variedad and temporada='VITRINAS' AND producto='MINICLAVEL' group by 1)";
+$sqlvar1 = "UPDATE varieties AS a SET producto='VITRINAS MINICLAVEL' WHERE EXISTS (SELECT 1 FROM plane AS b WHERE b.variedad = a.nombre AND b.temporada='VITRINAS' AND b.producto='MINICLAVEL')";
 $conexion->query($sqlvar1);
-$conexion->query($sqlvar2);
 
-for ($i=2025;$i<=2026;$i++){
-	$sql_ciclo = "update varieties as v 
-	inner join 
-	(SELECT pr.variedad,pr.ciclo FROM program as pr
-	inner join seasons as s
-	on pr.temporada_obj=s.nombre and s.año=$i
-	group by 1) as q
-	on q.variedad=v.nombre
-	set v.ciclo=q.ciclo
-	where v.ciclo=0";
+for ($i = 2025; $i <= 2026; $i++) {
+	$sql_ciclo = "UPDATE varieties AS v 
+	INNER JOIN 
+	(SELECT pr.variedad, MIN(pr.ciclo) AS ciclo FROM program AS pr
+	INNER JOIN seasons AS s ON pr.temporada_obj = s.nombre AND s.año = $i
+	GROUP BY pr.variedad) AS q ON q.variedad = v.nombre
+	SET v.ciclo = q.ciclo
+	WHERE v.ciclo = 0";
 
 	$updateQ = $conexion->query($sql_ciclo);
 }

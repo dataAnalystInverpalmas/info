@@ -1,13 +1,13 @@
 <?php
-include_once '../bd/conexion.php';
+
 if (is_file("funciones/conexion.php")){
     include ("funciones/conexion.php");
   }else{
     include ("../funciones/conexion.php");
 }
 
-$objeto = new Conexion();
-$conn = $objeto->Conectar();
+$conn = \App\Helpers\Database::getPdo(); //
+
 //recoger variables de formulario general
 $fecha = (isset($_POST['fecha'])) ? $_POST['fecha'] : '';
 $evaluador = (isset($_POST['evaluador'])) ? $_POST['evaluador'] : '';

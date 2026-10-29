@@ -12,7 +12,7 @@ if ($tipo === '' || $aplicar === '') {
     exit;
 }
 
-$sql = "INSERT INTO informes.arrangement (tipo, aplicar, seccion, orden, calc_conciclo) VALUES (?,?,?,?,?)";
+$sql = "INSERT INTO arrangement (tipo, aplicar, seccion, orden, calc_conciclo) VALUES (?,?,?,?,?)";
 $stmt = $conexion->prepare($sql);
 if (!$stmt) { echo json_encode(['success'=>false,'message'=>$conexion->error]); exit; }
 $stmt->bind_param('ssiii', $tipo, $aplicar, $seccion, $orden, $calc);

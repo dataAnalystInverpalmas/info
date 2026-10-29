@@ -12,12 +12,12 @@ $old_tipo = trim($_POST['old_tipo'] ?? '');
 $old_aplicar = trim($_POST['old_aplicar'] ?? '');
 
 if ($id > 0) {
-    $sql = "UPDATE informes.arrangement SET tipo=?, aplicar=?, seccion=?, orden=?, calc_conciclo=? WHERE id=?";
+    $sql = "UPDATE arrangement SET tipo=?, aplicar=?, seccion=?, orden=?, calc_conciclo=? WHERE id=?";
     $stmt = $conexion->prepare($sql);
     if (!$stmt) { echo json_encode(['success'=>false,'message'=>$conexion->error]); exit; }
     $stmt->bind_param('ssiiii', $tipo, $aplicar, $seccion, $orden, $calc, $id);
 } else {
-    $sql = "UPDATE informes.arrangement SET tipo=?, aplicar=?, seccion=?, orden=?, calc_conciclo=? WHERE tipo=? AND aplicar=?";
+    $sql = "UPDATE arrangement SET tipo=?, aplicar=?, seccion=?, orden=?, calc_conciclo=? WHERE tipo=? AND aplicar=?";
     $stmt = $conexion->prepare($sql);
     if (!$stmt) { echo json_encode(['success'=>false,'message'=>$conexion->error]); exit; }
     $stmt->bind_param('ssiiiss', $tipo, $aplicar, $seccion, $orden, $calc, $old_tipo, $old_aplicar);

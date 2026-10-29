@@ -1,6 +1,18 @@
+<link rel="stylesheet" href="scripts/crud_tables.css?v=2">
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <style>
+    .crud-page-header .crud-header-actions.report-actions-bar {
+        margin-bottom: 0 !important;
+        flex: 1 1 auto;
+        justify-content: flex-end;
+    }
+
+    .crud-page-header .crud-page-subtitle {
+        font-size: 0.85rem;
+        margin-top: 0;
+    }
+
     .ce-bar { background:#fff; border-bottom:1px solid #eef2f5; box-shadow:0 2px 10px rgba(0,0,0,.05); margin:-.5rem -15px 1rem; padding:.9rem 15px; }
     .ce-bar h1 { font-size:1.05rem; font-weight:700; margin:0; color:#17312d; }
     .ce-bar p { margin:.15rem 0 0; color:#5f6f6b; font-size:.8rem; }
@@ -59,70 +71,107 @@
     @media (max-width:575.98px) { .ce-filtros-grid { grid-template-columns:minmax(0,1fr); } }
 </style>
 
-<div class="ce-bar">
-    <h1>Comparar Escenarios</h1>
-    <p>Tallos por escenario (fuente) y tipo, cruzados con semana, variedad, flor y color. Filtros, agrupaciones, gráficos y comparaciones se recalculan al instante.</p>
-</div>
-
-<div class="container-fluid px-3 px-lg-4 pb-4">
-    <div class="row">
-        <!-- ===== Filtros ===== -->
-        <div class="col-md-4 col-lg-3" id="ceSidebarCol">
-            <div class="ce-sidebar mr-0 mr-lg-3">
-                <div class="card mb-3 shadow-sm">
-                    <div class="card-header" id="ceFiltrosToggle">
-                        <span><span class="material-icons" style="font-size:1rem;vertical-align:middle;">filter_list</span> Filtros</span>
-                        <span class="material-icons">chevron_left</span>
-                    </div>
-                    <div class="card-body p-3">
-                        <div class="ce-filtros-grid">
-                            <div class="mb-2 ce-full"><label for="ceFFuente">Fuente (escenario)</label>
-                                <select id="ceFFuente" class="form-control ce-ms" multiple></select></div>
-                            <div class="mb-2"><label for="ceFTipo">Tipo</label>
-                                <select id="ceFTipo" class="form-control ce-ms" multiple></select></div>
-                            <div class="mb-2"><label for="ceFAnio">Año</label>
-                                <select id="ceFAnio" class="form-control ce-ms" multiple></select></div>
-                            <div class="mb-2"><label for="ceFFlor">Flor</label>
-                                <select id="ceFFlor" class="form-control ce-ms" multiple></select></div>
-                            <div class="mb-2"><label for="ceFColor">Color</label>
-                                <select id="ceFColor" class="form-control ce-ms" multiple></select></div>
-                            <div class="mb-2 ce-full"><label for="ceFVariedad">Variedad</label>
-                                <select id="ceFVariedad" class="form-control ce-ms" multiple></select></div>
-                            <div class="mb-2"><label for="ceSemanaDesde">Semana desde</label>
-                                <select id="ceSemanaDesde" class="form-control ce-single">
-                                    <?php foreach ($semanas as $s): ?>
-                                        <option value="<?php echo htmlspecialchars($s); ?>" <?php echo $s === $semanaDesdeDefault ? 'selected' : ''; ?>><?php echo htmlspecialchars($s); ?></option>
-                                    <?php endforeach; ?>
-                                </select></div>
-                            <div class="mb-2"><label for="ceSemanaHasta">Semana hasta</label>
-                                <select id="ceSemanaHasta" class="form-control ce-single">
-                                    <?php foreach ($semanas as $s): ?>
-                                        <option value="<?php echo htmlspecialchars($s); ?>" <?php echo $s === $semanaHastaDefault ? 'selected' : ''; ?>><?php echo htmlspecialchars($s); ?></option>
-                                    <?php endforeach; ?>
-                                </select></div>
-                            <div class="mb-2 ce-full"><label for="ceGranularidad">Granularidad de carga</label>
-                                <select id="ceGranularidad" class="form-control form-control-sm">
-                                    <option value="semana" selected>Semana</option>
-                                    <option value="dia">Día (más pesado)</option>
-                                </select></div>
-                        </div>
-                        <small class="text-muted d-block mt-1">Fuente, tipo, año, flor, color y variedad filtran en cascada de inmediato. Semana y granularidad recargan los datos.</small>
-                    </div>
-                </div>
-                <button class="btn btn-sm w-100 mb-2" style="background-color:#00796B;border-color:#00796B;color:#fff;" id="ceBtnCargar">
-                    <span class="material-icons" style="font-size:1rem;vertical-align:middle;">sync</span> Cargar rango
-                </button>
-                <button class="btn btn-outline-secondary btn-sm w-100" id="ceBtnLimpiar">
-                    <span class="material-icons" style="font-size:1rem;vertical-align:middle;">restart_alt</span> Limpiar filtros
-                </button>
+<!-- Page Header Banner / Navbar estilo CRUD EMV -->
+<div class="crud-page-header d-print-none no-print">
+    <div class="crud-header-left">
+        <div class="crud-header-icon">
+            <span class="material-icons">dynamic_feed</span>
+        </div>
+        <div>
+            <!-- Título omitido según indicación del usuario (ya presente en el navbar/breadcrumb superior) -->
+            <div class="crud-page-subtitle">
+                <span class="crud-page-badge">Producción</span>
+                <span class="text-muted d-none d-sm-inline">• Comparación y análisis entre diferentes escenarios</span>
             </div>
         </div>
+    </div>
+    <div class="crud-header-actions report-actions-bar mb-0">
+        <!-- Espacio para los chips de filtros activos a medida que se agregan -->
+        <div class="filtros-aplicados"></div>
+        <button type="button" class="btn btn-sm btn-teal d-flex align-items-center" data-bs-toggle="offcanvas"
+            data-bs-target="#ceFiltros" aria-controls="ceFiltros" title="Mostrar filtros">
+            <span class="material-icons me-1" style="font-size:1rem;">filter_list</span>
+            Filtros
+            <span class="badge rounded-pill bg-light text-dark ms-1 d-none filtros-badge">0</span>
+        </button>
+    </div>
+</div>
 
+<!-- Barra lateral vertical de filtros (mismo patrón que Reporte Lonas) -->
+<div class="offcanvas offcanvas-end filtros-sidebar no-print" tabindex="-1" id="ceFiltros"
+    data-bs-scroll="true" data-bs-backdrop="false" aria-labelledby="ceFiltrosLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="ceFiltrosLabel">
+            <span class="material-icons" style="font-size: 1.2rem; color: #00796B;">filter_list</span>
+            Filtros
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div>
+            <label class="filter-label" for="ceFFuente">Fuente (escenario)</label>
+            <select id="ceFFuente" class="form-control ce-ms" multiple data-cuenta-filtro></select>
+        </div>
+        <div>
+            <label class="filter-label" for="ceFTipo">Tipo</label>
+            <select id="ceFTipo" class="form-control ce-ms" multiple data-cuenta-filtro></select>
+        </div>
+        <div>
+            <label class="filter-label" for="ceFAnio">Año</label>
+            <select id="ceFAnio" class="form-control ce-ms" multiple data-cuenta-filtro></select>
+        </div>
+        <div>
+            <label class="filter-label" for="ceFFlor">Flor</label>
+            <select id="ceFFlor" class="form-control ce-ms" multiple data-cuenta-filtro></select>
+        </div>
+        <div>
+            <label class="filter-label" for="ceFColor">Color</label>
+            <select id="ceFColor" class="form-control ce-ms" multiple data-cuenta-filtro></select>
+        </div>
+        <div>
+            <label class="filter-label" for="ceFVariedad">Variedad</label>
+            <select id="ceFVariedad" class="form-control ce-ms" multiple data-cuenta-filtro></select>
+        </div>
+        <div>
+            <label class="filter-label" for="ceSemanaDesde">Semana desde</label>
+            <select id="ceSemanaDesde" class="form-control ce-single">
+                <?php foreach ($semanas as $s): ?>
+                    <option value="<?php echo htmlspecialchars($s); ?>" <?php echo $s === $semanaDesdeDefault ? 'selected' : ''; ?>><?php echo htmlspecialchars($s); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div>
+            <label class="filter-label" for="ceSemanaHasta">Semana hasta</label>
+            <select id="ceSemanaHasta" class="form-control ce-single">
+                <?php foreach ($semanas as $s): ?>
+                    <option value="<?php echo htmlspecialchars($s); ?>" <?php echo $s === $semanaHastaDefault ? 'selected' : ''; ?>><?php echo htmlspecialchars($s); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div>
+            <label class="filter-label" for="ceGranularidad">Granularidad</label>
+            <select id="ceGranularidad" class="form-control form-control-sm">
+                <option value="semana" selected>Semana</option>
+                <option value="dia">Día (más pesado)</option>
+            </select>
+        </div>
+    </div>
+    <div class="filtros-footer d-flex gap-2">
+        <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" id="ceBtnLimpiar" title="Limpiar todos los filtros">
+            <span class="material-icons align-middle" style="font-size: 1rem;">restart_alt</span>
+            Limpiar
+        </button>
+        <button type="button" class="btn btn-sm btn-teal flex-fill" id="ceBtnCargar" title="Cargar rango de datos">
+            <span class="material-icons align-middle" style="font-size: 1rem;">sync</span>
+            Cargar rango
+        </button>
+    </div>
+</div>
+
+<div class="container-fluid px-0 pb-4">
+    <div class="row g-3">
         <!-- ===== Contenido ===== -->
-        <div class="col-md-8 col-lg-9" id="ceMainCol">
-            <button type="button" class="btn btn-outline-secondary btn-sm mb-3" id="ceBtnMostrarFiltros" style="display:none;">
-                <span class="material-icons" style="font-size:1rem;vertical-align:middle;">chevron_right</span> Mostrar filtros
-            </button>
+        <div class="col-12" id="ceMainCol">
 
             <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
                 <div id="ceEstado" class="small text-muted">Cargando información...</div>
@@ -239,6 +288,11 @@
 </div>
 
 <script>
-    window.CE_CONFIG = { endpoint: '/ajax/compara_escenarios.php' };
+    (function() {
+        var loc = window.location.pathname;
+        var subDirMatch = loc.match(/^(.*\/info\/)/i);
+        var base = subDirMatch ? subDirMatch[1] : '';
+        window.CE_CONFIG = { endpoint: base + 'ajax/compara_escenarios.php' };
+    })();
 </script>
-<script src="/scripts/compara_escenarios.js?v=1"></script>
+<script src="scripts/compara_escenarios.js?v=2"></script>

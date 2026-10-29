@@ -36,4 +36,4 @@
     </div>
 </div>
 
-<script src="scripts/mainSP.js"></script>
+<script src="scripts/mainSP.js?v=<?= file_exists('scripts/mainSP.js') ? filemtime('scripts/mainSP.js') : time() ?>"></script>

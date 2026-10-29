@@ -1,17 +1,11 @@
 <?php
-//lamar conexion
-if (is_file("funciones/conexion.php")){
-    include ("funciones/conexion.php");
-  }else{
-    include ("../funciones/conexion.php");
+require_once dirname(__DIR__) . '/funciones/conexion.php';
+
+try {
+    $fecha = (new \DateTime('-7 days', new \DateTimeZone('-05:00')))->format('Y-m-d 00:00:00');
+} catch (\Throwable $e) {
+    $fecha = date('Y-m-d 00:00:00', strtotime('-7 days'));
 }
-
-require "../vendor/autoload.php";
-use Carbon\Carbon;
-
-$actual=Carbon::now('-5:00');
-$fechacarbon=new Carbon($actual);
-$fecha=$fechacarbon->subDay(7)->format('Y-m-d 00:00:00');
 
 $query = "SELECT a.id,a.registro,b.nombre,a.fecha_florero,d.nombre,a.grupo_descripcion
             FROM flower_vases as a 

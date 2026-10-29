@@ -27,6 +27,12 @@ class DashboardProyeccionesController
                 return;
             }
 
+            // Filtrar únicamente errores fatales que interrumpieron la ejecución del script
+            $fatalErrors = [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR];
+            if (!in_array($error['type'], $fatalErrors, true)) {
+                return;
+            }
+
             if (!headers_sent()) {
                 http_response_code(500);
                 self::sendJsonHeader();

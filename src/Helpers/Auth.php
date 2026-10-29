@@ -11,6 +11,12 @@ class Auth
     public static function start(): void
     {
         if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+            ini_set('session.cookie_httponly', '1');
+            ini_set('session.use_only_cookies', '1');
+            ini_set('session.cookie_samesite', 'Lax');
+            if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+                ini_set('session.cookie_secure', '1');
+            }
             session_start();
         }
     }
@@ -171,7 +177,6 @@ class Auth
             'views/resumen_ejecutivo_mensual.php',
             'views/compara_escenarios.php',
             'views/reporte_cosecha_lonas.php',
-            'views/plano_consulta.php',
             'views/plano_reemplazos.php',
         ];
         if (in_array($dir, $publicAuthDirs, true)) {

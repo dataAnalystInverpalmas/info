@@ -1,7 +1,7 @@
 <?php
-include_once '../bd/conexion.php';
-$objeto = new Conexion();
-$conexion = $objeto->Conectar();
+require_once dirname(__DIR__) . '/funciones/conexion.php';
+$conexion = \App\Helpers\Database::getPdo(); //
+
 
 $variedad = (isset($_POST['variedad'])) ? $_POST['variedad'] : '';
 $temporada_obj = (isset($_POST['temporada_obj'])) ? $_POST['temporada_obj'] : '';

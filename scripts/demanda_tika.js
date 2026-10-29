@@ -23,9 +23,21 @@ var DemandaTika = (function () {
         semana_hasta: { id: '#dtkFiltroSemanaHasta' }
     };
 
+    function getEndpointUrl(path) {
+        if (window.APP_BASE_URL) {
+            return window.APP_BASE_URL.replace(/\/+$/, '') + '/' + path.replace(/^\/+/, '');
+        }
+        var loc = window.location.pathname;
+        var subDirMatch = loc.match(/^(.*\/info\/)/i);
+        if (subDirMatch) {
+            return subDirMatch[1] + path.replace(/^\/+/, '');
+        }
+        return path;
+    }
+
     function init() {
-        $('.select2').select2({ width: '100%', placeholder: 'Todas', allowClear: true });
-        $('.select2-single').select2({ width: '100%' });
+        $('.select2').each(function () { $(this).select2({ width: '100%', placeholder: 'Todas', allowClear: true, dropdownParent: $(this).closest('.offcanvas, body') }); });
+        $('.select2-single').each(function () { $(this).select2({ width: '100%', dropdownParent: $(this).closest('.offcanvas, body') }); });
 
         defaultSemanaDesde = $('#dtkFiltroSemanaDesde').val() || '';
         defaultSemanaHasta = $('#dtkFiltroSemanaHasta').val() || '';
@@ -69,7 +81,7 @@ var DemandaTika = (function () {
     function actualizarOpcionesFiltros() {
         var filtros = construirFiltros();
         $.ajax({
-            url: '/ajax/demanda_tika_filters.php',
+            url: getEndpointUrl('ajax/demanda_tika_filters.php'),
             method: 'GET',
             data: filtros,
             dataType: 'json'
@@ -270,7 +282,7 @@ var DemandaTika = (function () {
     function cargarDatos() {
         setStatus('muted', 'Consultando demanda...');
         $.ajax({
-            url: '/ajax/demanda_tika.php',
+            url: getEndpointUrl('ajax/demanda_tika.php'),
             method: 'GET',
             data: construirFiltros(),
             dataType: 'json'
@@ -299,25 +311,23 @@ var DemandaTika = (function () {
     }
 
     function toggleSidebar() {
-        var sidebarCol = document.getElementById('dtkSidebarCol');
-        var mainCol = document.getElementById('dtkMainCol');
-        var btnMostrar = document.getElementById('dtkBtnMostrarFiltros');
-        var oculto = sidebarCol.classList.toggle('d-none');
-
-        if (oculto) {
-            mainCol.classList.remove('col-md-8', 'col-lg-9');
-            mainCol.classList.add('col-12');
-            btnMostrar.style.display = 'inline-flex';
-        } else {
-            mainCol.classList.remove('col-12');
-            mainCol.classList.add('col-md-8', 'col-lg-9');
-            btnMostrar.style.display = 'none';
+        var wrapper = document.getElementById('dtkFiltersWrapper');
+        if (!wrapper) return;
+        var btn = document.querySelector('[data-target="#dtkFiltersWrapper"]');
+        var isExp = wrapper.classList.toggle('is-expanded');
+        wrapper.classList.toggle('is-collapsed', !isExp);
+        if (btn) {
+            btn.classList.toggle('active', isExp);
+            var textEl = btn.querySelector('.toggle-text');
+            var iconEl = btn.querySelector('.toggle-icon');
+            if (textEl) textEl.textContent = isExp ? 'Menos filtros' : 'Más filtros';
+            if (iconEl) iconEl.textContent = isExp ? 'expand_less' : 'expand_more';
         }
-
         setTimeout(function () {
             if (chartResumen) { chartResumen.resize(); }
-        }, 200);
+        }, 320);
     }
+
 
     return {
         init: init,

@@ -4,7 +4,7 @@ require_once dirname(__DIR__) . '/funciones/conexion.php';
 $tipo = isset($_GET['tipo']) ? trim($_GET['tipo']) : '';
 $aplicar = isset($_GET['aplicar']) ? trim($_GET['aplicar']) : '';
 
-$sql = "SELECT id, tipo, aplicar, seccion, orden, calc_conciclo FROM informes.arrangement WHERE 1=1";
+$sql = "SELECT id, tipo, aplicar, seccion, orden, calc_conciclo FROM arrangement WHERE 1=1";
 $types = '';
 $params = [];
 

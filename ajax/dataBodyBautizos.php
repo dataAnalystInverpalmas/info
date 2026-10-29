@@ -99,13 +99,13 @@ $sql = "
                         '%x%v')
         END AS fecha_formato
     FROM
-        informes.plane AS p
+        plane AS p
             LEFT JOIN
-        informes.seasons AS s ON p.temporada = s.nombre
+        seasons AS s ON p.temporada = s.nombre
             LEFT JOIN
-        informes.varieties AS v ON p.variedad = v.nombre
+        varieties AS v ON p.variedad = v.nombre
             LEFT JOIN
-        informes.arrangements AS a ON p.finca = a.finca
+        arrangements AS a ON p.finca = a.finca
             AND p.variedad = a.variedad
             LEFT JOIN
         (SELECT 
@@ -115,12 +115,12 @@ $sql = "
                 fecha_siembra,
                 temporada_obj
         FROM
-            informes.program
-        WHERE informes.program.estado=1
-        GROUP BY 1 , 2 , 3 , 4 , 5) AS pr ON pr.variedad = p.variedad
+            program
+        WHERE program.estado=1
+        GROUP BY variedad, programa, pico, fecha_siembra, temporada_obj) AS pr ON pr.variedad = p.variedad
             AND pr.temporada_obj = p.temporada
             LEFT JOIN
-        informes.arrangement AS aa ON a.tipo = aa.tipo
+        arrangement AS aa ON a.tipo = aa.tipo
             AND a.aplicar = aa.aplicar
     WHERE
         p.finca = ?
@@ -129,7 +129,7 @@ $sql = "
         AND p.temporada = ?
         AND p.fecha_siembra = ?
         AND aa.seccion IS NOT NULL
-    GROUP BY a.tipo, a.aplicar, a.valor, p.fecha_siembra, aa.seccion, v.ciclo, aa.calc_conciclo, s.fecha_pico
+    GROUP BY aa.seccion, a.tipo, a.aplicar, a.valor, p.fecha_siembra, pr.fecha_siembra, pr.ciclo, v.ciclo, aa.calc_conciclo, p.tipo_siembra, s.fecha_pico, p.bloque, aa.orden
     ORDER BY aa.seccion ASC, p.bloque ASC, aa.orden, a.valor ASC
 ";
 

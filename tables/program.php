@@ -129,7 +129,7 @@ use PhpOffice\PhpSpreadsheet\Shared\Date as SpreadsheetDate;
 		$variedad=strtoupper($variedad);
 		//$fecha_siembra=date('Y-m-d',$fechai);
 		//consulta de registro actual
-		$consulta = "SELECT id FROM program where estado=1 and variedad='$variedad' and ciclo=$ciclo and fecha_siembra='$fecha_siembra' and casa_id=$casa_id and raiz=$raiz group by variedad,fecha_siembra,casa_id,raiz,ciclo ";
+		$consulta = "SELECT id FROM program WHERE estado=1 AND variedad='$variedad' AND ciclo=$ciclo AND fecha_siembra='$fecha_siembra' AND casa_id=$casa_id AND raiz=$raiz LIMIT 1";
 		$query = $conexion->query($consulta);
 		if (!$query) {
 			$resumen['errores'][] = array('fila' => $i, 'motivo' => $conexion->error, 'sql' => $consulta);

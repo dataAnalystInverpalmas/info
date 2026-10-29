@@ -4,7 +4,7 @@ require_once dirname(__DIR__) . '/funciones/conexion.php';
 $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
 
 if ($id > 0) {
-    $sql = "DELETE FROM informes.arrangement WHERE id = ?";
+    $sql = "DELETE FROM arrangement WHERE id = ?";
     $stmt = $conexion->prepare($sql);
     if (!$stmt) { echo json_encode(['success'=>false,'message'=>$conexion->error]); exit; }
     $stmt->bind_param('i', $id);
@@ -12,7 +12,7 @@ if ($id > 0) {
     $tipo = trim($_POST['tipo'] ?? '');
     $aplicar = trim($_POST['aplicar'] ?? '');
 
-    $sql = "DELETE FROM informes.arrangement WHERE tipo = ? AND aplicar = ?";
+    $sql = "DELETE FROM arrangement WHERE tipo = ? AND aplicar = ?";
     $stmt = $conexion->prepare($sql);
     if (!$stmt) { echo json_encode(['success'=>false,'message'=>$conexion->error]); exit; }
     $stmt->bind_param('ss', $tipo, $aplicar);

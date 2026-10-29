@@ -1,6 +1,46 @@
 $(document).ready(function(){
-    var VARIEDADES_URL = '../ajax/fv_fetchProducts.php';
-    var FINCAS_URL = '../ajax/fetchFarms.php';
+    function resolveUrl(path) {
+        if (typeof window.getEndpointUrl === 'function') {
+            return window.getEndpointUrl(path);
+        }
+        if (!path) return '';
+        if (/^https?:\/\//i.test(path)) return path;
+        var clean = String(path).replace(/^(\.\.\/|\/)+/, '');
+        var m = window.location.pathname.match(/^(.*\/info)(?:\/.*)?$/i);
+        var base = m ? m[1] : '';
+        return (base ? base.replace(/\/+$/, '') + '/' : '') + clean;
+    }
+
+    function notify(msg, type, title) {
+        if (typeof window.showAppToast === 'function') {
+            window.showAppToast(msg, type, title);
+        } else {
+            alert(msg);
+        }
+    }
+
+    function showModal(selector) {
+        var el = document.querySelector(selector);
+        if (el && window.bootstrap && window.bootstrap.Modal) {
+            bootstrap.Modal.getOrCreateInstance(el).show();
+        } else {
+            $(selector).modal('show');
+        }
+    }
+
+    function hideModal(selector) {
+        var el = document.querySelector(selector);
+        if (el && window.bootstrap && window.bootstrap.Modal) {
+            var inst = bootstrap.Modal.getInstance(el);
+            if (inst) inst.hide();
+            else $(selector).modal('hide');
+        } else {
+            $(selector).modal('hide');
+        }
+    }
+
+    var VARIEDADES_URL = resolveUrl('ajax/fv_fetchProducts.php');
+    var FINCAS_URL = resolveUrl('ajax/fetchFarms.php');
 
     function catselRow(text, checked) {
         var ico = $('<span class="catsel-ico" style="display:inline-block; width:1.5em; text-align:center; color:#00796B;"></span>').text(checked ? '☑' : '☐');
@@ -82,7 +122,7 @@ $(document).ready(function(){
 
     var arrangementsTable = $('#arrangementsTable').DataTable({
         ajax: {
-            url: '../ajax/arrangements_list.php',
+            url: resolveUrl('ajax/arrangements_list.php'),
             data: function(d){
                 d.variedad = $('#f_arr_variedad').val() || '';
                 d.finca = $('#f_arr_finca').val() || '';
@@ -175,13 +215,13 @@ $(document).ready(function(){
         if(!confirm('Se copiarán todas las configuraciones de "' + variedadOrigen + '" hacia "' + variedadDestino + '". ¿Desea continuar?')) return;
 
         var $btn = $(this);
-        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm mr-1"></span> Copiando...');
+        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1 mr-1"></span> Copiando...');
 
-        $.post('../ajax/arrangements_copy_variety.php', {
+        $.post(resolveUrl('ajax/arrangements_copy_variety.php'), {
             variedad_origen: variedadOrigen,
             variedad_destino: variedadDestino
         }, function(res){
-            $btn.prop('disabled', false).html('<span class="material-icons mr-1" style="font-size: 1.05rem;">copy_all</span> Copiar');
+            $btn.prop('disabled', false).html('<span class="material-icons me-1 mr-1" style="font-size: 1.05rem;">copy_all</span> Copiar');
             if(res && res.success){
                 var msg = '¡Configuración copiada exitosamente!';
                 if(typeof res.copied_count !== 'undefined'){
@@ -190,14 +230,14 @@ $(document).ready(function(){
                 if(typeof res.skipped_count !== 'undefined'){
                     msg += '. Registros omitidos (ya existían): ' + res.skipped_count;
                 }
-                alert(msg);
+                notify(msg, 'success');
                 arrangementsTable.ajax.reload(null, false);
             } else {
-                alert((res && res.message) ? res.message : 'Error al copiar datos');
+                notify((res && res.message) ? res.message : 'Error al copiar datos', 'danger');
             }
         }, 'json').fail(function(xhr){
-            $btn.prop('disabled', false).html('<span class="material-icons mr-1" style="font-size: 1.05rem;">copy_all</span> Copiar');
-            alert('Error en la petición: ' + (xhr && xhr.responseText ? xhr.responseText : 'sin respuesta'));
+            $btn.prop('disabled', false).html('<span class="material-icons me-1 mr-1" style="font-size: 1.05rem;">copy_all</span> Copiar');
+            notify('Error en la petición: ' + (xhr && xhr.responseText ? xhr.responseText : 'sin respuesta'), 'danger');
         });
     });
 
@@ -214,7 +254,7 @@ $(document).ready(function(){
         $('#modalArrTitle').text('Nuevo Registro Arrangement');
         $('#modalArrSubtitle').text('Completar campos para vincular insumo y labor a la variedad');
         $('#modalArrIcon').text('add_circle');
-        $('#arrangementsModal').modal('show');
+        showModal('#arrangementsModal');
     });
 
     $('#arrangementsTable').on('click', '.btn-edit-arr', function(){
@@ -235,7 +275,7 @@ $(document).ready(function(){
         $('#modalArrTitle').text('Editar Arrangement #' + (row.id || ''));
         $('#modalArrSubtitle').text('Modifica los valores configurados para este registro');
         $('#modalArrIcon').text('edit_note');
-        $('#arrangementsModal').modal('show');
+        showModal('#arrangementsModal');
     });
 
     $('#saveArrangements').on('click', function(){
@@ -258,28 +298,29 @@ $(document).ready(function(){
             return;
         }
 
-        var url = payload.id ? '../ajax/arrangements_update.php' : '../ajax/arrangements_create.php';
+        var url = payload.id ? resolveUrl('ajax/arrangements_update.php') : resolveUrl('ajax/arrangements_create.php');
         var $btn = $(this);
-        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm mr-1"></span> Guardando...');
+        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1 mr-1"></span> Guardando...');
 
         $.post(url, payload, function(res){
-            $btn.prop('disabled', false).html('<span class="material-icons align-middle mr-1" style="font-size: 1rem;">save</span> Guardar Datos');
+            $btn.prop('disabled', false).html('<span class="material-icons align-middle me-1 mr-1" style="font-size: 1rem;">save</span> Guardar Datos');
             if(res && res.success){
-                $('#arrangementsModal').modal('hide');
+                hideModal('#arrangementsModal');
+                notify('Arrangement guardado exitosamente', 'success');
                 arrangementsTable.ajax.reload(null, false);
             } else {
-                alert((res && res.message) ? res.message : 'Error al guardar arrangement');
+                notify((res && res.message) ? res.message : 'Error al guardar arrangement', 'danger');
             }
         }, 'json').fail(function(xhr){
-            $btn.prop('disabled', false).html('<span class="material-icons align-middle mr-1" style="font-size: 1rem;">save</span> Guardar Datos');
-            alert('Error en la petición: ' + (xhr && xhr.responseText ? xhr.responseText : 'sin respuesta'));
+            $btn.prop('disabled', false).html('<span class="material-icons align-middle me-1 mr-1" style="font-size: 1rem;">save</span> Guardar Datos');
+            notify('Error en la petición: ' + (xhr && xhr.responseText ? xhr.responseText : 'sin respuesta'), 'danger');
         });
     });
 
     $('#arrangementsTable').on('click', '.btn-delete-arr', function(){
         if(!confirm('¿Está seguro de eliminar este registro de arrangement? Esta acción no se puede deshacer.')) return;
         var row = JSON.parse(decodeURIComponent($(this).attr('data-row') || '%7B%7D'));
-        $.post('../ajax/arrangements_delete.php', {
+        $.post(resolveUrl('ajax/arrangements_delete.php'), {
             id: row.id || '',
             variedad: row.variedad || '',
             finca: row.finca || '',
@@ -287,9 +328,10 @@ $(document).ready(function(){
             aplicar: row.aplicar || ''
         }, function(res){
             if(res && res.success){
+                notify('Arrangement eliminado con éxito', 'info');
                 arrangementsTable.ajax.reload(null, false);
             } else {
-                alert((res && res.message) ? res.message : 'Error al eliminar');
+                notify((res && res.message) ? res.message : 'Error al eliminar', 'danger');
             }
         }, 'json');
     });

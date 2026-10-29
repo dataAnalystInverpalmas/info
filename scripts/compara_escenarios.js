@@ -596,13 +596,19 @@ var ComparaEscenarios = (function () {
 
     // ---------- UI ----------
     function toggleSidebar() {
-        var side = document.getElementById('ceSidebarCol'), main = document.getElementById('ceMainCol'), btn = document.getElementById('ceBtnMostrarFiltros');
-        var oculto = side.classList.toggle('d-none');
-        main.classList.toggle('col-12', oculto);
-        main.classList.toggle('col-md-8', !oculto);
-        main.classList.toggle('col-lg-9', !oculto);
-        btn.style.display = oculto ? 'inline-flex' : 'none';
-        setTimeout(function () { if (chart) { chart.resize(); } if (chartDiff) { chartDiff.resize(); } }, 200);
+        var wrapper = document.getElementById('ceFiltersWrapper');
+        if (!wrapper) return;
+        var btn = document.querySelector('[data-target="#ceFiltersWrapper"]');
+        var isExp = wrapper.classList.toggle('is-expanded');
+        wrapper.classList.toggle('is-collapsed', !isExp);
+        if (btn) {
+            btn.classList.toggle('active', isExp);
+            var textEl = btn.querySelector('.toggle-text');
+            var iconEl = btn.querySelector('.toggle-icon');
+            if (textEl) textEl.textContent = isExp ? 'Menos filtros' : 'Más filtros';
+            if (iconEl) iconEl.textContent = isExp ? 'expand_less' : 'expand_more';
+        }
+        setTimeout(function () { if (chart) { chart.resize(); } if (chartDiff) { chartDiff.resize(); } }, 320);
     }
 
     function segmento(id, cb) {
@@ -622,8 +628,8 @@ var ComparaEscenarios = (function () {
     }
 
     function init() {
-        $('.ce-ms').select2({ width: '100%', placeholder: 'Todos', allowClear: true });
-        $('.ce-single').select2({ width: '100%' });
+        $('.ce-ms').select2({ width: '100%', placeholder: 'Todos', allowClear: true, dropdownParent: $('#ceFiltros') });
+        $('.ce-single').select2({ width: '100%', dropdownParent: $('#ceFiltros') });
         defaults.desde = $('#ceSemanaDesde').val() || '';
         defaults.hasta = $('#ceSemanaHasta').val() || '';
 

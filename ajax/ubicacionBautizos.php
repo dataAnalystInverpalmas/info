@@ -24,8 +24,8 @@ $sql = "
         tabla,
         nave,
         cama
-    FROM  siembras.ubicaciones_plano
-    WHERE  id_finca = ? AND bloque = ? 
+    FROM ubicaciones_plano
+    WHERE id_finca = ? AND bloque = ? 
     ORDER BY ubicacion";
 
 $stmt = $conexion->prepare($sql);

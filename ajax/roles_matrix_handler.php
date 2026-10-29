@@ -23,8 +23,6 @@ $modules = [
         ['dir' => 'views/formBautizo.php',          'name' => 'Hoja de Bautizo Clavel'],
         ['dir' => 'views/applications.php',         'name' => 'Aplicaciones de insumos por Semana'],
         ['dir' => 'views/reporte_cosecha_lonas.php','name' => 'Reporte Lonas Semanal'],
-        ['dir' => 'views/program.php',              'name' => 'Presupuesto de Siembras'],
-        ['dir' => 'views/programView.php',          'name' => 'Presupuesto con Asignación de Área'],
         ['dir' => 'views/growplanting.php',         'name' => 'Evaluación de Cosechas'],
     ],
     'Siembras y Propagación' => [
@@ -33,7 +31,6 @@ $modules = [
         ['dir' => 'views/entrada_material_vegetal.php', 'name' => 'Entrada Material Vegetal'],
         ['dir' => 'views/programs.php',                 'name' => 'Editar Programa Siembras'],
         ['dir' => 'views/programsf.php',                'name' => 'Editar Programa por Finca'],
-        ['dir' => 'views/plano_consulta.php',           'name' => 'Plano Consulta'],
         ['dir' => 'tables/viewReportsP.php',            'name' => 'Informes de Propagación y Siembras'],
         ['dir' => 'views/print.php',                    'name' => 'Programa de Siembras (Imprimir)'],
         ['dir' => 'views/growroot.php',                 'name' => 'Programa de Ensartes (Imprimir)'],

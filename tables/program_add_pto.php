@@ -51,7 +51,7 @@ $nombrearchivo='../archivos/tabla_pto_adicionales.xlsx';
 	$sqlUPD=$sqlUPD.",ncamas=plantas/960";
 	$sqlUPD=$sqlUPD.",producto=(SELECT v.producto FROM varieties as v WHERE v.nombre=variedad)";
 	$sqlUPD=$sqlUPD.",color=(SELECT v.color FROM varieties as v WHERE v.nombre=variedad)";*/
-	$sqlUPD = "UPDATE program_add_pto SET fecha_pico=DATE_ADD(fecha_siembra, INTERVAL + (ciclo) WEEK),fecha_temporada=(SELECT s.fecha_fiesta from seasons as s where s.nombre=temporada_obj),fecha_ensarte=DATE_ADD(fecha_pico, INTERVAL -(ciclo+4) WEEK),fecha_cosecha=DATE_ADD(fecha_siembra, INTERVAL -(2) DAY),ncamas=plantas/960,producto=(SELECT v.producto FROM varieties as v WHERE v.nombre=variedad),color=(SELECT v.color FROM varieties as v WHERE v.nombre=variedad)";
+	$sqlUPD = "UPDATE program_add_pto SET fecha_pico=DATE_ADD(fecha_siembra, INTERVAL + (ciclo) WEEK),fecha_temporada=(SELECT s.fecha_fiesta from seasons as s where s.nombre=temporada_obj LIMIT 1),fecha_ensarte=DATE_ADD(fecha_pico, INTERVAL -(ciclo+4) WEEK),fecha_cosecha=DATE_ADD(fecha_siembra, INTERVAL -(2) DAY),ncamas=plantas/960,producto=(SELECT v.producto FROM varieties as v WHERE v.nombre=variedad LIMIT 1),color=(SELECT v.color FROM varieties as v WHERE v.nombre=variedad LIMIT 1)";
 	$resultUPD=$conexion->query($sqlUPD);
 	if (!$resultUPD){
 		die ("Query failed Update".$sqlUPD);

@@ -13,8 +13,20 @@ var CurvasClavelProduccion = (function () {
         cosecha: { id: '#ccpFiltroCosecha', opciones: 'cosechas' }
     };
 
+    function getEndpointUrl(path) {
+        if (window.APP_BASE_URL) {
+            return window.APP_BASE_URL.replace(/\/+$/, '') + '/' + path.replace(/^\/+/, '');
+        }
+        var loc = window.location.pathname;
+        var subDirMatch = loc.match(/^(.*\/info\/)/i);
+        if (subDirMatch) {
+            return subDirMatch[1] + path.replace(/^\/+/, '');
+        }
+        return path;
+    }
+
     function init() {
-        $('.select2').select2({ width: '100%', placeholder: 'Todas', allowClear: true });
+        $('.select2').each(function () { $(this).select2({ width: '100%', placeholder: 'Todas', allowClear: true, dropdownParent: $(this).closest('.offcanvas, body') }); });
 
         $('#ccpFiltroFinca, #ccpFiltroBloque, #ccpFiltroFlor, #ccpFiltroVariedad, #ccpFiltroCosecha, #ccpFiltroCiclo')
             .on('change', onFiltroChange);
@@ -53,7 +65,7 @@ var CurvasClavelProduccion = (function () {
     function actualizarOpcionesFiltros() {
         var filtros = construirFiltros();
         $.ajax({
-            url: '/ajax/curvas_clavel_produccion_filters.php',
+            url: getEndpointUrl('ajax/curvas_clavel_produccion_filters.php'),
             method: 'GET',
             data: filtros,
             dataType: 'json'
@@ -238,7 +250,7 @@ var CurvasClavelProduccion = (function () {
     function cargarDatos() {
         setStatus('muted', 'Consultando curvas de producción...');
         $.ajax({
-            url: '/ajax/curvas_clavel_produccion.php',
+            url: getEndpointUrl('ajax/curvas_clavel_produccion.php'),
             method: 'GET',
             data: construirFiltros(),
             dataType: 'json'
@@ -261,25 +273,22 @@ var CurvasClavelProduccion = (function () {
     }
 
     function toggleSidebar() {
-        var sidebarCol = document.getElementById('ccpSidebarCol');
-        var mainCol = document.getElementById('ccpMainCol');
-        var btnMostrar = document.getElementById('ccpBtnMostrarFiltros');
-        var oculto = sidebarCol.classList.toggle('d-none');
-
-        if (oculto) {
-            mainCol.classList.remove('col-md-8', 'col-lg-9');
-            mainCol.classList.add('col-12');
-            btnMostrar.style.display = 'inline-flex';
-        } else {
-            mainCol.classList.remove('col-12');
-            mainCol.classList.add('col-md-8', 'col-lg-9');
-            btnMostrar.style.display = 'none';
+        var wrapper = document.getElementById('ccpFiltersWrapper');
+        if (!wrapper) return;
+        var btn = document.querySelector('[data-target="#ccpFiltersWrapper"]');
+        var isExp = wrapper.classList.toggle('is-expanded');
+        wrapper.classList.toggle('is-collapsed', !isExp);
+        if (btn) {
+            btn.classList.toggle('active', isExp);
+            var textEl = btn.querySelector('.toggle-text');
+            var iconEl = btn.querySelector('.toggle-icon');
+            if (textEl) textEl.textContent = isExp ? 'Menos filtros' : 'Más filtros';
+            if (iconEl) iconEl.textContent = isExp ? 'expand_less' : 'expand_more';
         }
-
         setTimeout(function () {
             if (chartFM) { chartFM.resize(); }
             if (chartCorte) { chartCorte.resize(); }
-        }, 200);
+        }, 320);
     }
 
     return {

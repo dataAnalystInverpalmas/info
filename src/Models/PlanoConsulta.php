@@ -143,7 +143,7 @@ class PlanoConsulta {
                 variedad_reem,
                 cosecha_reem,
                 plantas
-             FROM informes.plane
+             FROM plane
              $where
              ORDER BY finca, bloque, tabla, nave, cama"
         ];
@@ -192,7 +192,7 @@ class PlanoConsulta {
 
         $queries = [
             "SELECT DISTINCT $column FROM plane WHERE $where AND $column IS NOT NULL AND $column != '' ORDER BY $column",
-            "SELECT DISTINCT $column FROM informes.plane WHERE $where AND $column IS NOT NULL AND $column != '' ORDER BY $column"
+            "SELECT DISTINCT $column FROM plane WHERE $where AND $column IS NOT NULL AND $column != '' ORDER BY $column"
         ];
 
         foreach ($queries as $sql) {
@@ -271,7 +271,7 @@ class PlanoConsulta {
              WHERE $where AND fecha_siembra IS NOT NULL
              ORDER BY semana_siembra DESC",
             "SELECT DISTINCT DATE_FORMAT(fecha_siembra, '%y%v') AS semana_siembra
-             FROM informes.plane
+             FROM plane
              WHERE $where AND fecha_siembra IS NOT NULL
              ORDER BY semana_siembra DESC"
         ];

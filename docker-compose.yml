@@ -5,21 +5,50 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: php:7.4.1-apache
+    image: info-app:php85
     container_name: php_web
     restart: always
     ports:
       - "9258:80"
     environment:
-      # Token del API. Docker Compose interpola ${API_SECRET_TOKEN} desde el
-      # entorno o desde el archivo .env que esté junto a este docker-compose.yml.
-      # Si no está definido, se usa el valor legacy por defecto (sigue funcionando).
-      # Para rotarlo: export API_SECRET_TOKEN=$(openssl rand -hex 32) o crear .env
+      # Valores dinámicos leídos automáticamente desde .env
       API_SECRET_TOKEN: "${API_SECRET_TOKEN:-9035232260ca3fc11faa82b6b32b20605fe55c242e6903ca2f7e0887c3e9be17}"
+      DB_HOST: "${DOCKER_DB_HOST:-db}"
+      DB_NAME: "${DB_NAME:-info}"
+      DB_USER: "${DB_USER:-root}"
+      DB_PASS: "${DB_PASS:-AdmSys2014}"
+      DB_PORT: "${DB_PORT:-3306}"
+      PYTHON_API_URL: "${PYTHON_API_URL:-http://python_api:8000}"
     volumes:
-      - ./info:/var/www/html
+      - .:/var/www/html
       - ./php.ini:/usr/local/etc/php/php.ini
+    depends_on:
+      - db
+      - python_api
 
+    networks:
+      - proyecto-net
+
+  python_api:
+    build:
+      context: ./python_service
+      dockerfile: Dockerfile
+    image: info-app:python312
+    container_name: python_api
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      API_SECRET_TOKEN: "${API_SECRET_TOKEN:-9035232260ca3fc11faa82b6b32b20605fe55c242e6903ca2f7e0887c3e9be17}"
+      DB_HOST: "${DOCKER_DB_HOST:-db}"
+      DB_NAME: "${DB_NAME:-info}"
+      DB_USER: "${DB_USER:-root}"
+      DB_PASS: "${DB_PASS:-AdmSys2014}"
+      DB_PORT: "${DB_PORT:-3306}"
+    volumes:
+      - ./python_service/app:/app/app
+    depends_on:
+      - db
     networks:
       - proyecto-net
 
@@ -58,3 +87,4 @@ networks:
 
 volumes:
   db_data:
+

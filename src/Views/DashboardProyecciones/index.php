@@ -619,6 +619,76 @@
         to { transform: rotate(360deg); }
     }
 
+    /* --- TREND BADGES --- */
+    .dp-trend-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.2rem;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 0.18rem 0.55rem;
+        border-radius: 999px;
+        letter-spacing: 0.02em;
+    }
+    .dp-trend-badge.trend-up {
+        background: #DCFCE7;
+        color: #15803D;
+        border: 1px solid #BBF7D0;
+    }
+    .dp-trend-badge.trend-down {
+        background: #FEE2E2;
+        color: #B91C1C;
+        border: 1px solid #FECACA;
+    }
+    .dp-trend-badge.trend-neutral {
+        background: #F1F5F9;
+        color: #64748B;
+        border: 1px solid #E2E8F0;
+    }
+    .dp-trend-badge .material-icons {
+        font-size: 0.95rem;
+    }
+
+    /* --- EXECUTIVE PERFORMANCE STRIP --- */
+    .dp-exec-strip {
+        background: var(--dp-surface);
+        border: 1px solid var(--dp-border);
+        border-radius: var(--dp-radius-lg);
+        padding: 0.85rem 1.4rem;
+        box-shadow: var(--dp-shadow-card);
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .dp-exec-stat {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .dp-exec-stat .material-icons {
+        font-size: 1.6rem;
+    }
+    .dp-exec-stat-label {
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--dp-text-muted);
+        letter-spacing: 0.04em;
+    }
+    .dp-exec-stat strong {
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--dp-text-title);
+    }
+    .dp-exec-divider {
+        width: 1px;
+        height: 32px;
+        background: var(--dp-border);
+    }
+
     /* Responsive tweaks */
     @media (max-width: 768px) {
         .dp-hero-content {
@@ -642,6 +712,43 @@
         }
         .dp-chart-wrap {
             height: 300px;
+        }
+        .dp-exec-divider {
+            display: none;
+        }
+        .dp-exec-strip {
+            justify-content: flex-start;
+        }
+    }
+
+    /* Print styles */
+    @media print {
+        body {
+            background-color: #FFFFFF !important;
+            padding-top: 0 !important;
+        }
+        header, footer, .dp-hero-actions, .dp-filter-card, .dp-active-chips-bar, .dp-table-search, .dp-btn-chart-toggle, .dp-btn-chart-action, #dpErrorAlert {
+            display: none !important;
+        }
+        .dp-hero-header {
+            background: #00796B !important;
+            color: #FFFFFF !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            box-shadow: none !important;
+            margin-bottom: 1rem !important;
+        }
+        .dp-section-card, .dp-kpi-card, .dp-exec-strip {
+            box-shadow: none !important;
+            border: 1px solid #CBD5E1 !important;
+            page-break-inside: avoid;
+        }
+        .dp-table-wrapper {
+            max-height: none !important;
+            overflow: visible !important;
+        }
+        .dp-chart-wrap {
+            height: 280px !important;
         }
     }
 </style>
@@ -675,12 +782,30 @@
                     <span class="material-icons" id="dpRefreshIcon" style="font-size: 1.05rem;">sync</span>
                     Actualizar
                 </button>
-                <button type="button" class="dp-btn-hero" onclick="window.print();" title="Imprimir o exportar a PDF">
-                    <span class="material-icons" style="font-size: 1.05rem;">print</span>
-                    Imprimir
+                <button type="button" class="dp-btn-hero" id="dpBtnExportExcel" title="Exportar consolidado ejecutivo a Excel / CSV">
+                    <span class="material-icons" style="font-size: 1.05rem;">file_download</span>
+                    Excel
+                </button>
+                <button type="button" class="dp-btn-hero" id="dpBtnExportPdf" title="Imprimir reporte o guardar como PDF">
+                    <span class="material-icons" style="font-size: 1.05rem;">picture_as_pdf</span>
+                    PDF
                 </button>
             </div>
         </div>
+    </div>
+
+    <!-- Error Alert Container -->
+    <div id="dpErrorAlert" class="alert alert-danger d-none align-items-center justify-content-between p-3 mb-4" style="border-radius: 12px; background-color: #FEF2F2; border: 1px solid #FCA5A5; color: #991B1B;">
+        <div class="d-flex align-items-center">
+            <span class="material-icons mr-2" style="font-size: 1.5rem; color: #DC2626;">error_outline</span>
+            <div>
+                <strong id="dpErrorTitle">No se pudo cargar la información del dashboard</strong>
+                <div id="dpErrorMessage" class="small" style="color: #B91C1C !important;">Verifique la conexión o intente nuevamente.</div>
+            </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-danger px-3 font-weight-bold ml-3" id="dpBtnErrorRetry">
+            <span class="material-icons align-middle mr-1" style="font-size: 1rem;">refresh</span> Reintentar
+        </button>
     </div>
 
     <!-- ==========================================
@@ -731,8 +856,10 @@
             </div>
             <div class="dp-quick-ranges">
                 <span class="text-muted small align-self-center mr-1 font-weight-bold">Accesos rápidos:</span>
-                <button type="button" class="dp-btn-chip active" data-range="365">Último Año (365d)</button>
-                <button type="button" class="dp-btn-chip" data-range="180">Últimos 6 Meses</button>
+                <button type="button" class="dp-btn-chip" data-range="30">30 Días</button>
+                <button type="button" class="dp-btn-chip" data-range="90">90 Días</button>
+                <button type="button" class="dp-btn-chip" data-range="180">6 Meses</button>
+                <button type="button" class="dp-btn-chip active" data-range="365">1 Año (365d)</button>
                 <button type="button" class="dp-btn-chip" data-range="ytd">Año en Curso</button>
                 <button type="button" class="dp-btn-chip" data-range="all">Histórico Completo</button>
             </div>
@@ -756,8 +883,11 @@
         <div class="dp-kpi-card kpi-camas">
             <div class="dp-kpi-top">
                 <span class="dp-kpi-label">Total Camas Sembradas</span>
-                <div class="dp-kpi-icon-wrap">
-                    <span class="material-icons">grid_view</span>
+                <div class="d-flex align-items-center" style="gap: 0.4rem;">
+                    <span class="dp-trend-badge d-none" id="dpKpiCamasTrend"></span>
+                    <div class="dp-kpi-icon-wrap">
+                        <span class="material-icons">grid_view</span>
+                    </div>
                 </div>
             </div>
             <div class="dp-kpi-value" id="dpKpiCamasVal">
@@ -773,8 +903,11 @@
         <div class="dp-kpi-card kpi-plantas">
             <div class="dp-kpi-top">
                 <span class="dp-kpi-label">Población de Plantas</span>
-                <div class="dp-kpi-icon-wrap">
-                    <span class="material-icons">local_florist</span>
+                <div class="d-flex align-items-center" style="gap: 0.4rem;">
+                    <span class="dp-trend-badge d-none" id="dpKpiPlantasTrend"></span>
+                    <div class="dp-kpi-icon-wrap">
+                        <span class="material-icons">local_florist</span>
+                    </div>
                 </div>
             </div>
             <div class="dp-kpi-value" id="dpKpiPlantasVal">
@@ -819,6 +952,43 @@
             </div>
             <div class="dp-kpi-meta" id="dpKpiFincasMeta">
                 <span>Inverpalmas &amp; Palermo activas</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         EXECUTIVE PERFORMANCE STRIP (RITMO, DENSIDAD, LIDER, PICO)
+         ========================================== -->
+    <div class="dp-exec-strip mb-4" id="dpExecStrip">
+        <div class="dp-exec-stat">
+            <span class="material-icons" style="color: #00796B;">speed</span>
+            <div>
+                <span class="dp-exec-stat-label">Ritmo de Siembra</span>
+                <strong id="dpStatRitmo">- c./sem</strong>
+            </div>
+        </div>
+        <div class="dp-exec-divider"></div>
+        <div class="dp-exec-stat">
+            <span class="material-icons" style="color: #0284C7;">architecture</span>
+            <div>
+                <span class="dp-exec-stat-label">Densidad Real</span>
+                <strong id="dpStatDensidad">- pl./cama</strong>
+            </div>
+        </div>
+        <div class="dp-exec-divider"></div>
+        <div class="dp-exec-stat">
+            <span class="material-icons" style="color: #7C3AED;">domain_verification</span>
+            <div>
+                <span class="dp-exec-stat-label">Finca Predominante</span>
+                <strong id="dpStatFincaLider">-</strong>
+            </div>
+        </div>
+        <div class="dp-exec-divider"></div>
+        <div class="dp-exec-stat">
+            <span class="material-icons" style="color: #D97706;">workspace_premium</span>
+            <div>
+                <span class="dp-exec-stat-label">Flor Predominante</span>
+                <strong id="dpStatVariedadTop">-</strong>
             </div>
         </div>
     </div>
@@ -942,6 +1112,9 @@
                             <button type="button" class="dp-btn-chart-toggle active" data-chart="clavel" data-type="line" title="Ver como curva continua">Línea</button>
                             <button type="button" class="dp-btn-chart-toggle" data-chart="clavel" data-type="bar" title="Ver como barras">Barras</button>
                         </div>
+                        <button type="button" class="btn btn-sm btn-light border p-1" id="dpBtnDownloadClavelChart" title="Descargar curva de Clavel como imagen PNG">
+                            <span class="material-icons" style="font-size: 1.05rem; color: #475569;">photo_camera</span>
+                        </button>
                     </div>
                 </div>
                 <div class="dp-section-body">
@@ -972,6 +1145,9 @@
                             <button type="button" class="dp-btn-chart-toggle active" data-chart="miniclavel" data-type="line" title="Ver como curva continua">Línea</button>
                             <button type="button" class="dp-btn-chart-toggle" data-chart="miniclavel" data-type="bar" title="Ver como barras">Barras</button>
                         </div>
+                        <button type="button" class="btn btn-sm btn-light border p-1" id="dpBtnDownloadMiniclavelChart" title="Descargar curva de Miniclavel como imagen PNG">
+                            <span class="material-icons" style="font-size: 1.05rem; color: #475569;">photo_camera</span>
+                        </button>
                     </div>
                 </div>
                 <div class="dp-section-body">
@@ -984,4 +1160,4 @@
     </div>
 </div>
 
-<script src="/scripts/dashboard_proyecciones.js?v=<?php echo time(); ?>"></script>
+<script src="scripts/dashboard_proyecciones.js?v=<?php echo time(); ?>"></script>

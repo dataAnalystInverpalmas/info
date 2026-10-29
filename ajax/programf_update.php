@@ -19,7 +19,7 @@ $ferradica = $_POST['ferradica'] ?? '';
 $adicional = $_POST['adicional'] ?? '';
 $estado = (int)($_POST['estado'] ?? 1);
 
-$sql = "UPDATE informes.programf SET programa=?, producto=?, variedad=?, temporada_obj=?, plantas=?, finca=?, bloque=?, ncamas=?, ciclo=?, fecha_siembra=?, fecha_pico=?, ferradica=?, adicional=?, estado=? WHERE id = ?";
+$sql = "UPDATE programf SET programa=?, producto=?, variedad=?, temporada_obj=?, plantas=?, finca=?, bloque=?, ncamas=?, ciclo=?, fecha_siembra=?, fecha_pico=?, ferradica=?, adicional=?, estado=? WHERE id = ?";
 $stmt = $conexion->prepare($sql);
 if(!$stmt){ echo json_encode(['success'=>false,'message'=>$conexion->error]); exit; }
 // types: programa(i), producto(s), variedad(s), temporada_obj(s), plantas(i), finca(s), bloque(i), ncamas(i), ciclo(i), fecha_siembra(s), fecha_pico(s), ferradica(s), adicional(s), estado(i), id(i)

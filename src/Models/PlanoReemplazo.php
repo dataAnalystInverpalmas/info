@@ -191,7 +191,7 @@ class PlanoReemplazo {
 
         $queries = [
             "SELECT DISTINCT $column FROM plane WHERE plantas > 0 AND $column IS NOT NULL AND $column != '' ORDER BY $column",
-            "SELECT DISTINCT $column FROM informes.plane WHERE plantas > 0 AND $column IS NOT NULL AND $column != '' ORDER BY $column"
+            "SELECT DISTINCT $column FROM plane WHERE plantas > 0 AND $column IS NOT NULL AND $column != '' ORDER BY $column"
         ];
 
         foreach ($queries as $sql) {
@@ -222,7 +222,7 @@ class PlanoReemplazo {
              WHERE plantas > 0 AND fecha_siembra IS NOT NULL
              ORDER BY semana_siembra DESC",
             "SELECT DISTINCT DATE_FORMAT(fecha_siembra, '%y%v') AS semana_siembra
-             FROM informes.plane
+             FROM plane
              WHERE plantas > 0 AND fecha_siembra IS NOT NULL
              ORDER BY semana_siembra DESC"
         ];
@@ -261,7 +261,7 @@ class PlanoReemplazo {
             return ['success' => false, 'message' => 'Debe seleccionar variedad y temporada nuevas'];
         }
 
-        $sql = "INSERT INTO informes.plano_reemplazos
+        $sql = "INSERT INTO plano_reemplazos
                 (
                     finca,
                     bloque,

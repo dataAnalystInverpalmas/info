@@ -4,7 +4,7 @@ require_once dirname(__DIR__) . '/funciones/conexion.php';
 $id = $_GET['id'] ?? null;
 if(!$id){ echo json_encode(['success'=>false,'message'=>'Falta id']); exit; }
 
-$sql = "SELECT id, programa, producto, variedad, temporada_obj, plantas, finca, bloque, ncamas, ciclo, fecha_siembra, fecha_pico, ferradica, adicional, estado, color FROM informes.programf WHERE id = ? LIMIT 1";
+$sql = "SELECT id, programa, producto, variedad, temporada_obj, plantas, finca, bloque, ncamas, ciclo, fecha_siembra, fecha_pico, ferradica, adicional, estado, color FROM programf WHERE id = ? LIMIT 1";
 $stmt = $conexion->prepare($sql);
 if(!$stmt){ echo json_encode(['success'=>false,'message'=>$conexion->error]); exit; }
 $stmt->bind_param('i',$id);

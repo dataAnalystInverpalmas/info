@@ -31,7 +31,7 @@
         <div class="col-md-4 col-lg-3" id="crudSidebarCol">
             <div class="crud-filtro-sidebar">
                 <div class="card mb-3">
-                    <div class="card-header" id="crudFiltrosToggle" data-toggle="collapse" data-target="#crudFiltrosBody" aria-expanded="true">
+                    <div class="card-header" id="crudFiltrosToggle" data-bs-toggle="collapse" data-bs-target="#crudFiltrosBody" data-toggle="collapse" data-target="#crudFiltrosBody" aria-expanded="true">
                         <span>
                             <span class="material-icons" style="font-size:1.05rem;vertical-align:middle;margin-right:4px;">filter_alt</span>
                             Filtros de Búsqueda
@@ -96,9 +96,7 @@
                     <h5 class="modal-title font-weight-bold" id="modalArrangementTitle">Registro Arrangement</h5>
                     <p class="modal-subtitle text-muted" id="modalArrangementSubtitle">Definición de tipo y orden de aplicación</p>
                 </div>
-                <button type="button" class="close ml-auto" data-dismiss="modal" aria-label="Cerrar">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close close ms-auto ml-auto" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
                 <form id="arrangementForm">
@@ -134,15 +132,15 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-dismiss="modal">
-                    <span class="material-icons align-middle mr-1" style="font-size: 1rem;">close</span> Cancelar
+                <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-dismiss="modal" data-dismiss="modal">
+                    <span class="material-icons align-middle me-1 mr-1" style="font-size: 1rem;">close</span> Cancelar
                 </button>
                 <button type="button" id="saveArrangement" class="btn btn-brand-green btn-sm px-4">
-                    <span class="material-icons align-middle mr-1" style="font-size: 1rem;">save</span> Guardar Datos
+                    <span class="material-icons align-middle me-1 mr-1" style="font-size: 1rem;">save</span> Guardar Datos
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<script src="scripts/arrangement_only_crud.js?v=4"></script>
+<script src="scripts/arrangement_only_crud.js?v=5"></script>

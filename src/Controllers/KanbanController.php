@@ -1,15 +1,18 @@
 <?php
 namespace App\Controllers;
 
-class KanbanController {
+class KanbanController
+{
 
-    public function index() {
+    public function index()
+    {
         require_once __DIR__ . '/../Views/Kanban/index.php';
     }
 
     // ── Métodos estáticos para AJAX ───────────────────────────
 
-    public static function listar($desde, $hasta) {
+    public static function listar($desde, $hasta)
+    {
         if (!$desde || !$hasta) {
             return ['success' => false, 'mensaje' => 'Rango de fechas requerido'];
         }
@@ -42,7 +45,8 @@ class KanbanController {
         return ['success' => true, 'tareas' => $data];
     }
 
-    public static function actualizarEstado($id, $estado) {
+    public static function actualizarEstado($id, $estado)
+    {
         $usuario_id = $_SESSION['id'] ?? null;
         $conexion = \App\Helpers\Database::getConnection();
 
@@ -51,13 +55,17 @@ class KanbanController {
         $stmtAntes->bind_param("ii", $id, $usuario_id);
         $stmtAntes->execute();
         $antes = $stmtAntes->get_result()->fetch_assoc();
-        if (!$antes) return ['success' => false, 'mensaje' => 'Tarea no encontrada'];
+        if (!$antes)
+            return ['success' => false, 'mensaje' => 'Tarea no encontrada'];
 
         $porcentaje_avance = $antes['porcentaje_avance'];
         if ($antes['estado'] !== $estado) {
-            if ($estado === 'pendiente') $porcentaje_avance = 0;
-            elseif ($estado === 'en_progreso') $porcentaje_avance = 25;
-            elseif ($estado === 'completada') $porcentaje_avance = 100;
+            if ($estado === 'pendiente')
+                $porcentaje_avance = 0;
+            elseif ($estado === 'en_progreso')
+                $porcentaje_avance = 25;
+            elseif ($estado === 'completada')
+                $porcentaje_avance = 100;
         }
 
         $stmt = $conexion->prepare("UPDATE tareas SET estado=?, porcentaje_avance=?, fecha_actualizacion=NOW() WHERE id=? AND (usuario_id=? OR usuario_id IS NULL)");
@@ -75,7 +83,8 @@ class KanbanController {
         return ['success' => $ok, 'mensaje' => $ok ? 'Estado actualizado' : $conexion->error, 'porcentaje_avance' => $porcentaje_avance];
     }
 
-    public static function exportExcel($desde, $hasta) {
+    public static function exportExcel($desde, $hasta)
+    {
         if (!$desde || !$hasta) {
             return ['success' => false, 'mensaje' => 'Rango de fechas requerido'];
         }
@@ -164,7 +173,8 @@ class KanbanController {
         exit;
     }
 
-    public static function exportPdf($desde, $hasta) {
+    public static function exportPdf($desde, $hasta)
+    {
         if (!$desde || !$hasta) {
             return ['success' => false, 'mensaje' => 'Rango de fechas requerido'];
         }
@@ -205,7 +215,7 @@ class KanbanController {
         }
 
         $esc = function ($v) {
-            return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
+            return htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
         };
 
         $html = '<html><head><style>
@@ -246,22 +256,20 @@ class KanbanController {
 
         $html .= '<div class="clear"></div></body></html>';
 
-        $tempDir = sys_get_temp_dir() . '/mpdf';
-        if (!is_dir($tempDir)) {
-            @mkdir($tempDir, 0777, true);
-        }
-        $mpdf = new \Mpdf\Mpdf(['tempDir' => $tempDir]);
+        require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
+        $mpdf = new \Mpdf\Mpdf();
         $mpdf->WriteHTML($html);
         $filename = 'kanban_' . $desde . '_a_' . $hasta . '.pdf';
         $mpdf->Output($filename, 'D');
         exit;
     }
 
-    public static function updatePorcentaje($id, $porcentaje) {
+    public static function updatePorcentaje($id, $porcentaje)
+    {
         $usuario_id = $_SESSION['id'] ?? null;
         $conexion = \App\Helpers\Database::getConnection();
 
-        $porcentaje = (int)$porcentaje;
+        $porcentaje = (int) $porcentaje;
         if ($porcentaje < 0 || $porcentaje > 100) {
             return ['success' => false, 'mensaje' => 'Porcentaje inválido (0-100)'];
         }
@@ -270,7 +278,8 @@ class KanbanController {
         $stmtAntes->bind_param("ii", $id, $usuario_id);
         $stmtAntes->execute();
         $antes = $stmtAntes->get_result()->fetch_assoc();
-        if (!$antes) return ['success' => false, 'mensaje' => 'Tarea no encontrada'];
+        if (!$antes)
+            return ['success' => false, 'mensaje' => 'Tarea no encontrada'];
 
         $stmt = $conexion->prepare("UPDATE tareas SET porcentaje_avance=?, fecha_actualizacion=NOW() WHERE id=? AND (usuario_id=? OR usuario_id IS NULL)");
         $stmt->bind_param("iii", $porcentaje, $id, $usuario_id);

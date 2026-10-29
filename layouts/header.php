@@ -1,380 +1,525 @@
 <?php
 require("funciones/conexion.php");
 
-$directorio = $GLOBALS['src'];
-?>
-<style>
-  /* Modern styling for Navbar */
-  .navbar-custom {
-    background-color: #ffffff !important;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    border-bottom: 1px solid #eef2f5;
-    padding: 0.5rem 1.5rem;
-    z-index: 1060 !important;
-  }
+$directorio = $GLOBALS['src'] ?? '';
+$role = empty($_SESSION['usuario']) ? 0 : (int) $_SESSION['role'];
+$usuario = $_SESSION['usuario'] ?? '';
 
-  .navbar-custom .navbar-brand img {
-    height: 38px;
-    object-fit: contain;
-    transition: transform 0.3s ease;
-  }
-
-  .navbar-custom .navbar-brand:hover img {
-    transform: scale(1.02);
-  }
-
-  .nav-link-btn {
-    font-weight: 500;
-    font-size: 0.9rem;
-    color: #495057 !important;
-    border-radius: 8px;
-    padding: 0.4rem 0.85rem !important;
-    margin: 0 0.15rem;
-    transition: all 0.2s ease-in-out;
-  }
-
-  .nav-link-btn:hover,
-  .nav-link-btn:focus {
-    background-color: #f1f5f3;
-    color: #00796B !important;
-  }
-
-  .dropdown-custom .dropdown-menu {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-    padding: 0.6rem;
-    margin-top: 10px;
-    animation: navFadeIn 0.2s ease-out;
-  }
-
-  @keyframes navFadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(5px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .dropdown-custom .dropdown-item {
-    font-size: 0.85rem;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    color: #495057;
-    font-weight: 400;
-    transition: all 0.15s ease-in-out;
-  }
-
-  .dropdown-custom .dropdown-item:hover {
-    background-color: #e8f5e9;
-    color: #016241;
-  }
-
-  .dropdown-custom .dropdown-divider {
-    margin: 0.5rem 0;
-    border-top: 1px solid #f1f3f5;
-  }
-
-  /* Compact spacing for buttons on mobile */
-  @media (max-width: 767.98px) {
-    .navbar-custom {
-      padding: 0.5rem 1rem;
-    }
-
-    .navbar-collapse {
-      background: #ffffff;
-      padding: 1rem 0;
-      border-top: 1px solid #f1f3f5;
-      margin-top: 0.5rem;
-    }
-
-    .nav-link-btn {
-      margin: 0.25rem 0;
-      width: 100%;
-      text-align: left;
-    }
-
-    .dropdown-custom .dropdown-menu {
-      box-shadow: none;
-      border: 1px solid #eef2f5;
-      margin-top: 0;
-      padding-left: 1rem;
-    }
-
-    .navbar-text {
-      margin-bottom: 0.5rem;
-    }
-  }
-</style>
-
-<nav class="navbar navbar-expand-md navbar-light navbar-custom fixed-top">
-  <!-- Brand Logo -->
-  <a class="navbar-brand" href="<?php echo $directorio; ?>/index.php">
-    <img src="img/logo.png" alt="Inverpalmas Logo">
-  </a>
-
-  <?php
-  if (empty($_SESSION['usuario'])) {
-    $role = 0;
-  } else {
-    $role = $_SESSION['role'];
-  }
-  ?>
-
-  <?php if ($role > 0): ?>
-    <!-- Hamburger Toggler for Mobile -->
-    <button class="navbar-toggler border-0" type="button" data-toggle="collapse" data-target="#collapsibleNavbar"
-      aria-controls="collapsibleNavbar" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <?php
-    $can = function(string $dir) use ($conexion): bool {
+if ($role > 0):
+    $can = function (string $dir) use ($conexion): bool {
         return \App\Helpers\Auth::can($dir, $conexion);
     };
 
-    // ── DEFINICIÓN Y FILTRADO DINÁMICO DE MENÚS ──
+    // Current report / table for active states
+    $currentReport = $_GET['report'] ?? '';
+    $currentTable = $_GET['table'] ?? '';
+
+    // Helper to test if item is active
+    $isItemActive = function ($item) use ($currentReport, $currentTable): bool {
+        if (!empty($item['report']) && $item['report'] === $currentReport)
+            return true;
+        if (!empty($item['table']) && $item['table'] === $currentTable)
+            return true;
+        return false;
+    };
+
+    // ── DEFINICIÓN Y FILTRADO DE MENÚS ──
     $menuTablasGeneral = [
-        ['href' => 'index.php?report=arrangements_crud', 'dir' => 'views/arrangements_crud.php', 'icon' => 'tune', 'label' => 'CRUD Arrangements'],
-        ['href' => 'index.php?report=arrangement_crud',  'dir' => 'views/arrangement_crud.php',  'icon' => 'settings', 'label' => 'CRUD Arrangement'],
-        ['href' => 'index.php?report=crud_breeders',     'dir' => 'views/breeders_crud.php',     'icon' => 'biotech', 'label' => 'CRUD Breeders'],
-        ['href' => 'index.php?report=crud_supplies',     'dir' => 'views/supplies_crud.php',     'icon' => 'inventory_2', 'label' => 'CRUD Supplies'],
-        ['href' => 'index.php?report=crud_varieties',    'dir' => 'views/varieties_crud.php',    'icon' => 'local_florist', 'label' => 'CRUD Varieties'],
-        ['href' => 'index.php?report=crud_seasons',      'dir' => 'views/seasons_crud.php',      'icon' => 'date_range', 'label' => 'CRUD Seasons'],
-        ['href' => 'index.php?report=crud_greenhouses',  'dir' => 'views/greenhouses_crud.php',  'icon' => 'deck', 'label' => 'CRUD Greenhouses'],
-        ['href' => 'index.php?report=tika_calendario',   'dir' => 'views/tika_calendario.php',   'icon' => 'calendar_month', 'label' => 'CRUD Calendario Tika'],
+        ['href' => 'index.php?report=arrangements_crud', 'report' => 'arrangements_crud', 'dir' => 'views/arrangements_crud.php', 'icon' => 'tune', 'label' => 'CRUD Arrangements'],
+        ['href' => 'index.php?report=arrangement_crud', 'report' => 'arrangement_crud', 'dir' => 'views/arrangement_crud.php', 'icon' => 'settings', 'label' => 'CRUD Arrangement'],
+        ['href' => 'index.php?report=crud_breeders', 'report' => 'crud_breeders', 'dir' => 'views/breeders_crud.php', 'icon' => 'biotech', 'label' => 'CRUD Breeders'],
+        ['href' => 'index.php?report=crud_supplies', 'report' => 'crud_supplies', 'dir' => 'views/supplies_crud.php', 'icon' => 'inventory_2', 'label' => 'CRUD Supplies'],
+        ['href' => 'index.php?report=crud_varieties', 'report' => 'crud_varieties', 'dir' => 'views/varieties_crud.php', 'icon' => 'local_florist', 'label' => 'CRUD Varieties'],
+        ['href' => 'index.php?report=crud_seasons', 'report' => 'crud_seasons', 'dir' => 'views/seasons_crud.php', 'icon' => 'date_range', 'label' => 'CRUD Seasons'],
+        ['href' => 'index.php?report=crud_greenhouses', 'report' => 'crud_greenhouses', 'dir' => 'views/greenhouses_crud.php', 'icon' => 'deck', 'label' => 'CRUD Greenhouses'],
+        ['href' => 'index.php?report=tika_calendario', 'report' => 'tika_calendario', 'dir' => 'views/tika_calendario.php', 'icon' => 'calendar_month', 'label' => 'CRUD Calendario Tika'],
     ];
-    $visTablasGeneral = array_filter($menuTablasGeneral, function($i) use ($can) { return $can($i['dir']); });
+    $visTablasGeneral = array_filter($menuTablasGeneral, function ($i) use ($can) {
+        return $can($i['dir']); });
 
     $menuTablasFloreros = [
-        ['href' => 'index.php?report=crud_fv_kinds',       'dir' => 'views/fv_catalogs_crud.php', 'icon' => 'category', 'label' => 'CRUD Tipos'],
-        ['href' => 'index.php?report=crud_fv_origens',     'dir' => 'views/fv_catalogs_crud.php', 'icon' => 'place', 'label' => 'CRUD Orígenes'],
-        ['href' => 'index.php?report=crud_fv_causes',      'dir' => 'views/fv_catalogs_crud.php', 'icon' => 'report_problem', 'label' => 'CRUD Causas'],
-        ['href' => 'index.php?report=crud_fv_evaluations', 'dir' => 'views/fv_catalogs_crud.php', 'icon' => 'grading', 'label' => 'CRUD Ítems de Evaluación'],
+        ['href' => 'index.php?report=crud_fv_kinds', 'report' => 'crud_fv_kinds', 'dir' => 'views/fv_catalogs_crud.php', 'icon' => 'category', 'label' => 'CRUD Tipos'],
+        ['href' => 'index.php?report=crud_fv_origens', 'report' => 'crud_fv_origens', 'dir' => 'views/fv_catalogs_crud.php', 'icon' => 'place', 'label' => 'CRUD Orígenes'],
+        ['href' => 'index.php?report=crud_fv_causes', 'report' => 'crud_fv_causes', 'dir' => 'views/fv_catalogs_crud.php', 'icon' => 'report_problem', 'label' => 'CRUD Causas'],
+        ['href' => 'index.php?report=crud_fv_evaluations', 'report' => 'crud_fv_evaluations', 'dir' => 'views/fv_catalogs_crud.php', 'icon' => 'grading', 'label' => 'CRUD Ítems de Evaluación'],
     ];
-    $visTablasFloreros = array_filter($menuTablasFloreros, function($i) use ($can) { return $can($i['dir']); });
-    $hasAdminSec = ($role == 1);
-    $showTablas = !empty($visTablasGeneral) || !empty($visTablasFloreros) || $hasAdminSec;
+    $visTablasFloreros = array_filter($menuTablasFloreros, function ($i) use ($can) {
+        return $can($i['dir']); });
+
+    $hasAdminSec = ($role === 1);
+    $menuTablasSeguridad = [];
+    if ($hasAdminSec) {
+        $menuTablasSeguridad = [
+            ['href' => 'index.php?report=crud_users', 'report' => 'crud_users', 'icon' => 'people_alt', 'label' => 'Usuarios'],
+            ['href' => 'index.php?report=roles_matrix', 'report' => 'roles_matrix', 'icon' => 'grid_view', 'label' => 'Matriz de Permisos'],
+            ['href' => 'index.php?report=crud_roles', 'report' => 'crud_roles', 'icon' => 'security', 'label' => 'Permisos por Rol'],
+            ['href' => 'index.php?report=login_logs', 'report' => 'login_logs', 'icon' => 'manage_history', 'label' => 'Bitácora de Accesos'],
+        ];
+    }
+    $showTablas = !empty($visTablasGeneral) || !empty($visTablasFloreros) || !empty($menuTablasSeguridad);
 
     // Cultivo
     $menuCultivo = [
-        ['href' => 'index.php?report=hoja_bautizo', 'dir' => 'views/formBautizo.php', 'label' => 'Hoja de Bautizo Clavel'],
-        ['href' => 'index.php?report=aplicaciones', 'dir' => 'views/applications.php', 'label' => 'Aplicaciones de insumos por Semana'],
-        ['href' => 'index.php?report=reporte_cosecha_lonas', 'dir' => 'views/reporte_cosecha_lonas.php', 'label' => 'Reporte Lonas Semanal'],
-        ['href' => 'index.php?report=presupuesto_siembras', 'dir' => 'views/program.php', 'label' => 'Presupuesto de Siembras'],
-        ['href' => 'index.php?report=presupuesto_area', 'dir' => 'views/programView.php', 'label' => 'Presupuesto con Asignación de área'],
-        ['href' => 'index.php?report=evaluacion_cosechas', 'dir' => 'views/growplanting.php', 'label' => 'Evaluación de Cosechas'],
+        ['href' => 'index.php?report=hoja_bautizo', 'report' => 'hoja_bautizo', 'dir' => 'views/formBautizo.php', 'icon' => 'description', 'label' => 'Hoja de Bautizo Clavel'],
+        ['href' => 'index.php?report=aplicaciones', 'report' => 'aplicaciones', 'dir' => 'views/applications.php', 'icon' => 'science', 'label' => 'Aplicaciones de Insumos'],
+        ['href' => 'index.php?report=reporte_cosecha_lonas', 'report' => 'reporte_cosecha_lonas', 'dir' => 'views/reporte_cosecha_lonas.php', 'icon' => 'shopping_bag', 'label' => 'Reporte Lonas Semanal'],
+        ['href' => 'index.php?report=evaluacion_cosechas', 'report' => 'evaluacion_cosechas', 'dir' => 'views/growplanting.php', 'icon' => 'fact_check', 'label' => 'Evaluación de Cosechas'],
     ];
-    $visCultivo = array_filter($menuCultivo, function($i) use ($can) { return $can($i['dir']); });
+    $visCultivo = array_filter($menuCultivo, function ($i) use ($can) {
+        return $can($i['dir']); });
 
     // Siembras
     $menuSiembras = [
-        ['href' => 'index.php?report=cargar_archivos', 'dir' => 'views/loadfiles.php', 'label' => 'Cargar Archivos', 'divider_after' => true],
-        ['href' => 'index.php?report=labores_siembra', 'dir' => 'views/labors_form.php', 'label' => 'Registra Labores de Siembra'],
-        ['href' => 'index.php?report=crud_emv', 'dir' => 'views/entrada_material_vegetal.php', 'label' => 'Entrada Material Vegetal', 'divider_after' => true],
-        ['href' => 'index.php?report=programs', 'dir' => 'views/programs.php', 'label' => 'Editar programa siembras'],
-        ['href' => 'index.php?report=programsf', 'dir' => 'views/programsf.php', 'label' => 'Editar programa por finca'],
-        ['href' => 'index.php?report=plano_consulta', 'dir' => 'views/plano_consulta.php', 'label' => 'Plano Consulta', 'divider_after' => true],
-        ['href' => 'index.php?table=14', 'dir' => 'tables/viewReportsP.php', 'label' => 'Generar Informes de Propagación y Siembras'],
-        ['href' => 'index.php?report=imprimir_siembras', 'dir' => 'views/print.php', 'label' => 'Programa de Siembras - Imprimir'],
-        ['href' => 'index.php?report=imprimir_ensartes', 'dir' => 'views/growroot.php', 'label' => 'Programa de Ensartes - Imprimir'],
+        ['href' => 'index.php?report=cargar_archivos', 'report' => 'cargar_archivos', 'dir' => 'views/loadfiles.php', 'icon' => 'cloud_upload', 'label' => 'Cargar Archivos'],
+        ['href' => 'index.php?report=labores_siembra', 'report' => 'labores_siembra', 'dir' => 'views/labors_form.php', 'icon' => 'edit_calendar', 'label' => 'Registra Labores de Siembra'],
+        ['href' => 'index.php?report=crud_emv', 'report' => 'crud_emv', 'dir' => 'views/entrada_material_vegetal.php', 'icon' => 'forest', 'label' => 'Entrada Material Vegetal'],
+        ['href' => 'index.php?report=programs', 'report' => 'programs', 'dir' => 'views/programs.php', 'icon' => 'event_note', 'label' => 'Editar Programa Siembras'],
+        ['href' => 'index.php?report=programsf', 'report' => 'programsf', 'dir' => 'views/programsf.php', 'icon' => 'domain', 'label' => 'Editar Programa por Finca'],
+        ['href' => 'index.php?table=14', 'table' => '14', 'dir' => 'tables/viewReportsP.php', 'icon' => 'summarize', 'label' => 'Informes Propagación y Siembras'],
+        ['href' => 'index.php?report=imprimir_siembras', 'report' => 'imprimir_siembras', 'dir' => 'views/print.php', 'icon' => 'print', 'label' => 'Programa Siembras (Imprimir)'],
+        ['href' => 'index.php?report=imprimir_ensartes', 'report' => 'imprimir_ensartes', 'dir' => 'views/growroot.php', 'icon' => 'content_paste', 'label' => 'Programa Ensartes (Imprimir)'],
     ];
-    $visSiembras = array_filter($menuSiembras, function($i) use ($can) { return $can($i['dir']); });
+    $visSiembras = array_filter($menuSiembras, function ($i) use ($can) {
+        return $can($i['dir']); });
 
     // PowerBI
     $menuPowerBI = [
-        ['href' => 'index.php?report=plano_siembras', 'dir' => 'views/report_pb_pto_vs_real.php', 'label' => 'Plano de siembras'],
-        ['href' => 'index.php?report=informe_clavel_picos', 'dir' => 'views/report_pb_clavel.php', 'label' => 'Informe de Clavel por picos'],
-        ['href' => 'index.php?report=proyecciones_curvas', 'dir' => 'views/report_pb_curvas.php', 'label' => 'Proyecciones real - quipus - inver'],
-        ['href' => 'index.php?report=causas_nacional', 'dir' => 'views/report_pb_nacional.php', 'label' => 'Causas Nacional'],
-        ['href' => 'index.php?report=compara_produccion', 'dir' => 'views/report_pb_compara_prod.php', 'label' => 'Compara Producción'],
+        ['href' => 'index.php?report=plano_siembras', 'report' => 'plano_siembras', 'dir' => 'views/report_pb_pto_vs_real.php', 'icon' => 'map', 'label' => 'Plano de Siembras'],
+        ['href' => 'index.php?report=informe_clavel_picos', 'report' => 'informe_clavel_picos', 'dir' => 'views/report_pb_clavel.php', 'icon' => 'signal_cellular_alt', 'label' => 'Informe Clavel por Picos'],
+        ['href' => 'index.php?report=proyecciones_curvas', 'report' => 'proyecciones_curvas', 'dir' => 'views/report_pb_curvas.php', 'icon' => 'show_chart', 'label' => 'Proyecciones Real - Quipus'],
+        ['href' => 'index.php?report=causas_nacional', 'report' => 'causas_nacional', 'dir' => 'views/report_pb_nacional.php', 'icon' => 'pie_chart', 'label' => 'Causas Nacional'],
+        ['href' => 'index.php?report=compara_produccion', 'report' => 'compara_produccion', 'dir' => 'views/report_pb_compara_prod.php', 'icon' => 'compare_arrows', 'label' => 'Compara Producción'],
     ];
-    $visPowerBI = array_filter($menuPowerBI, function($i) use ($can) { return $can($i['dir']); });
+    $visPowerBI = array_filter($menuPowerBI, function ($i) use ($can) {
+        return $can($i['dir']); });
 
     // Reportes
     $menuReportes = [
-        ['href' => 'index.php?report=reportes_produccion', 'dir' => 'views/reportes_dashboard.php', 'label' => 'Reporte Sembrado'],
-        ['href' => 'index.php?report=reportes_real_vs_teorico', 'dir' => 'views/reporte_comparativo.php', 'label' => 'Teórico vs Real Siembras'],
-        ['href' => 'index.php?report=curvas_clavel_produccion', 'dir' => 'views/curvas_clavel_produccion.php', 'label' => 'Curvas Producción Clavel'],
-        ['href' => 'index.php?report=seguimiento_produccion', 'dir' => 'views/seguimiento_produccion.php', 'label' => 'Seguimiento de producción'],
-        ['href' => 'index.php?report=demanda_tika', 'dir' => 'views/demanda_tika.php', 'label' => 'Demanda Semanal'],
-        ['href' => 'index.php?report=compara_escenarios', 'dir' => 'views/compara_escenarios.php', 'label' => 'Comparar Escenarios'],
+        ['href' => 'index.php?report=reportes_produccion', 'report' => 'reportes_produccion', 'dir' => 'views/reportes_dashboard.php', 'icon' => 'bar_chart', 'label' => 'Reporte Sembrado'],
+        ['href' => 'index.php?report=reportes_real_vs_teorico', 'report' => 'reportes_real_vs_teorico', 'dir' => 'views/reporte_comparativo.php', 'icon' => 'query_stats', 'label' => 'Teórico vs Real Siembras'],
+        ['href' => 'index.php?report=curvas_clavel_produccion', 'report' => 'curvas_clavel_produccion', 'dir' => 'views/curvas_clavel_produccion.php', 'icon' => 'timeline', 'label' => 'Curvas Producción Clavel'],
+        ['href' => 'index.php?report=seguimiento_produccion', 'report' => 'seguimiento_produccion', 'dir' => 'views/seguimiento_produccion.php', 'icon' => 'trending_up', 'label' => 'Seguimiento de Producción'],
+        ['href' => 'index.php?report=demanda_tika', 'report' => 'demanda_tika', 'dir' => 'views/demanda_tika.php', 'icon' => 'difference', 'label' => 'Demanda Semanal Tika'],
+        ['href' => 'index.php?report=compara_escenarios', 'report' => 'compara_escenarios', 'dir' => 'views/compara_escenarios.php', 'icon' => 'dynamic_feed', 'label' => 'Comparar Escenarios'],
     ];
-    $visReportes = array_filter($menuReportes, function($i) use ($can) { return $can($i['dir']); });
+    $visReportes = array_filter($menuReportes, function ($i) use ($can) {
+        return $can($i['dir']); });
 
     // Floreros
     $menuFloreros = [
-        ['href' => 'index.php?report=registra_floreros', 'dir' => 'views/flowervase.php', 'label' => 'Registra Floreros'],
-        ['href' => 'index.php?report=floreros_diario', 'dir' => 'views/florero_diario.php', 'label' => 'Revisión diaria (móvil)'],
-        ['href' => 'index.php?report=florero_perfil', 'dir' => 'views/florero_perfil.php', 'label' => 'Perfil de Variedades (Nuevo)', 'bold' => true],
-        ['href' => 'index.php?report=reporte_floreros', 'dir' => 'views/report_fv.php', 'label' => 'Reporte Floreros (Tabular)', 'divider_after' => true],
-        ['href' => 'index.php?report=orders', 'dir' => 'views/evaluaciones_crud.php', 'label' => 'Registra Evaluaciones'],
-        ['href' => 'index.php?report=reporte_evaluaciones', 'dir' => 'views/report_evaluations.php', 'label' => 'Reporte Evaluaciones'],
+        ['href' => 'index.php?report=registra_floreros', 'report' => 'registra_floreros', 'dir' => 'views/flowervase.php', 'icon' => 'add_circle_outline', 'label' => 'Registra Floreros'],
+        ['href' => 'index.php?report=floreros_diario', 'report' => 'floreros_diario', 'dir' => 'views/florero_diario.php', 'icon' => 'smartphone', 'label' => 'Revisión Diaria (Móvil)'],
+        ['href' => 'index.php?report=florero_perfil', 'report' => 'florero_perfil', 'dir' => 'views/florero_perfil.php', 'icon' => 'stars', 'label' => 'Perfil de Variedades', 'badge' => 'Nuevo'],
+        ['href' => 'index.php?report=reporte_floreros', 'report' => 'reporte_floreros', 'dir' => 'views/report_fv.php', 'icon' => 'table_view', 'label' => 'Reporte Floreros (Tabular)'],
+        ['href' => 'index.php?report=orders', 'report' => 'orders', 'dir' => 'views/evaluaciones_crud.php', 'icon' => 'rate_review', 'label' => 'Registra Evaluaciones'],
+        ['href' => 'index.php?report=reporte_evaluaciones', 'report' => 'reporte_evaluaciones', 'dir' => 'views/report_evaluations.php', 'icon' => 'grading', 'label' => 'Reporte Evaluaciones'],
     ];
-    $visFloreros = array_filter($menuFloreros, function($i) use ($can) { return $can($i['dir']); });
+    $visFloreros = array_filter($menuFloreros, function ($i) use ($can) {
+        return $can($i['dir']); });
+
+    // Gestión PM (Role 1)
+    $menuGestion = [];
+    if ($role === 1) {
+        $menuGestion = [
+            ['href' => 'index.php?report=gestion_dashboard', 'report' => 'gestion_dashboard', 'icon' => 'dashboard', 'label' => 'Centro de Gestión'],
+            ['href' => 'index.php?report=proyectos', 'report' => 'proyectos', 'icon' => 'folder_special', 'label' => 'Proyectos y Frentes'],
+            ['href' => 'index.php?report=tareas', 'report' => 'tareas', 'icon' => 'task_alt', 'label' => 'Tareas Operativas'],
+            ['href' => 'index.php?report=kanban', 'report' => 'kanban', 'icon' => 'view_kanban', 'label' => 'Kanban de Ejecución'],
+            ['href' => 'index.php?report=bitacora', 'report' => 'bitacora', 'icon' => 'history_edu', 'label' => 'Bitácora y Seguimiento'],
+        ];
+    }
+
+    // Determine Active Category and Item for Breadcrumbs and Open Accordion
+    $activeSectionTitle = 'Inicio';
+    $activeItemTitle = 'Panel Integral';
+
+    $isTablasActive = false;
+    foreach (array_merge($visTablasGeneral, $visTablasFloreros, $menuTablasSeguridad) as $item) {
+        if ($isItemActive($item)) {
+            $isTablasActive = true;
+            $activeSectionTitle = 'Tablas';
+            $activeItemTitle = $item['label'];
+            break;
+        }
+    }
+
+    $isCultivoActive = false;
+    foreach ($visCultivo as $item) {
+        if ($isItemActive($item)) {
+            $isCultivoActive = true;
+            $activeSectionTitle = 'Cultivo';
+            $activeItemTitle = $item['label'];
+            break;
+        }
+    }
+
+    $isSiembrasActive = false;
+    foreach ($visSiembras as $item) {
+        if ($isItemActive($item)) {
+            $isSiembrasActive = true;
+            $activeSectionTitle = 'Siembras';
+            $activeItemTitle = $item['label'];
+            break;
+        }
+    }
+
+    $isPowerBIActive = false;
+    foreach ($visPowerBI as $item) {
+        if ($isItemActive($item)) {
+            $isPowerBIActive = true;
+            $activeSectionTitle = 'PowerBI';
+            $activeItemTitle = $item['label'];
+            break;
+        }
+    }
+
+    $isReportesActive = false;
+    foreach ($visReportes as $item) {
+        if ($isItemActive($item)) {
+            $isReportesActive = true;
+            $activeSectionTitle = 'Reportes';
+            $activeItemTitle = $item['label'];
+            break;
+        }
+    }
+
+    $isFlorerosActive = false;
+    foreach ($visFloreros as $item) {
+        if ($isItemActive($item)) {
+            $isFlorerosActive = true;
+            $activeSectionTitle = 'Floreros';
+            $activeItemTitle = $item['label'];
+            break;
+        }
+    }
+
+    $isGestionActive = false;
+    foreach ($menuGestion as $item) {
+        if ($isItemActive($item)) {
+            $isGestionActive = true;
+            $activeSectionTitle = 'Gestión PM';
+            $activeItemTitle = $item['label'];
+            break;
+        }
+    }
+
+    $GLOBALS['appActiveBreadcrumb'] = [
+        'section' => $activeSectionTitle,
+        'item' => $activeItemTitle
+    ];
     ?>
 
-    <!-- Unified Collapsible Menu -->
-    <div class="collapse navbar-collapse" id="collapsibleNavbar">
-      <ul class="navbar-nav mr-auto">
-
-        <!-- Tablas Dropdown -->
-        <?php if ($showTablas): ?>
-          <li class="nav-item dropdown dropdown-custom">
-            <a class="nav-link dropdown-toggle nav-link-btn" href="#" id="menuTablas" role="button" data-toggle="dropdown"
-              aria-haspopup="true" aria-expanded="false">
-              Tablas
+    <!-- =========================================================================
+     MODERN APP SIDEBAR NAVIGATION (INVERPALMAS)
+     ========================================================================= -->
+    <aside id="appSidebar" class="app-sidebar" aria-label="Menú principal">
+        <!-- Header: Brand & Close -->
+        <div class="sidebar-header">
+            <a href="index.php" class="sidebar-brand">
+                <img src="img/logo.png" alt="Inverpalmas">
+                <span class="sidebar-brand-badge">2026</span>
             </a>
-            <div class="dropdown-menu" aria-labelledby="menuTablas">
-              <?php foreach ($visTablasGeneral as $item): ?>
-                <a class="dropdown-item d-flex align-items-center" href="<?php echo $item['href']; ?>">
-                  <span class="material-icons mr-2 text-muted" style="font-size:1.1rem;"><?php echo $item['icon']; ?></span> <?php echo $item['label']; ?>
+            <button id="sidebarCloseBtn" class="btn-sidebar-close d-lg-none" type="button" title="Cerrar menú">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+
+        <!-- Live Instant Filter Input -->
+        <div class="sidebar-search-box">
+            <div class="sidebar-search-wrapper">
+                <span class="material-icons sidebar-search-icon">search</span>
+                <input type="text" id="sidebarSearchInput" class="sidebar-search-input"
+                    placeholder="Buscar módulo o CRUD..." autocomplete="off">
+                <button type="button" id="sidebarSearchClear" class="sidebar-search-clear"
+                    title="Limpiar búsqueda">&times;</button>
+            </div>
+        </div>
+
+        <!-- Navigation Groups -->
+        <div class="sidebar-nav-container">
+            <div class="sidebar-section-title">Módulos del Sistema</div>
+
+            <!-- 1. Tablas & Catálogos -->
+            <?php if ($showTablas): ?>
+                <div class="sidebar-group <?php echo $isTablasActive ? 'is-open' : ''; ?>">
+                    <button type="button" class="sidebar-group-btn <?php echo $isTablasActive ? 'active-group' : ''; ?>">
+                        <span class="d-flex align-items-center">
+                            <span class="material-icons sidebar-group-icon">grid_view</span>
+                            <span>Tablas & Catálogos</span>
+                        </span>
+                        <span class="material-icons sidebar-group-arrow">expand_more</span>
+                    </button>
+                    <ul class="sidebar-submenu">
+                        <?php foreach ($visTablasGeneral as $item): ?>
+                            <?php $act = $isItemActive($item); ?>
+                            <li class="sidebar-subitem">
+                                <a href="<?php echo $item['href']; ?>" class="sidebar-sublink <?php echo $act ? 'active' : ''; ?>">
+                                    <span class="material-icons sidebar-sublink-icon"><?php echo $item['icon']; ?></span>
+                                    <span><?php echo $item['label']; ?></span>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+
+                        <?php if (!empty($visTablasFloreros)): ?>
+                            <li class="sidebar-section-title text-muted mt-2 mb-1" style="font-size: 0.65rem;">Floreros</li>
+                            <?php foreach ($visTablasFloreros as $item): ?>
+                                <?php $act = $isItemActive($item); ?>
+                                <li class="sidebar-subitem">
+                                    <a href="<?php echo $item['href']; ?>" class="sidebar-sublink <?php echo $act ? 'active' : ''; ?>">
+                                        <span class="material-icons sidebar-sublink-icon"><?php echo $item['icon']; ?></span>
+                                        <span><?php echo $item['label']; ?></span>
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+
+                        <?php if (!empty($menuTablasSeguridad)): ?>
+                            <li class="sidebar-section-title text-danger mt-2 mb-1" style="font-size: 0.65rem;">Seguridad y Accesos
+                            </li>
+                            <?php foreach ($menuTablasSeguridad as $item): ?>
+                                <?php $act = $isItemActive($item); ?>
+                                <li class="sidebar-subitem">
+                                    <a href="<?php echo $item['href']; ?>" class="sidebar-sublink <?php echo $act ? 'active' : ''; ?>">
+                                        <span
+                                            class="material-icons sidebar-sublink-icon text-danger"><?php echo $item['icon']; ?></span>
+                                        <span
+                                            class="<?php echo $item['report'] === 'roles_matrix' ? 'fw-bold text-success' : ''; ?>"><?php echo $item['label']; ?></span>
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+
+            <!-- 2. Cultivo -->
+            <?php if (!empty($visCultivo)): ?>
+                <div class="sidebar-group <?php echo $isCultivoActive ? 'is-open' : ''; ?>">
+                    <button type="button" class="sidebar-group-btn <?php echo $isCultivoActive ? 'active-group' : ''; ?>">
+                        <span class="d-flex align-items-center">
+                            <span class="material-icons sidebar-group-icon">eco</span>
+                            <span>Cultivo</span>
+                        </span>
+                        <span class="material-icons sidebar-group-arrow">expand_more</span>
+                    </button>
+                    <ul class="sidebar-submenu">
+                        <?php foreach ($visCultivo as $item): ?>
+                            <?php $act = $isItemActive($item); ?>
+                            <li class="sidebar-subitem">
+                                <a href="<?php echo $item['href']; ?>" class="sidebar-sublink <?php echo $act ? 'active' : ''; ?>">
+                                    <span class="material-icons sidebar-sublink-icon"><?php echo $item['icon']; ?></span>
+                                    <span><?php echo $item['label']; ?></span>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+
+            <!-- 3. Siembras -->
+            <?php if (!empty($visSiembras)): ?>
+                <div class="sidebar-group <?php echo $isSiembrasActive ? 'is-open' : ''; ?>">
+                    <button type="button" class="sidebar-group-btn <?php echo $isSiembrasActive ? 'active-group' : ''; ?>">
+                        <span class="d-flex align-items-center">
+                            <span class="material-icons sidebar-group-icon">agriculture</span>
+                            <span>Siembras</span>
+                        </span>
+                        <span class="material-icons sidebar-group-arrow">expand_more</span>
+                    </button>
+                    <ul class="sidebar-submenu">
+                        <?php foreach ($visSiembras as $item): ?>
+                            <?php $act = $isItemActive($item); ?>
+                            <li class="sidebar-subitem">
+                                <a href="<?php echo $item['href']; ?>" class="sidebar-sublink <?php echo $act ? 'active' : ''; ?>">
+                                    <span class="material-icons sidebar-sublink-icon"><?php echo $item['icon']; ?></span>
+                                    <span><?php echo $item['label']; ?></span>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+
+            <!-- 4. PowerBI -->
+            <?php if (!empty($visPowerBI)): ?>
+                <div class="sidebar-group <?php echo $isPowerBIActive ? 'is-open' : ''; ?>">
+                    <button type="button" class="sidebar-group-btn <?php echo $isPowerBIActive ? 'active-group' : ''; ?>">
+                        <span class="d-flex align-items-center">
+                            <span class="material-icons sidebar-group-icon">analytics</span>
+                            <span>PowerBI & Analítica</span>
+                        </span>
+                        <span class="material-icons sidebar-group-arrow">expand_more</span>
+                    </button>
+                    <ul class="sidebar-submenu">
+                        <?php foreach ($visPowerBI as $item): ?>
+                            <?php $act = $isItemActive($item); ?>
+                            <li class="sidebar-subitem">
+                                <a href="<?php echo $item['href']; ?>" class="sidebar-sublink <?php echo $act ? 'active' : ''; ?>">
+                                    <span class="material-icons sidebar-sublink-icon"><?php echo $item['icon']; ?></span>
+                                    <span><?php echo $item['label']; ?></span>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+
+            <!-- 5. Reportes -->
+            <?php if (!empty($visReportes)): ?>
+                <div class="sidebar-group <?php echo $isReportesActive ? 'is-open' : ''; ?>">
+                    <button type="button" class="sidebar-group-btn <?php echo $isReportesActive ? 'active-group' : ''; ?>">
+                        <span class="d-flex align-items-center">
+                            <span class="material-icons sidebar-group-icon">assessment</span>
+                            <span>Reportes & Curvas</span>
+                        </span>
+                        <span class="material-icons sidebar-group-arrow">expand_more</span>
+                    </button>
+                    <ul class="sidebar-submenu">
+                        <?php foreach ($visReportes as $item): ?>
+                            <?php $act = $isItemActive($item); ?>
+                            <li class="sidebar-subitem">
+                                <a href="<?php echo $item['href']; ?>" class="sidebar-sublink <?php echo $act ? 'active' : ''; ?>">
+                                    <span class="material-icons sidebar-sublink-icon"><?php echo $item['icon']; ?></span>
+                                    <span><?php echo $item['label']; ?></span>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+
+            <!-- 6. Floreros -->
+            <?php if (!empty($visFloreros)): ?>
+                <div class="sidebar-group <?php echo $isFlorerosActive ? 'is-open' : ''; ?>">
+                    <button type="button" class="sidebar-group-btn <?php echo $isFlorerosActive ? 'active-group' : ''; ?>">
+                        <span class="d-flex align-items-center">
+                            <span class="material-icons sidebar-group-icon">filter_vintage</span>
+                            <span>Floreros & Calidad</span>
+                        </span>
+                        <span class="material-icons sidebar-group-arrow">expand_more</span>
+                    </button>
+                    <ul class="sidebar-submenu">
+                        <?php foreach ($visFloreros as $item): ?>
+                            <?php $act = $isItemActive($item); ?>
+                            <li class="sidebar-subitem">
+                                <a href="<?php echo $item['href']; ?>" class="sidebar-sublink <?php echo $act ? 'active' : ''; ?>">
+                                    <span class="material-icons sidebar-sublink-icon"><?php echo $item['icon']; ?></span>
+                                    <span><?php echo $item['label']; ?></span>
+                                    <?php if (!empty($item['badge'])): ?>
+                                        <span class="sidebar-sublink-badge bg-success text-white"><?php echo $item['badge']; ?></span>
+                                    <?php endif; ?>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+
+            <!-- 7. Gestión PM (Admin) -->
+            <?php if ($role === 1 && !empty($menuGestion)): ?>
+                <div class="sidebar-group <?php echo $isGestionActive ? 'is-open' : ''; ?>">
+                    <button type="button" class="sidebar-group-btn <?php echo $isGestionActive ? 'active-group' : ''; ?>">
+                        <span class="d-flex align-items-center">
+                            <span class="material-icons sidebar-group-icon">assignment</span>
+                            <span>Gestión PM</span>
+                        </span>
+                        <span class="material-icons sidebar-group-arrow">expand_more</span>
+                    </button>
+                    <ul class="sidebar-submenu">
+                        <?php foreach ($menuGestion as $item): ?>
+                            <?php $act = $isItemActive($item); ?>
+                            <li class="sidebar-subitem">
+                                <a href="<?php echo $item['href']; ?>" class="sidebar-sublink <?php echo $act ? 'active' : ''; ?>">
+                                    <span class="material-icons sidebar-sublink-icon"><?php echo $item['icon']; ?></span>
+                                    <span><?php echo $item['label']; ?></span>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+
+        </div>
+
+        <!-- Footer: User Badge & Quick Logout -->
+        <div class="sidebar-footer">
+            <div class="sidebar-user-card">
+                <div class="sidebar-user-avatar">
+                    <?php echo strtoupper(substr($usuario ?: 'U', 0, 1)); ?>
+                </div>
+                <div class="sidebar-user-info">
+                    <div class="sidebar-user-name" title="<?php echo htmlspecialchars($usuario); ?>">
+                        <?php echo htmlspecialchars($usuario); ?>
+                    </div>
+                    <div class="sidebar-user-role">
+                        <?php echo htmlspecialchars(\App\Helpers\Auth::roleName()); ?>
+                    </div>
+                </div>
+                <a href="logout.php" class="btn-sidebar-logout" title="Cerrar sesión">
+                    <span class="material-icons" style="font-size: 1.15rem;">logout</span>
                 </a>
-              <?php endforeach; ?>
-
-              <?php if (!empty($visTablasFloreros)): ?>
-                <?php if (!empty($visTablasGeneral)): ?><div class="dropdown-divider"></div><?php endif; ?>
-                <h6 class="dropdown-header">Floreros</h6>
-                <?php foreach ($visTablasFloreros as $item): ?>
-                  <a class="dropdown-item d-flex align-items-center" href="<?php echo $item['href']; ?>">
-                    <span class="material-icons mr-2 text-muted" style="font-size:1.1rem;"><?php echo $item['icon']; ?></span> <?php echo $item['label']; ?>
-                  </a>
-                <?php endforeach; ?>
-              <?php endif; ?>
-
-              <?php if ($hasAdminSec): ?>
-                <?php if (!empty($visTablasGeneral) || !empty($visTablasFloreros)): ?><div class="dropdown-divider"></div><?php endif; ?>
-                <h6 class="dropdown-header text-danger font-weight-bold">Seguridad y Accesos</h6>
-                <a class="dropdown-item d-flex align-items-center" href="index.php?report=crud_users"><span class="material-icons mr-2 text-danger" style="font-size:1.1rem;">people_alt</span> Usuarios</a>
-                <a class="dropdown-item d-flex align-items-center font-weight-bold" href="index.php?report=roles_matrix" style="color: #00796B !important;"><span class="material-icons mr-2" style="font-size:1.1rem; color:#00796B;">grid_view</span> Matriz de Permisos</a>
-                <a class="dropdown-item d-flex align-items-center text-muted" href="index.php?report=crud_roles"><span class="material-icons mr-2 text-secondary" style="font-size:1.1rem;">security</span> Permisos por Rol (Lista)</a>
-                <a class="dropdown-item d-flex align-items-center" href="index.php?report=login_logs"><span class="material-icons mr-2 text-danger" style="font-size:1.1rem;">manage_history</span> Bitácora de Accesos</a>
-              <?php endif; ?>
             </div>
-          </li>
-        <?php endif; ?>
+        </div>
+    </aside>
 
-        <!-- Cultivo Dropdown -->
-        <?php if (!empty($visCultivo)): ?>
-          <li class="nav-item dropdown dropdown-custom">
-            <a class="nav-link dropdown-toggle nav-link-btn" href="#" id="menuCultivo" role="button" data-toggle="dropdown"
-              aria-haspopup="true" aria-expanded="false">
-              Cultivo
+    <!-- Mobile Overlay Backdrop -->
+    <div id="appSidebarBackdrop" class="app-sidebar-backdrop"></div>
+
+    <?php
+endif; // $role > 0
+
+/**
+ * Topbar renderer helper for layout.php
+ */
+function renderAppTopBar()
+{
+    $breadcrumb = $GLOBALS['appActiveBreadcrumb'] ?? ['section' => 'Inverpalmas', 'item' => 'Panel Integral'];
+    $usuario = $_SESSION['usuario'] ?? '';
+    ?>
+    <header id="appTopBar" class="app-topbar sticky-top">
+        <div class="d-flex align-items-center">
+            <!-- Sidebar Collapse/Expand Button -->
+            <button id="sidebarToggleBtn" class="btn-toggle-sidebar" type="button"
+                title="Ocultar/Mostrar menú lateral (Ctrl+B)">
+                <span class="material-icons">menu_open</span>
+            </button>
+
+            <!-- Brand Icon visible when sidebar is collapsed on desktop -->
+            <a href="index.php" class="topbar-brand-collapsed">
+                <img src="img/logo.png" alt="Inverpalmas">
             </a>
-            <div class="dropdown-menu" aria-labelledby="menuCultivo">
-              <?php foreach ($visCultivo as $item): ?>
-                <a class="dropdown-item" href="<?php echo $item['href']; ?>"><?php echo $item['label']; ?></a>
-              <?php endforeach; ?>
-            </div>
-          </li>
-        <?php endif; ?>
 
-        <!-- Siembras Dropdown -->
-        <?php if (!empty($visSiembras)): ?>
-          <li class="nav-item dropdown dropdown-custom">
-            <a class="nav-link dropdown-toggle nav-link-btn" href="#" id="menuSiembras" role="button" data-toggle="dropdown"
-              aria-haspopup="true" aria-expanded="false">
-              Siembras
+            <!-- Breadcrumb / Contextual Location -->
+            <div class="app-topbar-breadcrumb d-none d-sm-flex align-items-center">
+                <span class="crumb-parent"><?php echo htmlspecialchars($breadcrumb['section']); ?></span>
+                <span class="material-icons crumb-separator">chevron_right</span>
+                <span class="crumb-active"><?php echo htmlspecialchars($breadcrumb['item']); ?></span>
+            </div>
+        </div>
+
+        <!-- Topbar Right Section -->
+        <div class="app-topbar-actions">
+            <!-- Fullscreen Toggle -->
+            <button id="fullscreenToggleBtn" class="btn-topbar-icon" type="button" title="Pantalla completa">
+                <span class="material-icons">fullscreen</span>
+            </button>
+
+            <!-- User Capsule -->
+            <div class="navbar-user-capsule d-none d-md-inline-flex">
+                <span class="material-icons text-success" style="font-size: 1.15rem;">account_circle</span>
+                <span class="fw-semibold text-dark"
+                    style="font-size: 0.85rem;"><?php echo htmlspecialchars($usuario); ?></span>
+                <span class="navbar-user-role-badge">
+                    <?php echo htmlspecialchars(\App\Helpers\Auth::roleName()); ?>
+                </span>
+            </div>
+
+            <!-- Logout Button -->
+            <a class="btn btn-navbar-logout d-flex align-items-center" href="logout.php">
+                <span class="material-icons me-1" style="font-size: 1rem;">logout</span>
+                Salir
             </a>
-            <div class="dropdown-menu" aria-labelledby="menuSiembras">
-              <?php foreach ($visSiembras as $item): ?>
-                <a class="dropdown-item" href="<?php echo $item['href']; ?>"><?php echo $item['label']; ?></a>
-                <?php if (!empty($item['divider_after'])): ?><div class="dropdown-divider"></div><?php endif; ?>
-              <?php endforeach; ?>
-            </div>
-          </li>
-        <?php endif; ?>
-
-        <!-- PowerBI Dropdown -->
-        <?php if (!empty($visPowerBI)): ?>
-          <li class="nav-item dropdown dropdown-custom">
-            <a class="nav-link dropdown-toggle nav-link-btn" href="#" id="menuPowerBI" role="button" data-toggle="dropdown"
-              aria-haspopup="true" aria-expanded="false">
-              PowerBI
-            </a>
-            <div class="dropdown-menu" aria-labelledby="menuPowerBI">
-              <?php foreach ($visPowerBI as $item): ?>
-                <a class="dropdown-item" href="<?php echo $item['href']; ?>"><?php echo $item['label']; ?></a>
-              <?php endforeach; ?>
-            </div>
-          </li>
-        <?php endif; ?>
-
-        <!-- Reportes Dropdown -->
-        <?php if (!empty($visReportes)): ?>
-          <li class="nav-item dropdown dropdown-custom">
-            <a class="nav-link dropdown-toggle nav-link-btn" href="#" id="menuReportes" role="button" data-toggle="dropdown"
-              aria-haspopup="true" aria-expanded="false">
-              Reportes
-            </a>
-            <div class="dropdown-menu" aria-labelledby="menuReportes">
-              <?php foreach ($visReportes as $item): ?>
-                <a class="dropdown-item" href="<?php echo $item['href']; ?>"><?php echo $item['label']; ?></a>
-              <?php endforeach; ?>
-            </div>
-          </li>
-        <?php endif; ?>
-
-        <!-- Floreros Dropdown -->
-        <?php if (!empty($visFloreros)): ?>
-          <li class="nav-item dropdown dropdown-custom">
-            <a class="nav-link dropdown-toggle nav-link-btn" href="#" id="menuFloreros" role="button" data-toggle="dropdown"
-              aria-haspopup="true" aria-expanded="false">
-              Floreros
-            </a>
-            <div class="dropdown-menu" aria-labelledby="menuFloreros">
-              <?php foreach ($visFloreros as $item): ?>
-                <a class="dropdown-item<?php echo !empty($item['bold']) ? ' font-weight-bold text-success' : ''; ?>" href="<?php echo $item['href']; ?>"><?php echo $item['label']; ?></a>
-                <?php if (!empty($item['divider_after'])): ?><div class="dropdown-divider"></div><?php endif; ?>
-              <?php endforeach; ?>
-            </div>
-          </li>
-        <?php endif; ?>
-
-        <!-- Gestión (Solo Admin) Dropdown -->
-        <?php if ($role == 1): ?>
-          <li class="nav-item dropdown dropdown-custom">
-            <a class="nav-link dropdown-toggle nav-link-btn" href="#" id="menuGestion" role="button" data-toggle="dropdown"
-              aria-haspopup="true" aria-expanded="false">
-              Gestión PM
-            </a>
-            <div class="dropdown-menu" aria-labelledby="menuGestion">
-              <a class="dropdown-item font-weight-bold" href="index.php?report=gestion_dashboard"
-                style="color: #00796B !important;">Centro de gestión</a>
-              <div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="index.php?report=proyectos">Proyectos y frentes</a>
-              <a class="dropdown-item" href="index.php?report=tareas">Tareas operativas</a>
-              <a class="dropdown-item" href="index.php?report=kanban">Kanban de ejecución</a>
-              <div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="index.php?report=bitacora">Bitácora y seguimiento</a>
-            </div>
-          </li>
-        <?php endif; ?>
-
-      </ul>
-
-      <!-- User Greeting & Logout (Right Align) -->
-      <div class="navbar-nav ml-auto align-items-center flex-column flex-md-row pt-2 pt-md-0">
-        <span class="navbar-text mr-md-4 mb-2 mb-md-0 font-weight-bold text-dark d-flex align-items-center"
-          style="font-size: 0.9rem;">
-          <span class="material-icons mr-2" style="font-size: 1.25rem; color: #00796B;">account_circle</span>
-          <span><?php echo htmlspecialchars($_SESSION['usuario']); ?></span>
-          <span class="badge badge-pill badge-light border ml-2 text-dark font-weight-normal py-1 px-2" style="font-size: 0.72rem; background: #eef2f5;">
-            <?php echo htmlspecialchars(\App\Helpers\Auth::roleName()); ?>
-          </span>
-        </span>
-        <a class="btn btn-sm btn-outline-danger px-3 d-flex align-items-center justify-content-center"
-          href="<?php echo $directorio; ?>/logout.php"
-          style="border-radius: 20px; font-weight: 500; font-size: 0.85rem; border-width: 1.5px; transition: all 0.2s;">
-          <span class="material-icons mr-1" style="font-size: 1rem;">logout</span>
-          Salir
-        </a>
-      </div>
-
-    </div>
-  <?php endif; ?>
-</nav>
+        </div>
+    </header>
+    <?php
+}

@@ -149,6 +149,110 @@ class DashboardProyecciones
             }
         }
 
+        // --- CÁLCULO DE COMPARATIVA E INDICADORES DE VARIACIÓN (Task 2) ---
+        $prevFilters = $filters;
+        $diffDays = 365;
+        if (!empty($filters['fecha_desde']) && !empty($filters['fecha_hasta'])) {
+            try {
+                $d1 = new \DateTime($filters['fecha_desde']);
+                $d2 = new \DateTime($filters['fecha_hasta']);
+                $diffDays = max(1, (int)$d1->diff($d2)->days + 1);
+                $prevEnd = (clone $d1)->modify('-1 day')->format('Y-m-d');
+                $prevStart = (clone $d1)->modify("-{$diffDays} days")->format('Y-m-d');
+                $prevFilters['fecha_desde'] = $prevStart;
+                $prevFilters['fecha_hasta'] = $prevEnd;
+            } catch (\Throwable $e) {
+                $prevFilters['fecha_desde'] = date('Y-m-d', strtotime('-730 days'));
+                $prevFilters['fecha_hasta'] = date('Y-m-d', strtotime('-366 days'));
+            }
+        } else {
+            $prevFilters['fecha_desde'] = date('Y-m-d', strtotime('-730 days'));
+            $prevFilters['fecha_hasta'] = date('Y-m-d', strtotime('-366 days'));
+        }
+
+        $wherePrev = self::buildWhere($prevFilters);
+        $prevTotals = self::fetchOne(
+            $conexion,
+            'SELECT '
+            . 'COALESCE(SUM(plantas), 0) AS total_plantas, '
+            . 'ROUND(COALESCE(SUM(plantas), 0) / 960, 0) AS total_camas '
+            . 'FROM ' . self::qi(self::TABLE_NAME) . ' '
+            . $wherePrev['sql'],
+            $wherePrev['types'],
+            $wherePrev['params']
+        );
+
+        $prevPlantas = (float)($prevTotals['total_plantas'] ?? 0);
+        $prevCamas = (float)($prevTotals['total_camas'] ?? 0);
+
+        $deltaCamas = $totalCamas - $prevCamas;
+        $pctCambioCamas = ($prevCamas > 0) ? round((($totalCamas - $prevCamas) / $prevCamas) * 100, 1) : null;
+        $deltaPlantas = $totalPlantas - $prevPlantas;
+        $pctCambioPlantas = ($prevPlantas > 0) ? round((($totalPlantas - $prevPlantas) / $prevPlantas) * 100, 1) : null;
+
+        $densidadReal = ($totalCamas > 0) ? round($totalPlantas / $totalCamas, 0) : 960;
+        $semanasRango = max(1, (int)round($diffDays / 7));
+        $ritmoSiembraSemanal = round($totalCamas / $semanasRango, 1);
+
+        // Finca Líder
+        $fincaLider = null;
+        $fincasTotales = [];
+        foreach ($camasPorFincaFlorRows as $row) {
+            $f = (string)($row['finca'] ?? '');
+            if (!isset($fincasTotales[$f])) {
+                $fincasTotales[$f] = 0;
+            }
+            $fincasTotales[$f] += (float)($row['camas'] ?? 0);
+        }
+        arsort($fincasTotales);
+        if (!empty($fincasTotales)) {
+            $topFincaName = array_key_first($fincasTotales);
+            $topFincaCamas = $fincasTotales[$topFincaName];
+            $topFincaPct = ($totalCamas > 0) ? round(($topFincaCamas / $totalCamas) * 100, 1) : 0;
+            $fincaLider = [
+                'finca' => $topFincaName,
+                'camas' => $topFincaCamas,
+                'porcentaje' => $topFincaPct,
+            ];
+        }
+
+        // Variedad Top
+        $florTop = null;
+        if (!empty($camasPorFlorRows)) {
+            $topRow = $camasPorFlorRows[0];
+            $topFlorCamas = (float)($topRow['camas'] ?? 0);
+            $topFlorPct = ($totalCamas > 0) ? round(($topFlorCamas / $totalCamas) * 100, 1) : 0;
+            $florTop = [
+                'flor' => (string)($topRow['flor'] ?? ''),
+                'camas' => $topFlorCamas,
+                'porcentaje' => $topFlorPct,
+            ];
+        }
+
+        $comparativa = [
+            'periodoPrevio' => [
+                'fecha_desde' => $prevFilters['fecha_desde'] ?? null,
+                'fecha_hasta' => $prevFilters['fecha_hasta'] ?? null,
+                'camas' => $prevCamas,
+                'plantas' => $prevPlantas,
+            ],
+            'variacionCamas' => [
+                'delta' => $deltaCamas,
+                'porcentaje' => $pctCambioCamas,
+                'tendencia' => ($pctCambioCamas === null) ? 'neutro' : ($pctCambioCamas > 0 ? 'arriba' : ($pctCambioCamas < 0 ? 'abajo' : 'neutro')),
+            ],
+            'variacionPlantas' => [
+                'delta' => $deltaPlantas,
+                'porcentaje' => $pctCambioPlantas,
+                'tendencia' => ($pctCambioPlantas === null) ? 'neutro' : ($pctCambioPlantas > 0 ? 'arriba' : ($pctCambioPlantas < 0 ? 'abajo' : 'neutro')),
+            ],
+            'densidadReal' => $densidadReal,
+            'densidadTeorica' => 960,
+            'ritmoSiembraSemanal' => $ritmoSiembraSemanal,
+            'fincaLider' => $fincaLider,
+            'florTop' => $florTop,
+        ];
+
         return [
             'ok' => true,
             'message' => 'Datos de camas sembradas cargados correctamente.',
@@ -157,6 +261,7 @@ class DashboardProyecciones
                 'plantas' => $totalPlantas,
                 'camas' => $totalCamas,
             ],
+            'comparativa' => $comparativa,
             'fincasDisponibles' => $fincasDisponibles,
             'floresDisponibles' => $floresDisponibles,
             'picoClavel' => $picoClavel,

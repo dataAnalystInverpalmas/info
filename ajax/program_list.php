@@ -13,7 +13,7 @@ $adicional = isset($_GET['adicional']) && $_GET['adicional'] !== '' ? (int)$_GET
 $semana_siembra = isset($_GET['semana_siembra']) && $_GET['semana_siembra'] !== '' ? $conexion->real_escape_string($_GET['semana_siembra']) : null;
 
 // Select columns ordered to match table headers: id, programa, variedad, ciclo, fecha_siembra, temporada_obj, pico, ncamas, casa_id, raiz, pm, ferradica, estado, adicional, cantidad_pedida
-$sql = "SELECT id, programa, variedad, ciclo, fecha_siembra, temporada_obj, pico, ncamas, casa_id, raiz, pm, ferradica, estado, adicional, cantidad_pedida FROM informes.program";
+$sql = "SELECT id, programa, variedad, ciclo, fecha_siembra, temporada_obj, pico, ncamas, casa_id, raiz, pm, ferradica, estado, adicional, cantidad_pedida FROM program";
 $where = [];
 if($programa !== null){ $where[] = "programa = " . $programa; }
 if($estado !== null){ $where[] = "estado = '" . $estado . "'"; }

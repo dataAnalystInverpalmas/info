@@ -16,7 +16,7 @@ $fecha_fin = isset($_GET['fecha_fin']) && $_GET['fecha_fin'] !== '' ? $_GET['fec
 $semana_siembra = isset($_GET['semana_siembra']) && $_GET['semana_siembra'] !== '' ? $conexion->real_escape_string($_GET['semana_siembra']) : null;
 $color = isset($_GET['color']) && $_GET['color'] !== '' ? $conexion->real_escape_string($_GET['color']) : null;
 
-$sql = "SELECT id, programa, producto, variedad, temporada_obj, plantas, finca, bloque, ncamas, ciclo, fecha_siembra, fecha_pico, ferradica, adicional, estado, COALESCE(color, (SELECT v.color FROM varieties v WHERE TRIM(v.nombre) = TRIM(programf.variedad))) AS color FROM informes.programf";
+$sql = "SELECT id, programa, producto, variedad, temporada_obj, plantas, finca, bloque, ncamas, ciclo, fecha_siembra, fecha_pico, ferradica, adicional, estado, COALESCE(color, (SELECT v.color FROM varieties v WHERE TRIM(v.nombre) = TRIM(programf.variedad))) AS color FROM programf";
 $where = [];
 if($programa !== null){ $where[] = "programa = " . $programa; }
 if($estado !== null){ $where[] = "estado = '" . $estado . "'"; }

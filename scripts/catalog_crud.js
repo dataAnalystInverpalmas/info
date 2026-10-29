@@ -6,12 +6,54 @@ $(document).ready(function () {
     var title = $root.data('title') || ('CRUD ' + table);
     var endpointBase = $root.data('endpoint') || table;
 
+    // Helper para resolver endpoints dinámicamente con la base de la app
+    function resolveUrl(path) {
+        if (typeof window.getEndpointUrl === 'function') {
+            return window.getEndpointUrl(path);
+        }
+        if (!path) return '';
+        if (/^https?:\/\//i.test(path)) return path;
+        var clean = String(path).replace(/^(\.\.\/|\/)+/, '');
+        var m = window.location.pathname.match(/^(.*\/info)(?:\/.*)?$/i);
+        var base = m ? m[1] : '';
+        return (base ? base.replace(/\/+$/, '') + '/' : '') + clean;
+    }
+
+    function notify(msg, type, title) {
+        if (typeof window.showAppToast === 'function') {
+            window.showAppToast(msg, type, title);
+        } else {
+            alert(msg);
+        }
+    }
+
+    function showModal(selector) {
+        var el = document.querySelector(selector);
+        if (el && window.bootstrap && window.bootstrap.Modal) {
+            bootstrap.Modal.getOrCreateInstance(el).show();
+        } else {
+            $(selector).modal('show');
+        }
+    }
+
+    function hideModal(selector) {
+        var el = document.querySelector(selector);
+        if (el && window.bootstrap && window.bootstrap.Modal) {
+            var inst = bootstrap.Modal.getInstance(el);
+            if (inst) inst.hide();
+            else $(selector).modal('hide');
+        } else {
+            $(selector).modal('hide');
+        }
+    }
+
     var urls = {
-        meta: '../ajax/crud_meta.php?table=' + encodeURIComponent(table),
-        list: '../ajax/' + endpointBase + '_list.php',
-        create: '../ajax/' + endpointBase + '_create.php',
-        update: '../ajax/' + endpointBase + '_update.php',
-        del: '../ajax/' + endpointBase + '_delete.php'
+        meta: resolveUrl('ajax/crud_meta.php?table=' + encodeURIComponent(table)),
+        list: resolveUrl('ajax/' + endpointBase + '_list.php'),
+        create: resolveUrl('ajax/' + endpointBase + '_create.php'),
+        update: resolveUrl('ajax/' + endpointBase + '_update.php'),
+        del: resolveUrl('ajax/' + endpointBase + '_delete.php'),
+        bulk: resolveUrl('ajax/' + endpointBase + '_bulk.php')
     };
 
     var meta = null;
@@ -171,7 +213,7 @@ $(document).ready(function () {
 
         $('#crudFilters select.f-col[data-url]').each(function () {
             var $sel = $(this);
-            var url = $sel.data('url');
+            var url = resolveUrl($sel.data('url'));
             var colName = $sel.data('col');
             var friendlyName = formatLabel(colName);
 
@@ -262,7 +304,7 @@ $(document).ready(function () {
                 $sel.html(htmlOpt);
                 initCatsel($sel);
             } else if (typeof cfg === 'string' && cfg.length > 0) {
-                $.get(cfg, function (htmlOpt) {
+                $.get(resolveUrl(cfg), function (htmlOpt) {
                     $sel.html(htmlOpt);
                     initCatsel($sel);
                 });
@@ -354,7 +396,7 @@ $(document).ready(function () {
     function initTable() {
         var columns = [];
         if (usesBulk) {
-            urls.bulk = '../ajax/' + endpointBase + '_bulk.php';
+            urls.bulk = resolveUrl('ajax/' + endpointBase + '_bulk.php');
             columns.push({
                 data: null,
                 orderable: false,
@@ -462,7 +504,7 @@ $(document).ready(function () {
             $('#modalActionTitle').text('Editar Registro #' + idVal);
             $('#modalActionSubtitle').text('Modifica los campos del registro seleccionado');
             $('#modalIcon').text('edit_note');
-            $('#catalogModal').modal('show');
+            showModal('#catalogModal');
         });
 
         $('#catalogTable').on('click', '.btn-del-c', function () {
@@ -476,12 +518,13 @@ $(document).ready(function () {
             }
             $.post(urls.del, payload, function (res) {
                 if (res && res.success) {
+                    notify('Registro #' + (payload.id || '') + ' eliminado con éxito', 'info');
                     dt.ajax.reload(null, false);
                 } else {
-                    alert((res && res.message) ? res.message : 'Error al eliminar el registro');
+                    notify((res && res.message) ? res.message : 'Error al eliminar el registro', 'danger');
                 }
             }, 'json').fail(function (xhr) {
-                alert('Error al comunicar con el servidor: ' + (xhr && xhr.responseText ? xhr.responseText : 'sin respuesta'));
+                notify('Error al comunicar con el servidor: ' + (xhr && xhr.responseText ? xhr.responseText : 'sin respuesta'), 'danger');
             });
         });
     }
@@ -561,7 +604,7 @@ $(document).ready(function () {
         $('#modalActionTitle').text('Nuevo Registro');
         $('#modalActionSubtitle').text('Completa los campos para agregar un elemento a ' + title);
         $('#modalIcon').text('add_circle');
-        $('#catalogModal').modal('show');
+        showModal('#catalogModal');
     });
 
     $('#btnCrudSave').on('click', function () {
@@ -571,25 +614,26 @@ $(document).ready(function () {
         var url = id ? urls.update : urls.create;
 
         var $btn = $(this);
-        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm mr-1"></span> Guardando...');
+        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1 mr-1"></span> Guardando...');
 
         $.post(url, payload, function (res) {
-            $btn.prop('disabled', false).html('<span class="material-icons align-middle mr-1" style="font-size: 1rem;">save</span> Guardar Datos');
+            $btn.prop('disabled', false).html('<span class="material-icons align-middle me-1 mr-1" style="font-size: 1rem;">save</span> Guardar Datos');
             if (res && res.success) {
-                $('#catalogModal').modal('hide');
+                hideModal('#catalogModal');
+                notify(id ? 'Registro #' + id + ' actualizado exitosamente' : 'Nuevo registro creado exitosamente', 'success');
                 if (dt) dt.ajax.reload(null, false);
             } else {
-                alert((res && res.message) ? res.message : 'Error al guardar los datos');
+                notify((res && res.message) ? res.message : 'Error al guardar los datos', 'danger');
             }
         }, 'json').fail(function (xhr) {
-            $btn.prop('disabled', false).html('<span class="material-icons align-middle mr-1" style="font-size: 1rem;">save</span> Guardar Datos');
-            alert('Error de petición: ' + (xhr && xhr.responseText ? xhr.responseText : 'sin respuesta del servidor'));
+            $btn.prop('disabled', false).html('<span class="material-icons align-middle me-1 mr-1" style="font-size: 1rem;">save</span> Guardar Datos');
+            notify('Error de petición: ' + (xhr && xhr.responseText ? xhr.responseText : 'sin respuesta del servidor'), 'danger');
         });
     });
 
     $.getJSON(urls.meta, function (res) {
         if (!res || !res.success) {
-            alert((res && res.message) ? res.message : 'No se pudo cargar metadata de la tabla');
+            notify((res && res.message) ? res.message : 'No se pudo cargar metadata de la tabla', 'danger');
             return;
         }
         meta = res;
@@ -605,6 +649,6 @@ $(document).ready(function () {
         buildModalFields();
         initTable();
     }).fail(function (xhr) {
-        alert('Error cargando metadata: ' + (xhr && xhr.responseText ? xhr.responseText : 'sin respuesta'));
+        notify('Error cargando metadata: ' + (xhr && xhr.responseText ? xhr.responseText : 'sin respuesta del servidor'), 'danger');
     });
 });

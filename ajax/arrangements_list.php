@@ -5,7 +5,7 @@ $variedad = isset($_GET['variedad']) ? trim($_GET['variedad']) : '';
 $finca = isset($_GET['finca']) ? trim($_GET['finca']) : '';
 $tipo = isset($_GET['tipo']) ? trim($_GET['tipo']) : '';
 
-$sql = "SELECT id, variedad, finca, tipo, aplicar, medidat, valor FROM informes.arrangements WHERE 1=1";
+$sql = "SELECT id, variedad, finca, tipo, aplicar, medidat, valor FROM arrangements WHERE 1=1";
 $types = '';
 $params = [];
 

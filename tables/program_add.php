@@ -41,7 +41,7 @@ $nombrearchivo='../archivos/tabla_adicionales.xlsx';
 	}
 	
 	//actualizar columnas que dependen de la tabla de temporadas
-	$sqlUPD="UPDATE program_add SET ciclo=(SELECT ciclo from varieties WHERE `variedad`=varieties.nombre group by 1)";
+	$sqlUPD="UPDATE program_add SET ciclo=(SELECT MIN(ciclo) FROM varieties WHERE varieties.nombre=program_add.variedad)";
 	$sqlUPD=$sqlUPD.",fecha_pico=DATE_ADD(fecha_siembra, INTERVAL + (ciclo) WEEK)";
 	$sqlUPD=$sqlUPD.",fecha_temporada=(SELECT s.fecha_fiesta from seasons as s where s.nombre=temporada_obj)";
 	$sqlUPD=$sqlUPD.",fecha_ensarte=DATE_ADD(fecha_pico, INTERVAL -(ciclo+4) WEEK)";

@@ -556,7 +556,8 @@ class Carbon extends DateTime implements JsonSerializable
         if (isset($locale)) {
             setlocale(LC_NUMERIC, $locale);
         }
-        static::setLastErrors(parent::getLastErrors());
+        $lastErrors = parent::getLastErrors();
+        static::setLastErrors(is_array($lastErrors) ? $lastErrors : []);
     }
 
     /**
@@ -920,13 +921,13 @@ class Carbon extends DateTime implements JsonSerializable
     /**
      * Set last errors.
      *
-     * @param array $lastErrors
+     * @param array|bool $lastErrors
      *
      * @return void
      */
-    private static function setLastErrors(array $lastErrors)
+    private static function setLastErrors($lastErrors)
     {
-        static::$lastErrors = $lastErrors;
+        static::$lastErrors = is_array($lastErrors) ? $lastErrors : [];
     }
 
     /**

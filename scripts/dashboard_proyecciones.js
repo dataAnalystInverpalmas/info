@@ -75,11 +75,43 @@
         if (kpiCamasEl) {
             kpiCamasEl.textContent = integerFormat(totalCamas) + ' camas';
         }
+        var trendCamasEl = document.getElementById('dpKpiCamasTrend');
+        if (trendCamasEl && data.comparativa && data.comparativa.variacionCamas) {
+            var vc = data.comparativa.variacionCamas;
+            if (vc.porcentaje !== null) {
+                var isUp = vc.porcentaje > 0;
+                var icon = isUp ? 'trending_up' : (vc.porcentaje < 0 ? 'trending_down' : 'trending_flat');
+                var cls = isUp ? 'trend-up' : (vc.porcentaje < 0 ? 'trend-down' : 'trend-neutral');
+                var sign = isUp ? '+' : '';
+                trendCamasEl.className = 'dp-trend-badge ' + cls;
+                trendCamasEl.innerHTML = '<span class="material-icons">' + icon + '</span>' + sign + vc.porcentaje + '%';
+                trendCamasEl.title = (isUp ? 'Crecimiento de ' : 'Disminución de ') + Math.abs(vc.delta) + ' camas respecto al periodo previo';
+                trendCamasEl.classList.remove('d-none');
+            } else {
+                trendCamasEl.classList.add('d-none');
+            }
+        }
 
         // KPI 2: Plantas
         var kpiPlantasEl = document.getElementById('dpKpiPlantasVal');
         if (kpiPlantasEl) {
             kpiPlantasEl.textContent = integerFormat(totalPlantas);
+        }
+        var trendPlantasEl = document.getElementById('dpKpiPlantasTrend');
+        if (trendPlantasEl && data.comparativa && data.comparativa.variacionPlantas) {
+            var vp = data.comparativa.variacionPlantas;
+            if (vp.porcentaje !== null) {
+                var isUpP = vp.porcentaje > 0;
+                var iconP = isUpP ? 'trending_up' : (vp.porcentaje < 0 ? 'trending_down' : 'trending_flat');
+                var clsP = isUpP ? 'trend-up' : (vp.porcentaje < 0 ? 'trend-down' : 'trend-neutral');
+                var signP = isUpP ? '+' : '';
+                trendPlantasEl.className = 'dp-trend-badge ' + clsP;
+                trendPlantasEl.innerHTML = '<span class="material-icons">' + iconP + '</span>' + signP + vp.porcentaje + '%';
+                trendPlantasEl.title = (isUpP ? 'Crecimiento de ' : 'Disminución de ') + integerFormat(Math.abs(vp.delta)) + ' plantas vs periodo previo';
+                trendPlantasEl.classList.remove('d-none');
+            } else {
+                trendPlantasEl.classList.add('d-none');
+            }
         }
 
         // KPI 3: Flor Mix
@@ -141,6 +173,26 @@
                 return '<span class="font-weight-bold">' + sanitize(f) + ':</span> ' + integerFormat(fincasMap[f]) + ' c.';
             }).join(' &nbsp;•&nbsp; ');
             kpiFincasMetaEl.innerHTML = metaHtml || 'Sin fincas registradas';
+        }
+
+        // Executive Performance Strip
+        if (data.comparativa) {
+            var comp = data.comparativa;
+            var statRitmo = document.getElementById('dpStatRitmo');
+            if (statRitmo) statRitmo.textContent = integerFormat(comp.ritmoSiembraSemanal || 0) + ' c./sem';
+
+            var statDensidad = document.getElementById('dpStatDensidad');
+            if (statDensidad) statDensidad.textContent = integerFormat(comp.densidadReal || 960) + ' pl./cama';
+
+            var statFinca = document.getElementById('dpStatFincaLider');
+            if (statFinca && comp.fincaLider) {
+                statFinca.textContent = comp.fincaLider.finca + ' (' + comp.fincaLider.porcentaje + '%)';
+            }
+
+            var statVariedad = document.getElementById('dpStatVariedadTop');
+            if (statVariedad && comp.florTop) {
+                statVariedad.textContent = comp.florTop.flor + ' (' + comp.florTop.porcentaje + '%)';
+            }
         }
     }
 
@@ -276,6 +328,11 @@
     function renderAgeChart(canvasId, chartRefName, payload, chartType) {
         var canvas = document.getElementById(canvasId);
         if (!canvas) return;
+
+        if (typeof Chart === 'undefined') {
+            console.warn('Chart.js no está disponible en la página para renderizar ' + canvasId);
+            return;
+        }
 
         var labels = (payload && payload.labels) ? payload.labels : [];
         var datasets = normalizeDatasets(payload, chartType);
@@ -550,6 +607,55 @@
         });
     }
 
+    // --- ERROR & ALERT HANDLING ---
+    function showError(title, message) {
+        var alertEl = document.getElementById('dpErrorAlert');
+        var titleEl = document.getElementById('dpErrorTitle');
+        var msgEl = document.getElementById('dpErrorMessage');
+        if (titleEl && title) titleEl.textContent = title;
+        if (msgEl && message) msgEl.textContent = message;
+        if (alertEl) {
+            alertEl.classList.remove('d-none');
+            alertEl.classList.add('d-flex');
+        }
+
+        // Clean stuck skeletons so user doesn't see perpetual pulse
+        var skeletons = document.querySelectorAll('.dp-skeleton');
+        skeletons.forEach(function (s) {
+            s.textContent = '-';
+            s.classList.remove('dp-skeleton', 'dp-skeleton-num', 'dp-skeleton-text');
+        });
+
+        var t1 = document.getElementById('dpTablaFincaFlor');
+        if (t1) {
+            t1.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-4"><span class="material-icons align-middle mr-1">warning</span> Error al cargar datos. Haga clic en Reintentar.</td></tr>';
+        }
+        var t2 = document.getElementById('dpTablaFlor');
+        if (t2) {
+            t2.innerHTML = '<tr><td colspan="4" class="text-center text-danger py-4"><span class="material-icons align-middle mr-1">warning</span> Error al cargar datos.</td></tr>';
+        }
+    }
+
+    function hideError() {
+        var alertEl = document.getElementById('dpErrorAlert');
+        if (alertEl) {
+            alertEl.classList.add('d-none');
+            alertEl.classList.remove('d-flex');
+        }
+    }
+
+    function getEndpointUrl(path) {
+        if (window.APP_BASE_URL) {
+            return window.APP_BASE_URL.replace(/\/+$/, '') + '/' + path.replace(/^\/+/, '');
+        }
+        var loc = window.location.pathname;
+        var subDirMatch = loc.match(/^(.*\/info\/)/i);
+        if (subDirMatch) {
+            return subDirMatch[1] + path.replace(/^\/+/, '');
+        }
+        return path;
+    }
+
     // --- DATA FETCHER ---
     function loadDashboard(filters) {
         var refreshIcon = document.getElementById('dpRefreshIcon');
@@ -568,15 +674,18 @@
         }
 
         $.ajax({
-            url: '/ajax/dashboard_proyecciones.php',
+            url: getEndpointUrl('ajax/dashboard_proyecciones.php'),
             method: 'GET',
             data: params,
             dataType: 'json'
         }).done(function (resp) {
             if (!resp || resp.ok !== true) {
+                var errMsg = (resp && resp.message) ? resp.message : 'Respuesta no válida del servidor';
+                showError('Error en el servicio de proyecciones', errMsg);
                 return;
             }
 
+            hideError();
             cachedData = resp;
             var totalCamasGlobal = (resp.totales && resp.totales.camas) ? Number(resp.totales.camas) : 0;
 
@@ -596,6 +705,9 @@
                 var timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 statusEl.textContent = 'ACTUALIZADO ' + timeStr;
             }
+        }).fail(function (xhr, status, error) {
+            var msg = 'No fue posible conectar con el servidor (HTTP ' + (xhr.status || 'ERR') + ': ' + (error || status) + '). Verifique la ruta o permisos del servidor.';
+            showError('Error de conexión', msg);
         }).always(function () {
             if (refreshIcon) {
                 setTimeout(function () {
@@ -735,6 +847,14 @@
             });
         }
 
+        // Retry on Error Button
+        var btnRetry = document.getElementById('dpBtnErrorRetry');
+        if (btnRetry) {
+            btnRetry.addEventListener('click', function () {
+                loadDashboard(activeFilters);
+            });
+        }
+
         // Instant Live Search in Table
         var searchInput = document.getElementById('dpSearchFincaFlor');
         if (searchInput) {
@@ -789,6 +909,127 @@
                 }
             });
         });
+
+        // Export Excel Button
+        var btnExportExcel = document.getElementById('dpBtnExportExcel');
+        if (btnExportExcel) {
+            btnExportExcel.addEventListener('click', function () {
+                exportDashboardExcel();
+            });
+        }
+
+        // Export PDF / Print Button
+        var btnExportPdf = document.getElementById('dpBtnExportPdf');
+        if (btnExportPdf) {
+            btnExportPdf.addEventListener('click', function () {
+                window.print();
+            });
+        }
+
+        // Chart Download Buttons (PNG)
+        var btnDownloadClavel = document.getElementById('dpBtnDownloadClavelChart');
+        if (btnDownloadClavel) {
+            btnDownloadClavel.addEventListener('click', function () {
+                downloadChartImage('dpChartEdadClavel', 'Inverpalmas_Curva_Clavel_' + (new Date().toISOString().slice(0, 10)) + '.png');
+            });
+        }
+        var btnDownloadMini = document.getElementById('dpBtnDownloadMiniclavelChart');
+        if (btnDownloadMini) {
+            btnDownloadMini.addEventListener('click', function () {
+                downloadChartImage('dpChartEdadMiniclavel', 'Inverpalmas_Curva_Miniclavel_' + (new Date().toISOString().slice(0, 10)) + '.png');
+            });
+        }
+    }
+
+    // --- EXPORT TO EXCEL / CSV HELPER ---
+    function exportDashboardExcel() {
+        if (!cachedData) {
+            alert('No hay datos disponibles para exportar en este momento.');
+            return;
+        }
+        var d = cachedData;
+        var totales = d.totales || { camas: 0, plantas: 0 };
+        var comp = d.comparativa || {};
+
+        var rows = [];
+        rows.push(['INVERPALMAS - REPORTE EJECUTIVO DE CAMAS Y PROYECCIONES']);
+        rows.push(['Fecha de Emisión', new Date().toLocaleString('es-CO')]);
+        rows.push(['Filtro Finca', activeFilters.finca || 'Todas']);
+        rows.push(['Filtro Flor', activeFilters.producto || 'Todas']);
+        rows.push(['Filtro Fechas', activeFilters.sin_rango_fechas ? 'Histórico Completo' : ((activeFilters.fecha_desde || '-') + ' a ' + (activeFilters.fecha_hasta || '-'))]);
+        rows.push([]);
+
+        rows.push(['RESUMEN EJECUTIVO (KPIs)']);
+        rows.push(['Indicador', 'Valor Actual', 'Variación vs Periodo Previo']);
+        rows.push(['Total Camas Sembradas', totales.camas, (comp.variacionCamas && comp.variacionCamas.porcentaje !== null) ? (comp.variacionCamas.porcentaje + '%') : 'N/A']);
+        rows.push(['Población de Plantas', totales.plantas, (comp.variacionPlantas && comp.variacionPlantas.porcentaje !== null) ? (comp.variacionPlantas.porcentaje + '%') : 'N/A']);
+        rows.push(['Densidad Real (plantas/cama)', comp.densidadReal || 960, 'Teórica: 960 pl/c']);
+        rows.push(['Ritmo Semanal Promedio', (comp.ritmoSiembraSemanal || 0) + ' camas/sem', '']);
+        rows.push(['Finca Líder', comp.fincaLider ? (comp.fincaLider.finca + ' (' + comp.fincaLider.porcentaje + '%)') : 'N/A', '']);
+        rows.push(['Flor Predominante', comp.florTop ? (comp.florTop.flor + ' (' + comp.florTop.porcentaje + '%)') : 'N/A', '']);
+        rows.push([]);
+
+        rows.push(['DISTRIBUCIÓN POR FINCA Y FLOR']);
+        rows.push(['Finca', 'Flor', 'Plantas', 'Camas', '% Participación']);
+        var ff = d.camasPorFincaFlor || [];
+        var totalCamas = Number(totales.camas) || 1;
+        ff.forEach(function (r) {
+            var pct = ((Number(r.camas || 0) / totalCamas) * 100).toFixed(1) + '%';
+            rows.push([r.finca, r.flor, r.plantas, r.camas, pct]);
+        });
+        rows.push([]);
+
+        rows.push(['CONSOLIDADO POR VARIEDAD']);
+        rows.push(['Flor', 'Plantas', 'Camas', '% Participación']);
+        var fl = d.camasPorFlor || [];
+        fl.forEach(function (r) {
+            var pct = ((Number(r.camas || 0) / totalCamas) * 100).toFixed(1) + '%';
+            rows.push([r.flor, r.plantas, r.camas, pct]);
+        });
+        rows.push([]);
+
+        rows.push(['PICOS FENOLÓGICOS PROYECTADOS']);
+        if (d.picoClavel) {
+            rows.push(['Pico Clavel', 'Semana ' + d.picoClavel.semana, d.picoClavel.camas + ' camas', d.picoClavel.finca]);
+        }
+        if (d.picoMiniclavel) {
+            rows.push(['Pico Miniclavel', 'Semana ' + d.picoMiniclavel.semana, d.picoMiniclavel.camas + ' camas', d.picoMiniclavel.finca]);
+        }
+
+        var csvContent = '\uFEFF' + rows.map(function (e) {
+            return e.map(function (cell) {
+                var str = String(cell === undefined || cell === null ? '' : cell).replace(/"/g, '""');
+                return '"' + str + '"';
+            }).join(';');
+        }).join('\r\n');
+
+        var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        var link = document.createElement('a');
+        var nowStr = new Date().toISOString().slice(0, 10);
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute('download', 'Inverpalmas_Dashboard_Siembras_' + nowStr + '.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // --- CHART IMAGE DOWNLOAD HELPER ---
+    function downloadChartImage(canvasId, defaultFilename) {
+        var canvas = document.getElementById(canvasId);
+        if (!canvas) {
+            alert('Gráfico no disponible para descarga.');
+            return;
+        }
+        try {
+            var link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.download = defaultFilename || 'grafico_fenologia.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (e) {
+            alert('No se pudo generar la imagen del gráfico.');
+        }
     }
 
     // --- INITIALIZATION ---

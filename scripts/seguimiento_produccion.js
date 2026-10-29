@@ -22,8 +22,20 @@ var SeguimientoProduccion = (function () {
         cosecha: { id: '#sgpFiltroCosecha', opciones: 'cosechas' }
     };
 
+    function getEndpointUrl(path) {
+        if (window.APP_BASE_URL) {
+            return window.APP_BASE_URL.replace(/\/+$/, '') + '/' + path.replace(/^\/+/, '');
+        }
+        var loc = window.location.pathname;
+        var subDirMatch = loc.match(/^(.*\/info\/)/i);
+        if (subDirMatch) {
+            return subDirMatch[1] + path.replace(/^\/+/, '');
+        }
+        return path;
+    }
+
     function init() {
-        $('.select2').select2({ width: '100%', placeholder: 'Todas', allowClear: true });
+        $('.select2').each(function () { $(this).select2({ width: '100%', placeholder: 'Todas', allowClear: true, dropdownParent: $(this).closest('.offcanvas, body') }); });
 
         defaultSemanaDesde = document.getElementById('sgpFiltroSemanaDesde').value;
         defaultSemanaHasta = document.getElementById('sgpFiltroSemanaHasta').value;
@@ -121,7 +133,7 @@ var SeguimientoProduccion = (function () {
     function actualizarOpcionesFiltros() {
         var filtros = construirFiltros();
         $.ajax({
-            url: '/ajax/seguimiento_produccion_filters.php',
+            url: getEndpointUrl('ajax/seguimiento_produccion_filters.php'),
             method: 'GET',
             data: filtros,
             dataType: 'json'
@@ -372,7 +384,7 @@ var SeguimientoProduccion = (function () {
     function cargarDatos() {
         setStatus('muted', 'Consultando seguimiento de producción...');
         $.ajax({
-            url: '/ajax/seguimiento_produccion.php',
+            url: getEndpointUrl('ajax/seguimiento_produccion.php'),
             method: 'GET',
             data: construirFiltros(),
             dataType: 'json'
@@ -399,25 +411,22 @@ var SeguimientoProduccion = (function () {
     }
 
     function toggleSidebar() {
-        var sidebarCol = document.getElementById('sgpSidebarCol');
-        var mainCol = document.getElementById('sgpMainCol');
-        var btnMostrar = document.getElementById('sgpBtnMostrarFiltros');
-        var oculto = sidebarCol.classList.toggle('d-none');
-
-        if (oculto) {
-            mainCol.classList.remove('col-md-8', 'col-lg-9');
-            mainCol.classList.add('col-12');
-            btnMostrar.style.display = 'inline-flex';
-        } else {
-            mainCol.classList.remove('col-12');
-            mainCol.classList.add('col-md-8', 'col-lg-9');
-            btnMostrar.style.display = 'none';
+        var wrapper = document.getElementById('sgpFiltersWrapper');
+        if (!wrapper) return;
+        var btn = document.querySelector('[data-target="#sgpFiltersWrapper"]');
+        var isExp = wrapper.classList.toggle('is-expanded');
+        wrapper.classList.toggle('is-collapsed', !isExp);
+        if (btn) {
+            btn.classList.toggle('active', isExp);
+            var textEl = btn.querySelector('.toggle-text');
+            var iconEl = btn.querySelector('.toggle-icon');
+            if (textEl) textEl.textContent = isExp ? 'Menos filtros' : 'Más filtros';
+            if (iconEl) iconEl.textContent = isExp ? 'expand_less' : 'expand_more';
         }
-
         setTimeout(function () {
             if (chartFM) { chartFM.resize(); }
             if (chartCorte) { chartCorte.resize(); }
-        }, 200);
+        }, 320);
     }
 
     return {

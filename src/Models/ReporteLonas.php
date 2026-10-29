@@ -308,6 +308,7 @@ class ReporteLonas {
 
         // 2. Consultar `ld_lonas` para este lote en el rango de fechas del año ISO
         $dailyData = [];
+        $tallosHistoricos = 0;
         $hasAnyFilter = !empty($filtros['finca']) || !empty($filtros['bloque']) || !empty($filtros['variedad']);
 
         if ($hasAnyFilter) {
@@ -369,6 +370,65 @@ class ReporteLonas {
                     }
                 }
                 $stmtLonas->close();
+            }
+
+            // 2b. Consultar tallos históricos acumulados anteriores al año seleccionado (fecha < minFecha)
+            // Esto permite que el acumulado ACM-FM no empiece en 0 si la siembra ya traía cosechas previas (ej. 2025 hacia 2026)
+            $whereHist = ["fecha < ?"];
+            $paramsHist = ["$minFecha 00:00:00"];
+            $typesHist = 's';
+
+            if (!empty($filtros['finca'])) {
+                $fincaCodigos = self::mapearFincaCodigos((string)$filtros['finca']);
+                $placeholders = implode(',', array_fill(0, count($fincaCodigos), '?'));
+                $whereHist[] = "finca IN ($placeholders)";
+                foreach ($fincaCodigos as $fc) {
+                    $paramsHist[] = $fc;
+                    $typesHist .= 's';
+                }
+            }
+
+            if (!empty($filtros['bloque'])) {
+                $whereHist[] = "bloque = ?";
+                $paramsHist[] = (int)$filtros['bloque'];
+                $typesHist .= 'i';
+            }
+
+            if (!empty($filtros['variedad'])) {
+                $whereHist[] = "UPPER(TRIM(variedad)) = UPPER(TRIM(?))";
+                $paramsHist[] = (string)$filtros['variedad'];
+                $typesHist .= 's';
+            }
+
+            if (!empty($filtros['cosecha'])) {
+                $whereHist[] = "cosecha = ?";
+                $paramsHist[] = (string)$filtros['cosecha'];
+                $typesHist .= 's';
+            }
+
+            if (!empty($filtros['semana_siembra'])) {
+                $whereHist[] = "SUBSTRING(YEARWEEK(fecha_siembra, 3), 3, 4) = ?";
+                $paramsHist[] = (string)$filtros['semana_siembra'];
+                $typesHist .= 's';
+            }
+
+            $whereSqlHist = implode(' AND ', $whereHist);
+            $sqlHist = "
+                SELECT COALESCE(SUM(tallos), 0) AS total_tallos
+                FROM ld_lonas
+                WHERE $whereSqlHist
+            ";
+
+            $stmtHist = $conexion->prepare($sqlHist);
+            if ($stmtHist) {
+                $stmtHist->bind_param($typesHist, ...$paramsHist);
+                if ($stmtHist->execute()) {
+                    $resHist = $stmtHist->get_result();
+                    if ($r = $resHist->fetch_assoc()) {
+                        $tallosHistoricos = (int)($r['total_tallos'] ?? 0);
+                    }
+                }
+                $stmtHist->close();
             }
         }
 
@@ -454,6 +514,7 @@ class ReporteLonas {
             'total_general'     => $totalGeneral,
             'semanas_con_datos' => $semanasConDatos,
             'dias_con_datos'    => $diasConDatos,
+            'tallos_historicos' => $tallosHistoricos,
         ];
     }
 

@@ -1,0 +1,40 @@
+/* Shared report styles for tables across report pages */
+.table-planilla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.72rem;
+    table-layout: fixed;
+    color: #000000;
+}
+.table-planilla thead th {
+    background-color: #ffffff;
+    color: #000000;
+    border: 1px solid #000000;
+    font-weight: 800;
+    text-align: center;
+    padding: 2.5px 2px;
+    font-size: 0.69rem;
+    vertical-align: middle;
+    line-height: 1.1;
+}
+.table-planilla th.col-sem { width: 6.5%; }
+.table-planilla th.col-dia { width: 8.3%; }
+.table-planilla th.col-tot { width: 11.8%; }
+.table-planilla th.col-fm { width: 11.8%; }
+.table-planilla th.col-acm { width: 11.8%; }
+.table-planilla tbody tr { height: 22px; }
+.table-planilla tbody td {
+    border: 1px solid #000000;
+    padding: 1.5px 3px;
+    vertical-align: middle;
+    line-height: 19px;
+    height: 22px;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.72rem;
+}
+.table-planilla tbody td.cell-sem { text-align: center; font-weight: 800; }
+.table-planilla tbody td.cell-num { text-align: right; }
+.table-planilla tbody td.cell-tot { text-align: right; font-weight: 800; }
+.table-planilla tbody td.cell-fm,
+.table-planilla tbody td.cell-acm { text-align: center; font-weight: 700; }
+.table-planilla tbody td.cell-empty { color: transparent; }

@@ -51,25 +51,28 @@
 }
 </style>
 
-<div class="container-fluid">
-  <div class="row d-flex justify-content-center">
-    <div class="col-sm-2">
-      <div class="pull-left">
-        <div class="row d-flex justify-content-center mt-200"> 
-          <button type="button" class="btn btn-brand-green" data-toggle="modal" data-target="#exampleModal"> Nuevo </button>
-        </div> <!-- Modal -->
-      </div>
+<div class="container-fluid px-3 px-lg-4 py-3">
+  <!-- Encabezado de la página -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div class="mb-2 mb-md-0">
+      <h3 class="font-weight-bold fw-bold text-dark mb-0 d-flex align-items-center" style="font-size: 1.35rem; color: #17312d;">
+        <span class="material-icons mr-2 me-2" style="font-size: 1.6rem; color: #00796B;">local_florist</span>
+        Registro de Floreros
+      </h3>
+      <p class="text-muted small mb-0 mt-1">Control diario, apertura de tallos, evaluación de vida en florero y causas de descarte</p>
     </div>
-    <div class="col-sm-10">
-        <div class="pull-right">
-          <h4>Registro de floreros</h4>
-        </div>
-      </div>  
+    <div>
+      <button type="button" class="btn btn-brand-green d-flex align-items-center shadow-sm px-3 py-2" data-toggle="modal" data-target="#exampleModal" data-bs-toggle="modal" data-bs-target="#exampleModal" style="border-radius: 8px; font-weight: 600;">
+        <span class="material-icons mr-1 me-1" style="font-size: 1.2rem;">add_circle</span>
+        Nuevo Florero
+      </button>
+    </div>
   </div>
-  <div class="row">
-    <div class="col">
+
+  <!-- Contenedor del listado -->
+  <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+    <div class="card-body p-3">
       <div class="table-responsive">
-        <br>
         <div id="records_content_fv"></div>
       </div>
     </div>

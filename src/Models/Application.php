@@ -65,7 +65,7 @@ class Application {
                 s.cod_temporada as temporada,
                 a.tipo,
                 a.aplicar,
-                ld_v.codigo,
+                MAX(ld_v.codigo) as codigo,
                 COUNT(p.bloque) as camas, round(sum(p.plantas)/960,1) as ncamas,
                 $expr as fecha_aplica
                 FROM plane AS p
@@ -73,12 +73,12 @@ class Application {
                 INNER JOIN varieties as v ON v.nombre=p.variedad
                 LEFT JOIN ld_variedades as ld_v ON ld_v.nombre=p.variedad
                 INNER JOIN seasons as s ON s.nombre=p.temporada
-                LEFT JOIN (SELECT variedad,temporada_obj,pico FROM program WHERE estado=1 group by 1,2,3) as pr
+                LEFT JOIN (SELECT variedad, temporada_obj, pico FROM program WHERE estado=1 GROUP BY variedad, temporada_obj, pico) as pr
                     ON pr.variedad=p.variedad and pr.temporada_obj=s.nombre
                 left join arrangement as aa on a.tipo=aa.tipo and a.aplicar=aa.aplicar
                 $where
-                GROUP BY 1,2,3,4,5,6
-                ORDER BY p.bloque, a.aplicar, p.variedad, p.temporada";
+                GROUP BY p.finca, p.bloque, p.variedad, s.cod_temporada, a.tipo, a.aplicar, $expr
+                ORDER BY p.bloque, a.aplicar, p.variedad, s.cod_temporada";
         $result = $conexion->query($sql);
         $data = [];
         if ($result) {
@@ -112,7 +112,7 @@ class Application {
                     INNER JOIN arrangements as a ON a.variedad=p.variedad and a.finca=p.finca
                     INNER JOIN varieties AS v ON v.nombre=p.variedad
                     INNER JOIN seasons AS s ON s.nombre=p.temporada
-                    LEFT JOIN (SELECT variedad,temporada_obj,pico FROM program WHERE estado=1 group by 1,2,3) AS pr
+                    LEFT JOIN (SELECT variedad,temporada_obj,pico FROM program WHERE estado=1 GROUP BY variedad, temporada_obj, pico) AS pr
                         ON pr.variedad=p.variedad and pr.temporada_obj=s.nombre
                     INNER JOIN arrangement as aa ON a.aplicar=aa.aplicar and a.tipo=aa.tipo
                     INNER JOIN supplies as su ON su.arrangement_id=aa.id AND (su.finca=p.finca OR (COALESCE(su.finca,'')='' AND NOT EXISTS (SELECT 1 FROM supplies s2 WHERE s2.arrangement_id=aa.id AND s2.finca=p.finca)))
@@ -170,7 +170,7 @@ class Application {
                     INNER JOIN arrangements as a ON a.variedad=p.variedad and a.finca=p.finca
                     INNER JOIN varieties AS v ON v.nombre=p.variedad
                     INNER JOIN seasons AS s ON s.nombre=p.temporada
-                    LEFT JOIN (SELECT variedad,temporada_obj,pico FROM program WHERE estado=1 group by 1,2,3) AS pr
+                    LEFT JOIN (SELECT variedad,temporada_obj,pico FROM program WHERE estado=1 GROUP BY variedad, temporada_obj, pico) AS pr
                         ON pr.variedad=p.variedad and pr.temporada_obj=s.nombre
                     INNER JOIN arrangement as aa ON a.aplicar=aa.aplicar and a.tipo=aa.tipo
                     INNER JOIN supplies as su ON su.arrangement_id=aa.id AND (su.finca=p.finca OR (COALESCE(su.finca,'')='' AND NOT EXISTS (SELECT 1 FROM supplies s2 WHERE s2.arrangement_id=aa.id AND s2.finca=p.finca)))

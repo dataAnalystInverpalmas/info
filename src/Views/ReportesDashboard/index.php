@@ -1,6 +1,18 @@
+<link rel="stylesheet" href="scripts/crud_tables.css?v=2">
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <style>
+    .crud-page-header .crud-header-actions.report-actions-bar {
+        margin-bottom: 0 !important;
+        flex: 1 1 auto;
+        justify-content: flex-end;
+    }
+
+    .crud-page-header .crud-page-subtitle {
+        font-size: 0.85rem;
+        margin-top: 0;
+    }
+
     .filtro-sidebar .select2-container { width: 100% !important; }
     .filtro-sidebar .select2-container .select2-selection--multiple {
         border: 1px solid #ced4da;
@@ -194,97 +206,115 @@
     }
 </style>
 
-<div class="reportes-bar">
-    <h1>Reporte Sembrado</h1>
-    <p>Consulta de siembras con filtros, indicadores, gráficos y tabla de detalle, para facilitar la búsqueda de siembras.</p>
-</div>
-
-<div class="container-fluid px-3 px-lg-4 pb-4">
-    <div class="row" id="reportesRow">
-        <div class="col-md-5 col-lg-4" id="reportesSidebarCol">
-            <div class="filtro-sidebar mr-0 mr-lg-3">
-                <div class="card mb-3 shadow-sm">
-                    <div class="card-header" id="reportesFiltrosToggle">
-                        <span>
-                            <span class="material-icons" style="font-size:1rem;vertical-align:middle;">filter_list</span>
-                            Filtros
-                        </span>
-                        <span class="material-icons toggle-icon">chevron_left</span>
-                    </div>
-                    <div class="card-body p-3" id="reportesFiltrosBody">
-                        <div class="reportes-filtros-grid">
-                            <div class="mb-2">
-                                <label for="filtroFinca">Finca</label>
-                                <select id="filtroFinca" class="form-control select2" multiple>
-                                    <?php foreach (($filtrosOpciones['fincas'] ?? []) as $finca): ?>
-                                        <option value="<?php echo htmlspecialchars($finca); ?>"><?php echo htmlspecialchars($finca); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-2">
-                                <label for="filtroBloque">Bloque</label>
-                                <select id="filtroBloque" class="form-control select2" multiple>
-                                    <?php foreach (($filtrosOpciones['bloques'] ?? []) as $bloque): ?>
-                                        <option value="<?php echo htmlspecialchars($bloque); ?>"><?php echo htmlspecialchars($bloque); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-2">
-                                <label for="filtroVariedad">Variedad</label>
-                                <select id="filtroVariedad" class="form-control select2" multiple>
-                                    <?php foreach (($filtrosOpciones['variedades'] ?? []) as $variedad): ?>
-                                        <option value="<?php echo htmlspecialchars($variedad); ?>"><?php echo htmlspecialchars($variedad); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-2">
-                                <label for="filtroTemporada">Temporada</label>
-                                <select id="filtroTemporada" class="form-control select2" multiple>
-                                    <?php foreach (($filtrosOpciones['temporadas'] ?? []) as $temporada): ?>
-                                        <option value="<?php echo htmlspecialchars($temporada); ?>"><?php echo htmlspecialchars($temporada); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-2">
-                                <label for="filtroFlor">Flor</label>
-                                <select id="filtroFlor" class="form-control select2" multiple>
-                                    <?php foreach (($filtrosOpciones['flores'] ?? []) as $flor): ?>
-                                        <option value="<?php echo htmlspecialchars($flor); ?>"><?php echo htmlspecialchars($flor); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-2">
-                                <label for="filtroColor">Color</label>
-                                <select id="filtroColor" class="form-control select2" multiple>
-                                    <?php foreach (($filtrosOpciones['colores'] ?? []) as $color): ?>
-                                        <option value="<?php echo htmlspecialchars($color); ?>"><?php echo htmlspecialchars($color); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-2">
-                                <label for="filtroFechaDesde">Siembra desde</label>
-                                <input type="date" id="filtroFechaDesde" class="form-control form-control-sm" value="<?php echo htmlspecialchars($rangoFechasDefault['desde'] ?? ''); ?>">
-                            </div>
-                            <div class="mb-2">
-                                <label for="filtroFechaHasta">Siembra hasta</label>
-                                <input type="date" id="filtroFechaHasta" class="form-control form-control-sm" value="<?php echo htmlspecialchars($rangoFechasDefault['hasta'] ?? ''); ?>">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <button class="btn btn-brand-green btn-sm w-100 mb-2" id="btnAplicarFiltros" style="background-color:#00796B;border-color:#00796B;color:#fff;" onclick="ReportesDashboard.aplicarFiltros()">
-                    <span class="material-icons" style="font-size:1rem;">search</span> Aplicar
-                </button>
-                <button class="btn btn-outline-secondary btn-sm w-100" onclick="ReportesDashboard.limpiarFiltros()">
-                    <span class="material-icons" style="font-size:1rem;">restart_alt</span> Limpiar
-                </button>
+<!-- Page Header Banner / Navbar estilo CRUD EMV -->
+<div class="crud-page-header d-print-none no-print">
+    <div class="crud-header-left">
+        <div class="crud-header-icon">
+            <span class="material-icons">bar_chart</span>
+        </div>
+        <div>
+            <!-- Título omitido según indicación del usuario (ya presente en el navbar/breadcrumb superior) -->
+            <div class="crud-page-subtitle">
+                <span class="crud-page-badge">Producción</span>
+                <span class="text-muted d-none d-sm-inline">• Resumen y métricas de camas sembradas</span>
             </div>
         </div>
+    </div>
+    <div class="crud-header-actions report-actions-bar mb-0">
+        <!-- Espacio para los chips de filtros activos a medida que se agregan -->
+        <div class="filtros-aplicados"></div>
+        <button type="button" class="btn btn-sm btn-teal d-flex align-items-center" data-bs-toggle="offcanvas"
+            data-bs-target="#reportesFiltros" aria-controls="reportesFiltros" title="Mostrar filtros">
+            <span class="material-icons me-1" style="font-size:1rem;">filter_list</span>
+            Filtros
+            <span class="badge rounded-pill bg-light text-dark ms-1 d-none filtros-badge">0</span>
+        </button>
+    </div>
+</div>
 
-        <div class="col-md-7 col-lg-8" id="reportesMainCol">
-            <button type="button" class="btn btn-outline-secondary btn-sm mb-3" id="btnMostrarFiltros" style="display:none;" onclick="ReportesDashboard.toggleSidebar()">
-                <span class="material-icons" style="font-size:1rem;vertical-align:middle;">chevron_right</span> Mostrar filtros
-            </button>
+<!-- Barra lateral vertical de filtros (mismo patrón que Reporte Lonas) -->
+<div class="offcanvas offcanvas-end filtros-sidebar no-print" tabindex="-1" id="reportesFiltros"
+    data-bs-scroll="true" data-bs-backdrop="false" aria-labelledby="reportesFiltrosLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="reportesFiltrosLabel">
+            <span class="material-icons" style="font-size: 1.2rem; color: #00796B;">filter_list</span>
+            Filtros
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div>
+            <label class="filter-label" for="filtroFinca">Finca</label>
+            <select id="filtroFinca" class="form-control select2" multiple data-cuenta-filtro>
+                <?php foreach (($filtrosOpciones['fincas'] ?? []) as $finca): ?>
+                    <option value="<?php echo htmlspecialchars($finca); ?>"><?php echo htmlspecialchars($finca); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div>
+            <label class="filter-label" for="filtroBloque">Bloque</label>
+            <select id="filtroBloque" class="form-control select2" multiple data-cuenta-filtro>
+                <?php foreach (($filtrosOpciones['bloques'] ?? []) as $bloque): ?>
+                    <option value="<?php echo htmlspecialchars($bloque); ?>"><?php echo htmlspecialchars($bloque); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div>
+            <label class="filter-label" for="filtroVariedad">Variedad</label>
+            <select id="filtroVariedad" class="form-control select2" multiple data-cuenta-filtro>
+                <?php foreach (($filtrosOpciones['variedades'] ?? []) as $variedad): ?>
+                    <option value="<?php echo htmlspecialchars($variedad); ?>"><?php echo htmlspecialchars($variedad); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div>
+            <label class="filter-label" for="filtroTemporada">Temporada</label>
+            <select id="filtroTemporada" class="form-control select2" multiple data-cuenta-filtro>
+                <?php foreach (($filtrosOpciones['temporadas'] ?? []) as $temporada): ?>
+                    <option value="<?php echo htmlspecialchars($temporada); ?>"><?php echo htmlspecialchars($temporada); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div>
+            <label class="filter-label" for="filtroFlor">Flor</label>
+            <select id="filtroFlor" class="form-control select2" multiple data-cuenta-filtro>
+                <?php foreach (($filtrosOpciones['flores'] ?? []) as $flor): ?>
+                    <option value="<?php echo htmlspecialchars($flor); ?>"><?php echo htmlspecialchars($flor); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div>
+            <label class="filter-label" for="filtroColor">Color</label>
+            <select id="filtroColor" class="form-control select2" multiple data-cuenta-filtro>
+                <?php foreach (($filtrosOpciones['colores'] ?? []) as $color): ?>
+                    <option value="<?php echo htmlspecialchars($color); ?>"><?php echo htmlspecialchars($color); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div>
+            <label class="filter-label" for="filtroFechaDesde">Siembra desde</label>
+            <input type="date" id="filtroFechaDesde" class="form-control form-control-sm" value="<?php echo htmlspecialchars($rangoFechasDefault['desde'] ?? ''); ?>">
+        </div>
+        <div>
+            <label class="filter-label" for="filtroFechaHasta">Siembra hasta</label>
+            <input type="date" id="filtroFechaHasta" class="form-control form-control-sm" value="<?php echo htmlspecialchars($rangoFechasDefault['hasta'] ?? ''); ?>">
+        </div>
+    </div>
+    <div class="filtros-footer d-flex gap-2">
+        <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" onclick="ReportesDashboard.limpiarFiltros()" title="Limpiar todos los filtros">
+            <span class="material-icons align-middle" style="font-size: 1rem;">restart_alt</span>
+            Limpiar
+        </button>
+        <button type="button" class="btn btn-sm btn-teal flex-fill" data-filtros-aplicar id="btnAplicarFiltros" onclick="ReportesDashboard.aplicarFiltros()" title="Consultar con los filtros seleccionados">
+            <span class="material-icons align-middle" style="font-size: 1rem;">search</span>
+            Consultar
+        </button>
+    </div>
+</div>
+
+<div class="container-fluid px-0 pb-4">
+    <div class="row g-3" id="reportesRow">
+        <div class="col-12" id="reportesMainCol">
             <div class="reportes-kpi-grid" id="reportesKpiGrid">
                 <div class="reportes-kpi">
                     <span class="reportes-kpi-label">KPI 1</span>
@@ -391,7 +421,7 @@ var ReportesDashboard = (function () {
     };
 
     function init() {
-        $('.select2').select2({ width: '100%', placeholder: 'Todas', allowClear: true });
+        $('.select2').each(function () { $(this).select2({ width: '100%', placeholder: 'Todas', allowClear: true, dropdownParent: $(this).closest('.offcanvas, body') }); });
         $('#resumenPorSelect').on('change', cargarDatos);
 
         $('#filtroFinca, #filtroBloque, #filtroVariedad, #filtroTemporada, #filtroFlor, #filtroColor')
@@ -563,27 +593,23 @@ var ReportesDashboard = (function () {
     }
 
     function toggleSidebar() {
-        var sidebarCol = document.getElementById('reportesSidebarCol');
-        var mainCol = document.getElementById('reportesMainCol');
-        var btnMostrar = document.getElementById('btnMostrarFiltros');
-        var oculto = sidebarCol.classList.toggle('d-none');
-
-        if (oculto) {
-            mainCol.classList.remove('col-md-7', 'col-lg-8');
-            mainCol.classList.add('col-12');
-            btnMostrar.style.display = 'inline-flex';
-        } else {
-            mainCol.classList.remove('col-12');
-            mainCol.classList.add('col-md-7', 'col-lg-8');
-            btnMostrar.style.display = 'none';
+        var wrapper = document.getElementById('reportesFiltersWrapper');
+        if (!wrapper) return;
+        var btn = document.querySelector('[data-target="#reportesFiltersWrapper"]');
+        var isExp = wrapper.classList.toggle('is-expanded');
+        wrapper.classList.toggle('is-collapsed', !isExp);
+        if (btn) {
+            btn.classList.toggle('active', isExp);
+            var textEl = btn.querySelector('.toggle-text');
+            var iconEl = btn.querySelector('.toggle-icon');
+            if (textEl) textEl.textContent = isExp ? 'Menos filtros' : 'Más filtros';
+            if (iconEl) iconEl.textContent = isExp ? 'expand_less' : 'expand_more';
         }
-
-        // Los canvas de Chart.js no se redimensionan solos cuando su contenedor cambia de ancho.
         setTimeout(function () {
             if (chart1) { chart1.resize(); }
             if (chart2) { chart2.resize(); }
             if (chartEdad) { chartEdad.resize(); }
-        }, 200);
+        }, 320);
     }
 
     return {

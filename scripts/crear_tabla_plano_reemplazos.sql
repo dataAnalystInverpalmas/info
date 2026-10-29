@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS informes.plano_reemplazos (
+CREATE TABLE IF NOT EXISTS plano_reemplazos (
     id INT AUTO_INCREMENT PRIMARY KEY,
 
     finca VARCHAR(50) NOT NULL,
@@ -26,11 +26,11 @@ CREATE TABLE IF NOT EXISTS informes.plano_reemplazos (
 
     CONSTRAINT fk_plano_reemplazos_variedad
         FOREIGN KEY (variedad_nueva_id)
-        REFERENCES informes.varieties(id),
+        REFERENCES varieties(id),
 
     CONSTRAINT fk_plano_reemplazos_temporada
         FOREIGN KEY (temporada_nueva_id)
-        REFERENCES informes.seasons(id)
+        REFERENCES seasons(id)
 )
 ENGINE=InnoDB
 DEFAULT CHARSET=utf8mb4

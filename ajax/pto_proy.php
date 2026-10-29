@@ -7,22 +7,34 @@ if (is_file("funciones/conexion.php")){
 	  include ("../funciones/conexion.php");
 }
 
-$where = "WHERE estado=1 AND producto in('CLAVEL','MINICLAVEL','CLAVEL STANDARD','CLAVEL MINIATURA')";
+$conditions = ["producto IN ('CLAVEL','MINICLAVEL','CLAVEL STANDARD','CLAVEL MINIATURA')"];
+$types = '';
+$params = [];
 
-if ($_POST){
-	$finicial=strval($_POST['fini']);
-	$ffinal=strval($_POST['ffin']);
-        $tipo = $_POST['tipo'];
+// La columna `estado` no existe en todos los entornos (p.ej. pruebas): filtrar solo si existe
+$colEstado = $conexion->query("SHOW COLUMNS FROM budget LIKE 'estado'");
+if ($colEstado && $colEstado->num_rows > 0) {
+    array_unshift($conditions, 'estado = 1');
+}
 
-        if ( $tipo != "" ){
-                $where .= "and tipo = '$tipo' ";
-        }elseif( $finicial != "" & $ffinal != "") {
-                $where .= "and fecha_siembra BETWEEN '$finicial' and '$ffinal' ";
-        }
-        else{
-                $where .= "";
-        }
-}    
+if (!empty($_POST)){
+	$finicial = strval($_POST['fini'] ?? '');
+	$ffinal = strval($_POST['ffin'] ?? '');
+    $tipo = strval($_POST['tipo'] ?? '');
+
+    if ($tipo != ""){
+        $conditions[] = 'tipo = ?';
+        $types .= 's';
+        $params[] = $tipo;
+    } elseif ($finicial != "" && $ffinal != "") {
+        $conditions[] = 'fecha_siembra BETWEEN ? AND ?';
+        $types .= 'ss';
+        $params[] = $finicial;
+        $params[] = $ffinal;
+    }
+}
+
+$where = 'WHERE ' . implode(' AND ', $conditions);
 
 $query="
         SELECT  finca,
@@ -40,11 +52,16 @@ $query="
                 siembra 
             FROM budget 
             $where 
-            GROUP BY finca,bloque,producto,variedad,temporada,fecha_siembra,tipo,siembra,color 
-            order by fecha_siembra asc
+            GROUP BY finca, bloque, producto, variedad, temporada, fecha_siembra, tipo, siembra, color, ciclo, codvari, cod_temporada 
+            ORDER BY fecha_siembra ASC
 ";
 
-$result=$conexion->query($query);
+$stmt = $conexion->prepare($query);
+if ($types !== '') {
+    $stmt->bind_param($types, ...$params);
+}
+$stmt->execute();
+$result = $stmt->get_result();
 
 $response = array();
 
