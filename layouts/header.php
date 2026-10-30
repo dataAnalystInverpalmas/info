@@ -2,8 +2,8 @@
 require("funciones/conexion.php");
 
 $directorio = $GLOBALS['src'] ?? '';
-$role = empty($_SESSION['usuario']) ? 0 : (int) $_SESSION['role'];
-$usuario = $_SESSION['usuario'] ?? '';
+$role = \App\Helpers\Auth::check() ? \App\Helpers\Auth::role() : 0;
+$usuario = \App\Helpers\Auth::check() ? (\App\Helpers\Auth::user() ?? '') : '';
 
 if ($role > 0):
     $can = function (string $dir) use ($conexion): bool {
@@ -35,7 +35,8 @@ if ($role > 0):
         ['href' => 'index.php?report=tika_calendario', 'report' => 'tika_calendario', 'dir' => 'views/tika_calendario.php', 'icon' => 'calendar_month', 'label' => 'CRUD Calendario Tika'],
     ];
     $visTablasGeneral = array_filter($menuTablasGeneral, function ($i) use ($can) {
-        return $can($i['dir']); });
+        return $can($i['dir']);
+    });
 
     $menuTablasFloreros = [
         ['href' => 'index.php?report=crud_fv_kinds', 'report' => 'crud_fv_kinds', 'dir' => 'views/fv_catalogs_crud.php', 'icon' => 'category', 'label' => 'CRUD Tipos'],
@@ -44,7 +45,8 @@ if ($role > 0):
         ['href' => 'index.php?report=crud_fv_evaluations', 'report' => 'crud_fv_evaluations', 'dir' => 'views/fv_catalogs_crud.php', 'icon' => 'grading', 'label' => 'CRUD Ítems de Evaluación'],
     ];
     $visTablasFloreros = array_filter($menuTablasFloreros, function ($i) use ($can) {
-        return $can($i['dir']); });
+        return $can($i['dir']);
+    });
 
     $hasAdminSec = ($role === 1);
     $menuTablasSeguridad = [];
@@ -66,7 +68,8 @@ if ($role > 0):
         ['href' => 'index.php?report=evaluacion_cosechas', 'report' => 'evaluacion_cosechas', 'dir' => 'views/growplanting.php', 'icon' => 'fact_check', 'label' => 'Evaluación de Cosechas'],
     ];
     $visCultivo = array_filter($menuCultivo, function ($i) use ($can) {
-        return $can($i['dir']); });
+        return $can($i['dir']);
+    });
 
     // Siembras
     $menuSiembras = [
@@ -75,12 +78,13 @@ if ($role > 0):
         ['href' => 'index.php?report=crud_emv', 'report' => 'crud_emv', 'dir' => 'views/entrada_material_vegetal.php', 'icon' => 'forest', 'label' => 'Entrada Material Vegetal'],
         ['href' => 'index.php?report=programs', 'report' => 'programs', 'dir' => 'views/programs.php', 'icon' => 'event_note', 'label' => 'Editar Programa Siembras'],
         ['href' => 'index.php?report=programsf', 'report' => 'programsf', 'dir' => 'views/programsf.php', 'icon' => 'domain', 'label' => 'Editar Programa por Finca'],
-        ['href' => 'index.php?table=14', 'table' => '14', 'dir' => 'tables/viewReportsP.php', 'icon' => 'summarize', 'label' => 'Informes Propagación y Siembras'],
+        ['href' => 'index.php?table=14', 'table' => '14', 'dir' => 'tables/viewReportsP.php', 'icon' => 'summarize', 'label' => 'Generar Informes Siembras'],
         ['href' => 'index.php?report=imprimir_siembras', 'report' => 'imprimir_siembras', 'dir' => 'views/print.php', 'icon' => 'print', 'label' => 'Programa Siembras (Imprimir)'],
         ['href' => 'index.php?report=imprimir_ensartes', 'report' => 'imprimir_ensartes', 'dir' => 'views/growroot.php', 'icon' => 'content_paste', 'label' => 'Programa Ensartes (Imprimir)'],
     ];
     $visSiembras = array_filter($menuSiembras, function ($i) use ($can) {
-        return $can($i['dir']); });
+        return $can($i['dir']);
+    });
 
     // PowerBI
     $menuPowerBI = [
@@ -91,7 +95,8 @@ if ($role > 0):
         ['href' => 'index.php?report=compara_produccion', 'report' => 'compara_produccion', 'dir' => 'views/report_pb_compara_prod.php', 'icon' => 'compare_arrows', 'label' => 'Compara Producción'],
     ];
     $visPowerBI = array_filter($menuPowerBI, function ($i) use ($can) {
-        return $can($i['dir']); });
+        return $can($i['dir']);
+    });
 
     // Reportes
     $menuReportes = [
@@ -101,9 +106,11 @@ if ($role > 0):
         ['href' => 'index.php?report=seguimiento_produccion', 'report' => 'seguimiento_produccion', 'dir' => 'views/seguimiento_produccion.php', 'icon' => 'trending_up', 'label' => 'Seguimiento de Producción'],
         ['href' => 'index.php?report=demanda_tika', 'report' => 'demanda_tika', 'dir' => 'views/demanda_tika.php', 'icon' => 'difference', 'label' => 'Demanda Semanal Tika'],
         ['href' => 'index.php?report=compara_escenarios', 'report' => 'compara_escenarios', 'dir' => 'views/compara_escenarios.php', 'icon' => 'dynamic_feed', 'label' => 'Comparar Escenarios'],
+        ['href' => 'index.php?report=comparador_tika', 'report' => 'comparador_tika', 'dir' => 'views/comparador_tika.php', 'icon' => 'compare', 'label' => 'Comparador Escenarios Tika'],
     ];
     $visReportes = array_filter($menuReportes, function ($i) use ($can) {
-        return $can($i['dir']); });
+        return $can($i['dir']);
+    });
 
     // Floreros
     $menuFloreros = [
@@ -115,7 +122,8 @@ if ($role > 0):
         ['href' => 'index.php?report=reporte_evaluaciones', 'report' => 'reporte_evaluaciones', 'dir' => 'views/report_evaluations.php', 'icon' => 'grading', 'label' => 'Reporte Evaluaciones'],
     ];
     $visFloreros = array_filter($menuFloreros, function ($i) use ($can) {
-        return $can($i['dir']); });
+        return $can($i['dir']);
+    });
 
     // Gestión PM (Role 1)
     $menuGestion = [];
@@ -474,7 +482,7 @@ endif; // $role > 0
 function renderAppTopBar()
 {
     $breadcrumb = $GLOBALS['appActiveBreadcrumb'] ?? ['section' => 'Inverpalmas', 'item' => 'Panel Integral'];
-    $usuario = $_SESSION['usuario'] ?? '';
+    $usuario = \App\Helpers\Auth::check() ? (\App\Helpers\Auth::user() ?? '') : '';
     ?>
     <header id="appTopBar" class="app-topbar sticky-top">
         <div class="d-flex align-items-center">
@@ -503,22 +511,6 @@ function renderAppTopBar()
             <button id="fullscreenToggleBtn" class="btn-topbar-icon" type="button" title="Pantalla completa">
                 <span class="material-icons">fullscreen</span>
             </button>
-
-            <!-- User Capsule -->
-            <div class="navbar-user-capsule d-none d-md-inline-flex">
-                <span class="material-icons text-success" style="font-size: 1.15rem;">account_circle</span>
-                <span class="fw-semibold text-dark"
-                    style="font-size: 0.85rem;"><?php echo htmlspecialchars($usuario); ?></span>
-                <span class="navbar-user-role-badge">
-                    <?php echo htmlspecialchars(\App\Helpers\Auth::roleName()); ?>
-                </span>
-            </div>
-
-            <!-- Logout Button -->
-            <a class="btn btn-navbar-logout d-flex align-items-center" href="logout.php">
-                <span class="material-icons me-1" style="font-size: 1rem;">logout</span>
-                Salir
-            </a>
         </div>
     </header>
     <?php

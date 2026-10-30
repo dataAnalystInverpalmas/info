@@ -515,6 +515,9 @@ $reportes = array(
 	'seguimiento_produccion'   => 'views/seguimiento_produccion.php',
 	'demanda_tika'             => 'views/demanda_tika.php',
 	'compara_escenarios'       => 'views/compara_escenarios.php',
+	'comparador_tika'          => 'views/comparador_tika.php',
+	'coparador_tika'           => 'views/comparador_tika.php',
+	'importar_tika'            => 'views/comparador_tika.php',
 
 	// --- Floreros y Postcosecha ---
 	'registra_floreros'        => 'views/flowervase.php',

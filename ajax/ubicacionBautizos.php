@@ -24,7 +24,7 @@ $sql = "
         tabla,
         nave,
         cama
-    FROM ubicaciones_plano
+    FROM siembras.ubicaciones_plano
     WHERE id_finca = ? AND bloque = ? 
     ORDER BY ubicacion";
 

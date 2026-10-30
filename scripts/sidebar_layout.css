@@ -6,6 +6,8 @@
 /* ==========================================================================
    1. Layout Structure
    ========================================================================== */
+body:not(.has-app-sidebar) .app-main-wrapper { margin-left: 0 !important; width: 100% !important; }
+body:not(.has-app-sidebar),
 body.has-app-sidebar {
   padding-top: 0 !important;
   overflow-x: hidden;

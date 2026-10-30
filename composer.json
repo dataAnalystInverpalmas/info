@@ -21,7 +21,7 @@
     },
     "config": {
         "platform": {
-            "php": "7.4.33"
+            "php": "8.2.0"
         },
         "allow-plugins": {
             "kylekatarnls/update-helper": false

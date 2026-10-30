@@ -1,3 +1,4 @@
+<?php $isAuthenticated = \App\Helpers\Auth::check(); ?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -28,13 +29,13 @@
 	<link href="scripts/fonts/inter.css" rel="stylesheet">
 	<link href="scripts/fonts/material-icons.css" rel="stylesheet">
 	<link href="scripts/minimal_premium.css" rel="stylesheet" media="screen" type="text/css">
-	<link href="scripts/sidebar_layout.css?v=3" rel="stylesheet" media="screen" type="text/css">
-	<script src="scripts/sidebar_layout.js?v=3" defer></script>
+	<link href="scripts/sidebar_layout.css?v=4" rel="stylesheet" media="screen" type="text/css">
+	<script src="scripts/sidebar_layout.js?v=4" defer></script>
 	<script>
 		// Evitar FOUC cuando el menú está colapsado
 		(function() {
 			try {
-				if (localStorage.getItem('ip_sidebar_collapsed') === '1' && window.innerWidth >= 992) {
+				if (<?php echo $isAuthenticated ? 'true' : 'false'; ?> && localStorage.getItem('ip_sidebar_collapsed') === '1' && window.innerWidth >= 992) {
 					document.documentElement.classList.add('sidebar-collapsed');
 				}
 			} catch (e) {}
@@ -87,7 +88,7 @@
 	<?php setlocale(LC_TIME, "es_CO"); ?>
 </head>
 
-<body class="<?php echo !empty($_SESSION['usuario']) ? 'has-app-sidebar' : ''; ?>">
+<body class="<?php echo $isAuthenticated ? 'has-app-sidebar' : ''; ?>">
 	<style>
 		/* Keep modal header/actions visible below the navbar */
 		.modal.show {
@@ -147,7 +148,7 @@
 
 		@media screen {
 			body:not(.has-app-sidebar) {
-				padding-top: 4.5rem;
+				padding-top: 0 !important;
 			}
 			body.has-app-sidebar {
 				padding-top: 0 !important;
@@ -161,7 +162,7 @@
 	?>
 
 	<div id="appMainWrapper" class="app-main-wrapper d-flex flex-column min-vh-100">
-		<?php if (!empty($_SESSION['usuario'])): ?>
+		<?php if ($isAuthenticated): ?>
 			<?php renderAppTopBar(); ?>
 		<?php else: ?>
 			<header class="app-topbar justify-content-center border-bottom bg-white py-2">

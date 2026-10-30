@@ -9,11 +9,8 @@ use mysqli;
 use RuntimeException;
 
 /**
- * Controlador Base para Inverpalmas MVC (2026 Ready).
- * 
- * Diseñado para facilitar el desarrollo modular, limpio y asistido por IA.
- * Proporciona métodos directos para renderizado de vistas, respuestas JSON,
- * captura y saneamiento de entradas, autenticación y base de datos.
+ * Controlador Base para Inverpalmas MVC.
+ * Compatible con PHP 7.4+ y PHP 8.2+.
  */
 abstract class BaseController
 {
@@ -29,7 +26,7 @@ abstract class BaseController
 
     /**
      * Renderiza una vista PHP inyectando datos.
-     * 
+     *
      * @param string $viewPath Ruta de la vista relativa a 'src/Views/' (ej: 'CurvasClavelProduccion/index') o ruta absoluta.
      * @param array<string, mixed> $data Variables a extraer en el contexto de la vista.
      */
@@ -47,8 +44,10 @@ abstract class BaseController
 
     /**
      * Envía una respuesta JSON pura con código de estado HTTP y finaliza la ejecución.
+     *
+     * @param mixed $data
      */
-    protected function json(mixed $data, int $statusCode = 200): void
+    protected function json($data, int $statusCode = 200): void
     {
         if (!headers_sent()) {
             http_response_code($statusCode);
@@ -62,8 +61,10 @@ abstract class BaseController
 
     /**
      * Envía una respuesta JSON estandarizada de éxito
+     *
+     * @param mixed $data
      */
-    protected function jsonSuccess(mixed $data = null, string $message = 'Operación exitosa', int $statusCode = 200, array $meta = []): void
+    protected function jsonSuccess($data = null, string $message = 'Operación exitosa', int $statusCode = 200, array $meta = []): void
     {
         $payload = [
             'status'  => 'ok',
@@ -81,8 +82,10 @@ abstract class BaseController
 
     /**
      * Envía una respuesta JSON estandarizada de error
+     *
+     * @param mixed $details
      */
-    protected function jsonError(string $message, int $statusCode = 400, mixed $details = null): void
+    protected function jsonError(string $message, int $statusCode = 400, $details = null): void
     {
         $payload = [
             'status'  => 'error',
@@ -100,24 +103,33 @@ abstract class BaseController
 
     /**
      * Obtiene un parámetro de la query string ($_GET)
+     *
+     * @param mixed $default
+     * @return mixed
      */
-    protected function get(string $key, mixed $default = null): mixed
+    protected function get(string $key, $default = null)
     {
         return $_GET[$key] ?? $default;
     }
 
     /**
      * Obtiene un parámetro de POST ($_POST)
+     *
+     * @param mixed $default
+     * @return mixed
      */
-    protected function post(string $key, mixed $default = null): mixed
+    protected function post(string $key, $default = null)
     {
         return $_POST[$key] ?? $default;
     }
 
     /**
      * Obtiene un parámetro de $_GET o $_POST
+     *
+     * @param mixed $default
+     * @return mixed
      */
-    protected function input(string $key, mixed $default = null): mixed
+    protected function input(string $key, $default = null)
     {
         return $_POST[$key] ?? $_GET[$key] ?? $default;
     }
@@ -223,12 +235,12 @@ abstract class BaseController
      */
     private function resolveViewPath(string $viewPath): string
     {
-        if (str_ends_with($viewPath, '.php') && file_exists($viewPath)) {
+        if (substr($viewPath, -4) === '.php' && file_exists($viewPath)) {
             return $viewPath;
         }
 
         $cleaned = ltrim($viewPath, '/\\');
-        if (!str_ends_with($cleaned, '.php')) {
+        if (substr($cleaned, -4) !== '.php') {
             $cleaned .= '.php';
         }
 

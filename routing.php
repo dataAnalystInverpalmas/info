@@ -6,7 +6,7 @@ if (is_file("funciones/conexion.php")){
 	include ("../funciones/conexion.php");
 }
 
-	if (empty($_SESSION['usuario'])){
+	if (!\App\Helpers\Auth::check()){
 		?>
 		<div class="row justify-content-center align-items-center" style="min-height: calc(100vh - 190px); padding: 2rem 0;">
 			<div class="col-12 col-md-10 col-lg-8 col-xl-7">

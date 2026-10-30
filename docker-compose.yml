@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: info-app:php85
+    image: info-app:php82
     container_name: php_web
     restart: always
     ports:
@@ -13,8 +13,8 @@ services:
     environment:
       # Valores dinámicos leídos automáticamente desde .env
       API_SECRET_TOKEN: "${API_SECRET_TOKEN:-9035232260ca3fc11faa82b6b32b20605fe55c242e6903ca2f7e0887c3e9be17}"
-      DB_HOST: "${DOCKER_DB_HOST:-db}"
-      DB_NAME: "${DB_NAME:-info}"
+      DB_HOST: "${DB_HOST:-172.10.18.128}"
+      DB_NAME: "${DB_NAME:-informes}"
       DB_USER: "${DB_USER:-root}"
       DB_PASS: "${DB_PASS:-AdmSys2014}"
       DB_PORT: "${DB_PORT:-3306}"
@@ -40,8 +40,8 @@ services:
       - "8000:8000"
     environment:
       API_SECRET_TOKEN: "${API_SECRET_TOKEN:-9035232260ca3fc11faa82b6b32b20605fe55c242e6903ca2f7e0887c3e9be17}"
-      DB_HOST: "${DOCKER_DB_HOST:-db}"
-      DB_NAME: "${DB_NAME:-info}"
+      DB_HOST: "${DB_HOST:-172.10.18.128}"
+      DB_NAME: "${DB_NAME:-informes}"
       DB_USER: "${DB_USER:-root}"
       DB_PASS: "${DB_PASS:-AdmSys2014}"
       DB_PORT: "${DB_PORT:-3306}"
@@ -87,4 +87,3 @@ networks:
 
 volumes:
   db_data:
-

@@ -1,0 +1,6 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(comparador|modelos|importar)/?$ $1.php [L,QSA]
+</IfModule>
+

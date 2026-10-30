@@ -8,7 +8,7 @@
   // Apply stored preference immediately to prevent flash of uncollapsed layout
   try {
     var isCollapsed = localStorage.getItem('ip_sidebar_collapsed') === '1';
-    if (isCollapsed && window.innerWidth >= 992) {
+    if (isCollapsed && window.innerWidth >= 992 && document.body.classList.contains('has-app-sidebar')) {
       document.body.classList.add('sidebar-collapsed');
     }
   } catch (e) {

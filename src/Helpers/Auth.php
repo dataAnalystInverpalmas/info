@@ -31,7 +31,7 @@ class Auth
         // Control de inactividad de sesión (60 minutos = 3600 segundos)
         $timeout = 3600;
         if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > $timeout)) {
-            session_unset();
+            $_SESSION = []; session_unset(); if (empty($_GET['error'])) { $_GET['error'] = 'timeout'; }
             if (session_status() === PHP_SESSION_ACTIVE) {
                 session_destroy();
             }
@@ -176,6 +176,7 @@ class Auth
             'views/report_pb_pto_vs_real.php',
             'views/resumen_ejecutivo_mensual.php',
             'views/compara_escenarios.php',
+            'views/comparador_tika.php',
             'views/reporte_cosecha_lonas.php',
             'views/plano_reemplazos.php',
         ];
@@ -264,7 +265,7 @@ class Auth
                 echo json_encode(['success' => false, 'message' => 'Sesión expirada o no autenticada']);
                 exit;
             }
-            header('Location: index.php?error=auth');
+            header('Location: index.php?error=' . (($_GET['error'] ?? '') === 'timeout' ? 'timeout' : 'auth'));
             exit;
         }
     }
